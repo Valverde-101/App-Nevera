@@ -1,0 +1,5 @@
+{
+  "nevera": ["leche", "huevos"],
+  "congelador": ["helado"],
+  "despensa": ["arroz", "pasta"]
+}
