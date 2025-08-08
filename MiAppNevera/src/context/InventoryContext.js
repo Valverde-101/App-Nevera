@@ -1,20 +1,29 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
+import {getFoodIcon} from '../foodIcons';
 
 const InventoryContext = createContext();
 
 export const InventoryProvider = ({children}) => {
   const [inventory, setInventory] = useState({fridge: [], freezer: [], pantry: []});
 
+  function attachIcons(data) {
+    const withIcons = {};
+    Object.keys(data).forEach(cat => {
+      withIcons[cat] = data[cat].map(item => ({...item, icon: getFoodIcon(item.name)}));
+    });
+    return withIcons;
+  }
+
   useEffect(() => {
     (async () => {
       try {
         const stored = await AsyncStorage.getItem('inventory');
         if (stored) {
-          setInventory(JSON.parse(stored));
+          setInventory(attachIcons(JSON.parse(stored)));
         } else {
-          setInventory(foods);
+          setInventory(attachIcons(foods));
         }
       } catch (e) {
         console.error('Failed to load inventory', e);
@@ -32,7 +41,8 @@ export const InventoryProvider = ({children}) => {
   };
 
   const addItem = (category, name, quantity = 1, unit = 'units') => {
-    const newItem = {name, quantity, unit};
+    const icon = getFoodIcon(name);
+    const newItem = {name, quantity, unit, icon};
     const updated = {...inventory, [category]: [...inventory[category], newItem]};
     persist(updated);
   };

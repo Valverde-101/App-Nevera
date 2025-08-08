@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, ScrollView, Text, TextInput, View } from 'react-native';
+import { Button, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
 
 export default function CategoryScreen({ route }) {
@@ -59,6 +59,12 @@ export default function CategoryScreen({ route }) {
                 opacity: item.quantity === 0 ? 0.5 : 1,
               }}
             >
+              {item.icon && (
+                <Image
+                  source={item.icon}
+                  style={{ width: 32, height: 32, marginRight: 10 }}
+                />
+              )}
               <Text style={{ flex: 1 }}>{item.name}</Text>
               <Button
                 title="-"
