@@ -28,13 +28,26 @@ export const ShoppingProvider = ({children}) => {
     }
   };
 
-  const addItem = (item) => {
-    const updated = [...list, item];
+  const addItem = (name, category = 'general', quantity = 1, unit = 'units') => {
+    const newItem = {name, category, quantity, unit, purchased: false};
+    const updated = [...list, newItem];
+    persist(updated);
+  };
+
+  const togglePurchased = (index) => {
+    const updated = list.map((item, idx) =>
+      idx === index ? {...item, purchased: !item.purchased} : item,
+    );
+    persist(updated);
+  };
+
+  const removeItem = (index) => {
+    const updated = list.filter((_, idx) => idx !== index);
     persist(updated);
   };
 
   return (
-    <ShoppingContext.Provider value={{list, addItem}}>
+    <ShoppingContext.Provider value={{list, addItem, togglePurchased, removeItem}}>
       {children}
     </ShoppingContext.Provider>
   );

@@ -4,13 +4,17 @@ import { useInventory } from '../context/InventoryContext';
 
 export default function CategoryScreen({ route }) {
   const { category } = route.params;
-  const { inventory, addItem } = useInventory();
-  const [text, setText] = useState('');
+  const { inventory, addItem, updateQuantity, removeItem } = useInventory();
+  const [name, setName] = useState('');
+  const [quantity, setQuantity] = useState('1');
+  const [search, setSearch] = useState('');
 
   const onAdd = () => {
-    if (text.trim()) {
-      addItem(category, text.trim());
-      setText('');
+    if (name.trim()) {
+      const qty = parseInt(quantity, 10);
+      addItem(category, name.trim(), isNaN(qty) ? 0 : qty);
+      setName('');
+      setQuantity('1');
     }
   };
 
@@ -19,21 +23,58 @@ export default function CategoryScreen({ route }) {
       <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
         {category.charAt(0).toUpperCase() + category.slice(1)}
       </Text>
+      <TextInput
+        style={{ borderWidth: 1, padding: 5, marginBottom: 10 }}
+        placeholder="Buscar"
+        value={search}
+        onChangeText={setSearch}
+      />
       <View style={{ flexDirection: 'row', marginBottom: 10 }}>
         <TextInput
           style={{ flex: 1, borderWidth: 1, marginRight: 10, padding: 5 }}
-          value={text}
-          onChangeText={setText}
+          value={name}
+          onChangeText={setName}
           placeholder="Añadir alimento"
+        />
+        <TextInput
+          style={{ width: 60, borderWidth: 1, marginRight: 10, padding: 5 }}
+          value={quantity}
+          onChangeText={setQuantity}
+          keyboardType="numeric"
         />
         <Button title="Añadir" onPress={onAdd} />
       </View>
       <ScrollView>
-        {inventory[category]?.map((item, idx) => (
-          <Text key={idx} style={{ padding: 5 }}>
-            {item}
-          </Text>
-        ))}
+        {inventory[category]
+          ?.filter(item =>
+            item.name.toLowerCase().includes(search.toLowerCase()),
+          )
+          .map((item, idx) => (
+            <View
+              key={idx}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                padding: 5,
+                opacity: item.quantity === 0 ? 0.5 : 1,
+              }}
+            >
+              <Text style={{ flex: 1 }}>{item.name}</Text>
+              <Button
+                title="-"
+                onPress={() => updateQuantity(category, idx, -1)}
+              />
+              <Text style={{ marginHorizontal: 10 }}>{item.quantity}</Text>
+              <Button
+                title="+"
+                onPress={() => updateQuantity(category, idx, 1)}
+              />
+              <Button
+                title="Eliminar"
+                onPress={() => removeItem(category, idx)}
+              />
+            </View>
+          ))}
       </ScrollView>
     </View>
   );
