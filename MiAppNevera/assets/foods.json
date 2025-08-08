@@ -1,0 +1,5 @@
+{
+  "fridge": ["Milk", "Eggs"],
+  "freezer": ["Ice Cream", "Peas"],
+  "pantry": ["Pasta", "Rice"]
+}
