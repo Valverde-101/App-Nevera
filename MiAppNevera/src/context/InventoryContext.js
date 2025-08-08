@@ -31,13 +31,28 @@ export const InventoryProvider = ({children}) => {
     }
   };
 
-  const addItem = (category, item) => {
-    const updated = {...inventory, [category]: [...inventory[category], item]};
+  const addItem = (category, name, quantity = 1, unit = 'units') => {
+    const newItem = {name, quantity, unit};
+    const updated = {...inventory, [category]: [...inventory[category], newItem]};
     persist(updated);
   };
 
+  const updateQuantity = (category, index, delta) => {
+    const updatedCategory = inventory[category].map((item, idx) =>
+      idx === index
+        ? {...item, quantity: Math.max(0, item.quantity + delta)}
+        : item,
+    );
+    persist({...inventory, [category]: updatedCategory});
+  };
+
+  const removeItem = (category, index) => {
+    const updatedCategory = inventory[category].filter((_, idx) => idx !== index);
+    persist({...inventory, [category]: updatedCategory});
+  };
+
   return (
-    <InventoryContext.Provider value={{inventory, addItem}}>
+    <InventoryContext.Provider value={{inventory, addItem, updateQuantity, removeItem}}>
       {children}
     </InventoryContext.Provider>
   );

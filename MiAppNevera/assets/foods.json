@@ -1,5 +1,14 @@
 {
-  "fridge": ["Milk", "Eggs"],
-  "freezer": ["Ice Cream", "Peas"],
-  "pantry": ["Pasta", "Rice"]
+  "fridge": [
+    {"name": "Milk", "quantity": 1, "unit": "units"},
+    {"name": "Eggs", "quantity": 12, "unit": "units"}
+  ],
+  "freezer": [
+    {"name": "Ice Cream", "quantity": 1, "unit": "units"},
+    {"name": "Peas", "quantity": 1, "unit": "units"}
+  ],
+  "pantry": [
+    {"name": "Pasta", "quantity": 1, "unit": "units"},
+    {"name": "Rice", "quantity": 1, "unit": "units"}
+  ]
 }
