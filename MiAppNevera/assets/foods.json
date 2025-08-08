@@ -1,14 +1,14 @@
 {
   "fridge": [
-    {"name": "Milk", "quantity": 1, "unit": "units"},
-    {"name": "Eggs", "quantity": 12, "unit": "units"}
+    {"name": "Tomate", "quantity": 2, "unit": "units"},
+    {"name": "Zanahoria", "quantity": 5, "unit": "units"}
   ],
   "freezer": [
-    {"name": "Ice Cream", "quantity": 1, "unit": "units"},
-    {"name": "Peas", "quantity": 1, "unit": "units"}
+    {"name": "Guisantes", "quantity": 1, "unit": "units"},
+    {"name": "Maíz", "quantity": 1, "unit": "units"}
   ],
   "pantry": [
-    {"name": "Pasta", "quantity": 1, "unit": "units"},
-    {"name": "Rice", "quantity": 1, "unit": "units"}
+    {"name": "Frijoles", "quantity": 1, "unit": "units"},
+    {"name": "Lentejas", "quantity": 1, "unit": "units"}
   ]
 }
