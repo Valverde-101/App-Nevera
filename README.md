@@ -1,1 +1,36 @@
 # App-Nevera
+
+Aplicación de inventario de alimentos escrita en React Native con soporte para web.
+
+## Estructura
+- `MiAppNevera/App.js`: punto de entrada que configura la navegación entre las pantallas.
+- `MiAppNevera/src/screens`: implementa las pantallas de inicio, categorías (nevera, congelador, despensa) y lista de compras.
+- `MiAppNevera/src/context`: hooks de estado con persistencia en `AsyncStorage`.
+- `MiAppNevera/assets/foods.json`: datos iniciales con ejemplos de alimentos.
+
+## Desarrollo
+1. Instalar dependencias
+   ```bash
+   cd MiAppNevera
+   npm install
+   ```
+2. Ejecutar en web
+   ```bash
+   npm run web
+   ```
+3. Ejecutar en Android
+   ```bash
+   npm run android
+   ```
+4. Ejecutar en iOS
+   ```bash
+   npm run ios
+   ```
+5. Iniciar el bundler de Expo (elige plataforma desde el menú)
+   ```bash
+   npm start
+   ```
+
+El estado de inventario y lista de compras se guarda localmente usando `AsyncStorage`,
+permitiendo uso sin conexión. La misma base de código funciona en Android, iOS y web
+mediante `react-native-web` y Expo.
