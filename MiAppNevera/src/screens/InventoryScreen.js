@@ -1,5 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, Image, Button, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState, useLayoutEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Button,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
@@ -23,7 +33,7 @@ function StorageSelector({ current, onChange }) {
   );
 }
 
-export default function InventoryScreen() {
+export default function InventoryScreen({ navigation }) {
   const { inventory, addItem, updateItem, removeItem } = useInventory();
   const [storage, setStorage] = useState('fridge');
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -38,6 +48,34 @@ export default function InventoryScreen() {
   const [sortOrder, setSortOrder] = useState('name');
   const [groupBy, setGroupBy] = useState('category');
   const [viewType, setViewType] = useState('list');
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [multiSelect, setMultiSelect] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [transferType, setTransferType] = useState(null); // 'move' | 'copy'
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            onPress={() =>
+              setSearchVisible(v => {
+                if (v) setSearch('');
+                return !v;
+              })
+            }
+            style={{ marginRight: 15 }}
+          >
+            <Text style={{ fontSize: 18 }}>🔍</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMenuVisible(true)}>
+            <Text style={{ fontSize: 24 }}>⋮</Text>
+          </TouchableOpacity>
+        </View>
+      ),
+    });
+  }, [navigation]);
 
   const allItems = ['fridge', 'freezer', 'pantry'].flatMap(loc =>
     inventory[loc].map((item, index) => ({ ...item, location: loc, index })),
@@ -109,22 +147,80 @@ export default function InventoryScreen() {
     setAddVisible(false);
   };
 
+  const toggleSelection = (location, index) => {
+    const key = `${location}-${index}`;
+    setSelectedItems(prev => {
+      const exists = prev.find(it => it.key === key);
+      const updated = exists
+        ? prev.filter(it => it.key !== key)
+        : [...prev, { key, location, index }];
+      if (updated.length === 0) setMultiSelect(false);
+      return updated;
+    });
+  };
+
+  const addButtonBottom = multiSelect && selectedItems.length > 0 ? 80 : 20;
+
+  const getSelectedFullItems = () =>
+    selectedItems.map(sel => ({
+      ...inventory[sel.location][sel.index],
+      location: sel.location,
+      index: sel.index,
+    }));
+
+  const clearSelection = () => {
+    setSelectedItems([]);
+    setMultiSelect(false);
+  };
+
+  const handleTransfer = target => {
+    const items = getSelectedFullItems();
+    if (transferType === 'move') {
+      selectedItems
+        .slice()
+        .sort((a, b) =>
+          a.location === b.location ? b.index - a.index : a.location.localeCompare(b.location),
+        )
+        .forEach(sel => removeItem(sel.location, sel.index));
+    }
+    items.forEach(item => {
+      addItem(
+        target,
+        item.name,
+        item.quantity,
+        item.unit,
+        item.registered,
+        item.expiration,
+        item.note,
+      );
+    });
+    clearSelection();
+    setTransferType(null);
+  };
+
+  const handleDelete = () => {
+    selectedItems
+      .slice()
+      .sort((a, b) =>
+        a.location === b.location ? b.index - a.index : a.location.localeCompare(b.location),
+      )
+      .forEach(sel => removeItem(sel.location, sel.index));
+    clearSelection();
+    setConfirmVisible(false);
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <StorageSelector current={storage} onChange={setStorage} />
       <View style={{ padding: 20, flex: 1 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button title="Añadir" onPress={() => setPickerVisible(true)} />
-          <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Text style={{ fontSize: 24 }}>⋮</Text>
-          </TouchableOpacity>
-        </View>
-        <TextInput
-          placeholder="Buscar..."
-          value={search}
-          onChangeText={setSearch}
-          style={{ borderWidth: 1, marginTop: 10, padding: 5 }}
-        />
+        {searchVisible && (
+          <TextInput
+            placeholder="Buscar..."
+            value={search}
+            onChangeText={setSearch}
+            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+          />
+        )}
         <ScrollView style={{ marginTop: 10 }}>
           {groupOrder.map(cat => {
             const items = grouped[cat];
@@ -144,63 +240,98 @@ export default function InventoryScreen() {
                   </View>
                 )}
                 {viewType === 'list' ? (
-                  items.map(item => (
-                    <TouchableOpacity
-                      key={`${item.location}-${item.index}`}
-                      style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 5 }}
-                      onPress={() =>
-                        setEditingItem({
-                          ...item,
-                          index: item.index,
-                          category: item.location,
-                          location: item.location,
-                        })
-                      }
-                    >
-                      {item.icon && (
-                        <Image source={item.icon} style={{ width: 32, height: 32, marginRight: 10 }} />
-                      )}
-                      <Text>{item.name}</Text>
-                      <Text style={{ marginLeft: 10 }}>
-                        {item.quantity} {item.unit}
-                      </Text>
-                      {search && (
-                        <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
-                      )}
-                    </TouchableOpacity>
-                  ))
+                  items.map(item => {
+                    const key = `${item.location}-${item.index}`;
+                    const selected = selectedItems.some(it => it.key === key);
+                    return (
+                      <TouchableOpacity
+                        key={key}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 5,
+                          backgroundColor: selected ? '#d0ebff' : undefined,
+                        }}
+                        onLongPress={() => {
+                          setMultiSelect(true);
+                          toggleSelection(item.location, item.index);
+                        }}
+                        onPress={() => {
+                          if (multiSelect) {
+                            toggleSelection(item.location, item.index);
+                          } else {
+                            setEditingItem({
+                              ...item,
+                              index: item.index,
+                              category: item.location,
+                              location: item.location,
+                            });
+                          }
+                        }}
+                      >
+                        {item.icon && (
+                          <Image
+                            source={item.icon}
+                            style={{ width: 32, height: 32, marginRight: 10 }}
+                          />
+                        )}
+                        <Text>{item.name}</Text>
+                        <Text style={{ marginLeft: 10 }}>
+                          {item.quantity} {item.unit}
+                        </Text>
+                        {search && (
+                          <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })
                 ) : (
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                    {items.map(item => (
-                      <TouchableOpacity
-                        key={`${item.location}-${item.index}`}
-                        style={{ width: '25%', padding: 5 }}
-                        onPress={() =>
-                          setEditingItem({
-                            ...item,
-                            index: item.index,
-                            category: item.location,
-                            location: item.location,
-                          })
-                        }
-                      >
-                        <View
-                          style={{
-                            backgroundColor: '#eee',
-                            borderRadius: 8,
-                            alignItems: 'center',
-                            padding: 8,
+                    {items.map(item => {
+                      const key = `${item.location}-${item.index}`;
+                      const selected = selectedItems.some(it => it.key === key);
+                      return (
+                        <TouchableOpacity
+                          key={key}
+                          style={{ width: '25%', padding: 5 }}
+                          onLongPress={() => {
+                            setMultiSelect(true);
+                            toggleSelection(item.location, item.index);
+                          }}
+                          onPress={() => {
+                            if (multiSelect) {
+                              toggleSelection(item.location, item.index);
+                            } else {
+                              setEditingItem({
+                                ...item,
+                                index: item.index,
+                                category: item.location,
+                                location: item.location,
+                              });
+                            }
                           }}
                         >
-                          {item.icon && (
-                            <Image source={item.icon} style={{ width: 40, height: 40, marginBottom: 4 }} />
-                          )}
-                          <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                            {item.name} - {item.quantity}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
+                          <View
+                            style={{
+                              backgroundColor: selected ? '#d0ebff' : '#eee',
+                              borderRadius: 8,
+                              alignItems: 'center',
+                              padding: 8,
+                            }}
+                          >
+                            {item.icon && (
+                              <Image
+                                source={item.icon}
+                                style={{ width: 40, height: 40, marginBottom: 4 }}
+                              />
+                            )}
+                            <Text style={{ textAlign: 'center', fontSize: 12 }}>
+                              {item.name} - {item.quantity}
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 )}
               </View>
@@ -208,34 +339,76 @@ export default function InventoryScreen() {
           })}
         </ScrollView>
       </View>
+      <TouchableOpacity
+        onPress={() => setPickerVisible(true)}
+        style={{
+          position: 'absolute',
+          right: 20,
+          bottom: addButtonBottom,
+          backgroundColor: '#2196f3',
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ fontSize: 30, color: '#fff', marginTop: -2 }}>+</Text>
+      </TouchableOpacity>
 
-      <Modal visible={menuVisible} transparent animationType="fade">
+      {multiSelect && selectedItems.length > 0 && (
         <View
           style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0,0,0,0.3)',
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            backgroundColor: '#fff',
+            padding: 10,
+            borderTopWidth: 1,
+            borderColor: '#ccc',
           }}
         >
-          <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8 }}>
-            <Button
-              title="Clasificar"
-              onPress={() => {
-                setMenuVisible(false);
-                setSortVisible(true);
-              }}
-            />
-            <Button
-              title="Tipo de vista"
-              onPress={() => {
-                setMenuVisible(false);
-                setViewVisible(true);
-              }}
-            />
-            <Button title="Cerrar" onPress={() => setMenuVisible(false)} />
-          </View>
+          <Button title="Mover" onPress={() => setTransferType('move')} />
+          <Button title="Copiar" onPress={() => setTransferType('copy')} />
+          <Button title="Eliminar" onPress={() => setConfirmVisible(true)} />
         </View>
+      )}
+
+      <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }}>
+            <TouchableWithoutFeedback>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 40,
+                  right: 10,
+                  backgroundColor: '#fff',
+                  padding: 10,
+                  borderRadius: 8,
+                }}
+              >
+                <Button
+                  title="Clasificar"
+                  onPress={() => {
+                    setMenuVisible(false);
+                    setSortVisible(true);
+                  }}
+                />
+                <Button
+                  title="Tipo de vista"
+                  onPress={() => {
+                    setMenuVisible(false);
+                    setViewVisible(true);
+                  }}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       <Modal visible={sortVisible} animationType="slide">
@@ -320,6 +493,60 @@ export default function InventoryScreen() {
         }}
         onClose={() => setEditingItem(null)}
       />
+
+      <Modal visible={!!transferType} transparent animationType="fade" onRequestClose={() => setTransferType(null)}>
+        <TouchableWithoutFeedback onPress={() => setTransferType(null)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8 }}>
+                <Text style={{ marginBottom: 10 }}>
+                  {transferType === 'move' ? 'Mover a:' : 'Copiar a:'}
+                </Text>
+                {[
+                  { key: 'fridge', label: 'Nevera' },
+                  { key: 'freezer', label: 'Congelador' },
+                  { key: 'pantry', label: 'Estante' },
+                ].map(opt => (
+                  <Button key={opt.key} title={opt.label} onPress={() => handleTransfer(opt.key)} />
+                ))}
+                <Button title="Cancelar" onPress={() => setTransferType(null)} />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      <Modal visible={confirmVisible} transparent animationType="fade" onRequestClose={() => setConfirmVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setConfirmVisible(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8 }}>
+                <Text style={{ marginBottom: 10 }}>
+                  ¿Eliminar {selectedItems.length} items?
+                </Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                  <Button title="Cancelar" onPress={() => setConfirmVisible(false)} />
+                  <Button title="Eliminar" onPress={handleDelete} />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
