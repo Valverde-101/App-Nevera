@@ -3,7 +3,8 @@ import { View, Text, ScrollView, Image, Button, TouchableOpacity } from 'react-n
 import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
-import { categories } from '../foodIcons';
+import EditItemModal from '../components/EditItemModal';
+import { categories, getFoodIcon } from '../foodIcons';
 
 function StorageSelector({ current, onChange }) {
   const opts = [
@@ -23,11 +24,12 @@ function StorageSelector({ current, onChange }) {
 }
 
 export default function InventoryScreen() {
-  const { inventory, addItem, updateQuantity, removeItem } = useInventory();
+  const { inventory, addItem, updateItem, updateQuantity, removeItem } = useInventory();
   const [storage, setStorage] = useState('fridge');
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
   const [addVisible, setAddVisible] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
 
   const grouped = inventory[storage].reduce((acc, item, index) => {
     const cat = item.foodCategory || 'otros';
@@ -39,13 +41,21 @@ export default function InventoryScreen() {
   const groupOrder = Object.keys(categories);
 
   const onSelectFood = name => {
-    setSelectedFood(name);
+    setSelectedFood({ name, icon: getFoodIcon(name) });
     setPickerVisible(false);
     setAddVisible(true);
   };
 
   const onSave = data => {
-    addItem(data.location, selectedFood, data.quantity, data.unit, data.registered, data.expiration, data.note);
+    addItem(
+      data.location,
+      selectedFood.name,
+      data.quantity,
+      data.unit,
+      data.registered,
+      data.expiration,
+      data.note,
+    );
     setAddVisible(false);
   };
 
@@ -68,10 +78,22 @@ export default function InventoryScreen() {
                     key={item.index}
                     style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 5 }}
                   >
-                    {item.icon && (
-                      <Image source={item.icon} style={{ width: 32, height: 32, marginRight: 10 }} />
-                    )}
-                    <Text style={{ flex: 1 }}>{item.name}</Text>
+                    <TouchableOpacity
+                      style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                      onPress={() =>
+                        setEditingItem({
+                          ...item,
+                          index: item.index,
+                          category: storage,
+                          location: storage,
+                        })
+                      }
+                    >
+                      {item.icon && (
+                        <Image source={item.icon} style={{ width: 32, height: 32, marginRight: 10 }} />
+                      )}
+                      <Text>{item.name}</Text>
+                    </TouchableOpacity>
                     <Button title="-" onPress={() => updateQuantity(storage, item.index, -1)} />
                     <Text style={{ marginHorizontal: 10 }}>{item.quantity}</Text>
                     <Button title="+" onPress={() => updateQuantity(storage, item.index, 1)} />
@@ -90,10 +112,24 @@ export default function InventoryScreen() {
       />
       <AddItemModal
         visible={addVisible}
-        foodName={selectedFood}
+        foodName={selectedFood?.name}
+        foodIcon={selectedFood?.icon}
         initialLocation={storage}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
+      />
+      <EditItemModal
+        visible={!!editingItem}
+        item={editingItem}
+        onSave={data => {
+          updateItem(editingItem.category, editingItem.index, data);
+          setEditingItem(null);
+        }}
+        onDelete={() => {
+          removeItem(editingItem.category, editingItem.index);
+          setEditingItem(null);
+        }}
+        onClose={() => setEditingItem(null)}
       />
     </View>
   );
