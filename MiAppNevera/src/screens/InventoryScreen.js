@@ -24,7 +24,7 @@ function StorageSelector({ current, onChange }) {
 }
 
 export default function InventoryScreen() {
-  const { inventory, addItem, updateItem, updateQuantity, removeItem } = useInventory();
+  const { inventory, addItem, updateItem, removeItem } = useInventory();
   const [storage, setStorage] = useState('fridge');
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -74,31 +74,26 @@ export default function InventoryScreen() {
                   {cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </Text>
                 {items.map(item => (
-                  <View
+                  <TouchableOpacity
                     key={item.index}
                     style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 5 }}
+                    onPress={() =>
+                      setEditingItem({
+                        ...item,
+                        index: item.index,
+                        category: storage,
+                        location: storage,
+                      })
+                    }
                   >
-                    <TouchableOpacity
-                      style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-                      onPress={() =>
-                        setEditingItem({
-                          ...item,
-                          index: item.index,
-                          category: storage,
-                          location: storage,
-                        })
-                      }
-                    >
-                      {item.icon && (
-                        <Image source={item.icon} style={{ width: 32, height: 32, marginRight: 10 }} />
-                      )}
-                      <Text>{item.name}</Text>
-                    </TouchableOpacity>
-                    <Button title="-" onPress={() => updateQuantity(storage, item.index, -1)} />
-                    <Text style={{ marginHorizontal: 10 }}>{item.quantity}</Text>
-                    <Button title="+" onPress={() => updateQuantity(storage, item.index, 1)} />
-                    <Button title="Eliminar" onPress={() => removeItem(storage, item.index)} />
-                  </View>
+                    {item.icon && (
+                      <Image source={item.icon} style={{ width: 32, height: 32, marginRight: 10 }} />
+                    )}
+                    <Text>{item.name}</Text>
+                    <Text style={{ marginLeft: 10 }}>
+                      {item.quantity} {item.unit}
+                    </Text>
+                  </TouchableOpacity>
                 ))}
               </View>
             );
