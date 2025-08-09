@@ -157,4 +157,14 @@ export function getFoodIcon(name) {
   return foodIcons[normalizeFoodName(name)];
 }
 
+export function getFoodCategory(name) {
+  const normalized = normalizeFoodName(name);
+  for (const [cat, data] of Object.entries(categories)) {
+    if (data.items.includes(normalized)) {
+      return cat;
+    }
+  }
+  return null;
+}
+
 export default foodIcons;
