@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import { Button, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
+import FoodPickerModal from '../components/FoodPickerModal';
 
 export default function CategoryScreen({ route }) {
   const { category } = route.params;
   const { inventory, addItem, updateQuantity, removeItem } = useInventory();
-  const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [search, setSearch] = useState('');
+  const [pickerVisible, setPickerVisible] = useState(false);
 
-  const onAdd = () => {
-    if (name.trim()) {
-      const qty = parseInt(quantity, 10);
-      addItem(category, name.trim(), isNaN(qty) ? 0 : qty);
-      setName('');
-      setQuantity('1');
-    }
+  const onSelectFood = name => {
+    const qty = parseInt(quantity, 10);
+    addItem(category, name, isNaN(qty) ? 0 : qty);
+    setQuantity('1');
+    setPickerVisible(false);
   };
 
   return (
@@ -31,19 +30,18 @@ export default function CategoryScreen({ route }) {
       />
       <View style={{ flexDirection: 'row', marginBottom: 10 }}>
         <TextInput
-          style={{ flex: 1, borderWidth: 1, marginRight: 10, padding: 5 }}
-          value={name}
-          onChangeText={setName}
-          placeholder="Añadir alimento"
-        />
-        <TextInput
           style={{ width: 60, borderWidth: 1, marginRight: 10, padding: 5 }}
           value={quantity}
           onChangeText={setQuantity}
           keyboardType="numeric"
         />
-        <Button title="Añadir" onPress={onAdd} />
+        <Button title="Añadir" onPress={() => setPickerVisible(true)} />
       </View>
+      <FoodPickerModal
+        visible={pickerVisible}
+        onSelect={onSelectFood}
+        onClose={() => setPickerVisible(false)}
+      />
       <ScrollView>
         {inventory[category]
           ?.filter(item =>
