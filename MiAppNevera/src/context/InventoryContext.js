@@ -72,6 +72,33 @@ export const InventoryProvider = ({children}) => {
     persist(updated);
   };
 
+  const updateItem = (
+    oldCategory,
+    index,
+    {location, quantity, unit, registered, expiration, note},
+  ) => {
+    const item = inventory[oldCategory][index];
+    const updatedItem = {
+      ...item,
+      quantity,
+      unit,
+      registered,
+      expiration,
+      note,
+    };
+    const newCategory = location;
+    if (newCategory === oldCategory) {
+      const updatedCategory = inventory[oldCategory].map((it, idx) =>
+        idx === index ? updatedItem : it,
+      );
+      persist({...inventory, [oldCategory]: updatedCategory});
+    } else {
+      const removedOld = inventory[oldCategory].filter((_, idx) => idx !== index);
+      const addedNew = [...inventory[newCategory], updatedItem];
+      persist({...inventory, [oldCategory]: removedOld, [newCategory]: addedNew});
+    }
+  };
+
   const updateQuantity = (category, index, delta) => {
     const updatedCategory = inventory[category].map((item, idx) =>
       idx === index
@@ -87,7 +114,7 @@ export const InventoryProvider = ({children}) => {
   };
 
   return (
-    <InventoryContext.Provider value={{inventory, addItem, updateQuantity, removeItem}}>
+    <InventoryContext.Provider value={{inventory, addItem, updateItem, updateQuantity, removeItem}}>
       {children}
     </InventoryContext.Provider>
   );

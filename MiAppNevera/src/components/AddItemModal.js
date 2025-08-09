@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
+import { Modal, View, Text, TextInput, Button, TouchableOpacity, Image } from 'react-native';
 
-export default function AddItemModal({ visible, foodName, initialLocation = 'fridge', onSave, onClose }) {
+export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const [location, setLocation] = useState(initialLocation);
   const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('units');
@@ -24,6 +24,12 @@ export default function AddItemModal({ visible, foodName, initialLocation = 'fri
     <Modal visible={visible} animationType="slide">
       <View style={{ flex: 1, padding: 20 }}>
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>{foodName}</Text>
+        {foodIcon && (
+          <Image
+            source={foodIcon}
+            style={{ width: 60, height: 60, alignSelf: 'center', marginBottom: 10 }}
+          />
+        )}
         <Text style={{ marginBottom: 5 }}>Ubicación</Text>
         <View style={{ flexDirection: 'row', marginBottom: 10 }}>
           {[
@@ -54,11 +60,27 @@ export default function AddItemModal({ visible, foodName, initialLocation = 'fri
           keyboardType="numeric"
         />
         <Text>Unidad</Text>
-        <TextInput
-          style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-          value={unit}
-          onChangeText={setUnit}
-        />
+        <View style={{ flexDirection: 'row', marginBottom: 10 }}>
+          {[
+            { key: 'units', label: 'Unidades' },
+            { key: 'kg', label: 'Kg' },
+            { key: 'l', label: 'L' },
+          ].map(opt => (
+            <TouchableOpacity
+              key={opt.key}
+              style={{
+                padding: 8,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                marginRight: 10,
+                backgroundColor: unit === opt.key ? '#ddd' : '#fff',
+              }}
+              onPress={() => setUnit(opt.key)}
+            >
+              <Text>{opt.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <Text>Fecha de registro</Text>
         <TextInput
           style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
