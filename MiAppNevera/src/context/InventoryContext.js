@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
-import {getFoodIcon} from '../foodIcons';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 
 const InventoryContext = createContext();
 
@@ -11,7 +11,11 @@ export const InventoryProvider = ({children}) => {
   function attachIcons(data) {
     const withIcons = {};
     Object.keys(data).forEach(cat => {
-      withIcons[cat] = data[cat].map(item => ({...item, icon: getFoodIcon(item.name)}));
+      withIcons[cat] = data[cat].map(item => ({
+        ...item,
+        icon: getFoodIcon(item.name),
+        foodCategory: getFoodCategory(item.name),
+      }));
     });
     return withIcons;
   }
@@ -40,10 +44,31 @@ export const InventoryProvider = ({children}) => {
     }
   };
 
-  const addItem = (category, name, quantity = 1, unit = 'units') => {
+  const addItem = (
+    category,
+    name,
+    quantity = 1,
+    unit = 'units',
+    registered = '',
+    expiration = '',
+    note = '',
+  ) => {
     const icon = getFoodIcon(name);
-    const newItem = {name, quantity, unit, icon};
-    const updated = {...inventory, [category]: [...inventory[category], newItem]};
+    const foodCategory = getFoodCategory(name);
+    const newItem = {
+      name,
+      quantity,
+      unit,
+      icon,
+      registered,
+      expiration,
+      note,
+      foodCategory,
+    };
+    const updated = {
+      ...inventory,
+      [category]: [...inventory[category], newItem],
+    };
     persist(updated);
   };
 

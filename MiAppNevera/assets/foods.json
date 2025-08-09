@@ -1,6 +1,7 @@
 {
   "fridge": [
     {"name": "Tomate", "quantity": 2, "unit": "units"},
+    {"name": "Manzana", "quantity": 3, "unit": "units"},
     {"name": "Zanahoria", "quantity": 5, "unit": "units"}
   ],
   "freezer": [

@@ -1,8 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './src/screens/HomeScreen';
-import CategoryScreen from './src/screens/CategoryScreen';
+import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import { InventoryProvider } from './src/context/InventoryContext';
 import { ShoppingProvider } from './src/context/ShoppingContext';
@@ -17,26 +16,16 @@ export default function App() {
         <NavigationContainer>
           <StatusBar style="auto" />
           <Stack.Navigator>
-            <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen
-              name="Fridge"
-              component={CategoryScreen}
-              initialParams={{ category: 'fridge' }}
+              name="Inventory"
+              component={InventoryScreen}
               options={{ title: 'Nevera' }}
             />
             <Stack.Screen
-              name="Freezer"
-              component={CategoryScreen}
-              initialParams={{ category: 'freezer' }}
-              options={{ title: 'Congelador' }}
+              name="Shopping"
+              component={ShoppingListScreen}
+              options={{ title: 'Compras' }}
             />
-            <Stack.Screen
-              name="Pantry"
-              component={CategoryScreen}
-              initialParams={{ category: 'pantry' }}
-              options={{ title: 'Despensa' }}
-            />
-            <Stack.Screen name="Shopping" component={ShoppingListScreen} options={{ title: 'Compras' }} />
           </Stack.Navigator>
         </NavigationContainer>
       </ShoppingProvider>
