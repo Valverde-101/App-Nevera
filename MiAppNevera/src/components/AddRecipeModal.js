@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   Modal,
   View,
@@ -9,9 +9,19 @@ import {
   Image,
   Button,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
+
+let QuillEditor = null;
+let QuillToolbar = null;
+
+if (Platform.OS !== 'web') {
+  const Quill = require('react-native-cn-quill');
+  QuillEditor = Quill.default;
+  QuillToolbar = Quill.QuillToolbar;
+}
 
 export default function AddRecipeModal({
   visible,
@@ -30,6 +40,7 @@ export default function AddRecipeModal({
   const [selected, setSelected] = useState([]);
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
+  const editorRef = useRef(null);
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -123,13 +134,17 @@ export default function AddRecipeModal({
     setUnitPickerIndex(null);
   };
 
-  const save = () => {
+  const save = async () => {
+    const html =
+      Platform.OS === 'web'
+        ? steps
+        : (await editorRef.current?.getHtml()) || steps;
     onSave({
       name,
       image,
       persons: parseInt(persons, 10) || 0,
       difficulty,
-      steps,
+      steps: html,
       ingredients: ingredients.map(ing => ({
         name: ing.name,
         quantity: parseFloat(ing.quantity) || 0,
@@ -301,14 +316,33 @@ export default function AddRecipeModal({
           <TouchableOpacity onPress={() => setPickerVisible(true)} style={{marginBottom:10}}>
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
-          <Text>Pasos (admite Markdown)</Text>
-          <TextInput
-            multiline
-            placeholder="Usa **negrita**, - listas, 1. enumeraciones"
-            style={{borderWidth:1,marginBottom:10,padding:5,height:80}}
-            value={steps}
-            onChangeText={setSteps}
-          />
+          <Text>Pasos</Text>
+          {Platform.OS === 'web' ? (
+            <TextInput
+              multiline
+              value={steps}
+              onChangeText={setSteps}
+              style={{
+                height: 200,
+                marginBottom: 10,
+                borderWidth: 1,
+                padding: 5,
+                textAlignVertical: 'top',
+              }}
+            />
+          ) : (
+            <>
+              <View style={{height:200,marginBottom:10}}>
+                <QuillEditor
+                  ref={editorRef}
+                  initialHtml={steps}
+                  onHtmlChange={d => setSteps(d.html)}
+                  style={{flex:1,borderWidth:1}}
+                />
+              </View>
+              <QuillToolbar editor={editorRef} options="full" theme="light" />
+            </>
+          )}
           <TouchableOpacity
             onPress={save}
             style={{backgroundColor:'#2196f3',padding:10,borderRadius:6,alignSelf:'center'}}
