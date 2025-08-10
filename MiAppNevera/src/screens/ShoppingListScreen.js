@@ -22,7 +22,6 @@ export default function ShoppingListScreen() {
     addItem,
     addItems,
     togglePurchased,
-    removeItem,
     removeItems,
     markPurchased,
   } = useShopping();
@@ -63,16 +62,19 @@ export default function ShoppingListScreen() {
   };
 
   const toggleSelect = index => {
-    setSelected(prev =>
-      prev.includes(index)
+    setSelected(prev => {
+      const updated = prev.includes(index)
         ? prev.filter(i => i !== index)
-        : [...prev, index],
-    );
+        : [...prev, index];
+      if (updated.length === 0) setSelectMode(false);
+      return updated;
+    });
   };
 
   const selectAll = () => {
     if (selected.length === list.length) {
       setSelected([]);
+      setSelectMode(false);
     } else {
       setSelected(list.map((_, idx) => idx));
     }
@@ -120,7 +122,6 @@ export default function ShoppingListScreen() {
             <TouchableOpacity onPress={() => setAutoVisible(true)}>
               <Text style={{fontSize:24}}>⚡</Text>
             </TouchableOpacity>
-            <Button title="Seleccionar" onPress={() => setSelectMode(true)} />
           </>
         ) : (
           <>
@@ -140,7 +141,14 @@ export default function ShoppingListScreen() {
                 onPress={() =>
                   selectMode ? toggleSelect(index) : togglePurchased(index)
                 }
-                onLongPress={() => !selectMode && removeItem(index)}
+                onLongPress={() => {
+                  if (!selectMode) {
+                    setSelectMode(true);
+                    setSelected([index]);
+                  } else {
+                    toggleSelect(index);
+                  }
+                }}
               >
                 <View
                   style={{
