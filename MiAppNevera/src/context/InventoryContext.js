@@ -35,13 +35,14 @@ export const InventoryProvider = ({children}) => {
     })();
   }, []);
 
-  const persist = async (data) => {
-    setInventory(data);
-    try {
-      await AsyncStorage.setItem('inventory', JSON.stringify(data));
-    } catch (e) {
-      console.error('Failed to save inventory', e);
-    }
+  const persist = updater => {
+    setInventory(prev => {
+      const data = typeof updater === 'function' ? updater(prev) : updater;
+      AsyncStorage.setItem('inventory', JSON.stringify(data)).catch(e => {
+        console.error('Failed to save inventory', e);
+      });
+      return data;
+    });
   };
 
   const addItem = (
@@ -65,11 +66,10 @@ export const InventoryProvider = ({children}) => {
       note,
       foodCategory,
     };
-    const updated = {
-      ...inventory,
-      [category]: [...inventory[category], newItem],
-    };
-    persist(updated);
+    persist(prev => ({
+      ...prev,
+      [category]: [...prev[category], newItem],
+    }));
   };
 
   const updateItem = (
@@ -77,40 +77,50 @@ export const InventoryProvider = ({children}) => {
     index,
     {location, quantity, unit, registered, expiration, note},
   ) => {
-    const item = inventory[oldCategory][index];
-    const updatedItem = {
-      ...item,
-      quantity,
-      unit,
-      registered,
-      expiration,
-      note,
-    };
-    const newCategory = location;
-    if (newCategory === oldCategory) {
-      const updatedCategory = inventory[oldCategory].map((it, idx) =>
-        idx === index ? updatedItem : it,
-      );
-      persist({...inventory, [oldCategory]: updatedCategory});
-    } else {
-      const removedOld = inventory[oldCategory].filter((_, idx) => idx !== index);
-      const addedNew = [...inventory[newCategory], updatedItem];
-      persist({...inventory, [oldCategory]: removedOld, [newCategory]: addedNew});
-    }
+    persist(prev => {
+      const item = prev[oldCategory][index];
+      const updatedItem = {
+        ...item,
+        quantity,
+        unit,
+        registered,
+        expiration,
+        note,
+      };
+      const newCategory = location;
+      if (newCategory === oldCategory) {
+        const updatedCategory = prev[oldCategory].map((it, idx) =>
+          idx === index ? updatedItem : it,
+        );
+        return { ...prev, [oldCategory]: updatedCategory };
+      } else {
+        const removedOld = prev[oldCategory].filter((_, idx) => idx !== index);
+        const addedNew = [...prev[newCategory], updatedItem];
+        return {
+          ...prev,
+          [oldCategory]: removedOld,
+          [newCategory]: addedNew,
+        };
+      }
+    });
   };
 
   const updateQuantity = (category, index, delta) => {
-    const updatedCategory = inventory[category].map((item, idx) =>
-      idx === index
-        ? {...item, quantity: Math.max(0, item.quantity + delta)}
-        : item,
-    );
-    persist({...inventory, [category]: updatedCategory});
+    persist(prev => {
+      const updatedCategory = prev[category].map((item, idx) =>
+        idx === index
+          ? { ...item, quantity: Math.max(0, item.quantity + delta) }
+          : item,
+      );
+      return { ...prev, [category]: updatedCategory };
+    });
   };
 
   const removeItem = (category, index) => {
-    const updatedCategory = inventory[category].filter((_, idx) => idx !== index);
-    persist({...inventory, [category]: updatedCategory});
+    persist(prev => {
+      const updatedCategory = prev[category].filter((_, idx) => idx !== index);
+      return { ...prev, [category]: updatedCategory };
+    });
   };
 
   return (
