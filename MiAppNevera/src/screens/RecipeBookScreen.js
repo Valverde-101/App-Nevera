@@ -50,6 +50,7 @@ export default function RecipeBookScreen({navigation}) {
               )}
               <Text style={{fontWeight:'bold'}}>{rec.name}</Text>
               <Text>Para {rec.persons} personas</Text>
+              <Text>Dificultad: {rec.difficulty}</Text>
             </TouchableOpacity>
           );
         })}
