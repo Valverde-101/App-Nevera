@@ -13,7 +13,7 @@ import {useShopping} from '../context/ShoppingContext';
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
   const [location, setLocation] = useState(initialLocation);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('units');
   const [regDate, setRegDate] = useState(today);
   const [expDate, setExpDate] = useState('');
@@ -48,7 +48,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              addShoppingItem(foodName, quantity, unit);
+              addShoppingItem(foodName, parseFloat(quantity) || 0, unit);
               Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
             }}
           >
@@ -91,15 +91,37 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             marginBottom: 10,
           }}
         >
-          <Text style={{ marginRight: 10 }}>Cantidad: {quantity}</Text>
+          <Text style={{ marginRight: 10 }}>Cantidad:</Text>
           <TouchableOpacity
-            onPress={() => setQuantity(q => Math.max(0, q - 1))}
+            onPress={() =>
+              setQuantity(q => {
+                const num = Math.max(0, (parseFloat(q) || 0) - 1);
+                return String(num);
+              })
+            }
             style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
           >
             <Text>◀</Text>
           </TouchableOpacity>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              padding: 5,
+              marginRight: 5,
+              width: 60,
+              textAlign: 'center',
+            }}
+            keyboardType="numeric"
+            value={quantity}
+            onChangeText={t => setQuantity(t.replace(/[^0-9.]/g, ''))}
+          />
           <TouchableOpacity
-            onPress={() => setQuantity(q => q + 1)}
+            onPress={() =>
+              setQuantity(q => {
+                const num = (parseFloat(q) || 0) + 1;
+                return String(num);
+              })
+            }
             style={{ borderWidth: 1, padding: 5 }}
           >
             <Text>▶</Text>
@@ -151,7 +173,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           onPress={() =>
             onSave({
               location,
-              quantity,
+              quantity: parseFloat(quantity) || 0,
               unit,
               registered: regDate,
               expiration: expDate,

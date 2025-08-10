@@ -95,7 +95,7 @@ export default function ShoppingListScreen() {
       addInventoryItem(
         location,
         item.name,
-        parseInt(quantity, 10) || 0,
+        parseFloat(quantity) || 0,
         unit,
         regDate,
         expDate,

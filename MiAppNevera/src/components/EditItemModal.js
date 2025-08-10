@@ -14,7 +14,7 @@ import AddShoppingItemModal from './AddShoppingItemModal';
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
   const [location, setLocation] = useState('fridge');
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('units');
   const [regDate, setRegDate] = useState('');
   const [expDate, setExpDate] = useState('');
@@ -25,7 +25,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   useEffect(() => {
     if (visible && item) {
       setLocation(item.location || 'fridge');
-      setQuantity(item.quantity);
+      setQuantity(String(item.quantity));
       setUnit(item.unit);
       setRegDate(item.registered || '');
       setExpDate(item.expiration || '');
@@ -36,7 +36,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const handleSave = () => {
     onSave({
       location,
-      quantity,
+      quantity: parseFloat(quantity) || 0,
       unit,
       registered: regDate,
       expiration: expDate,
@@ -107,15 +107,37 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               marginBottom: 10,
             }}
           >
-            <Text style={{ marginRight: 10 }}>Cantidad: {quantity}</Text>
+            <Text style={{ marginRight: 10 }}>Cantidad:</Text>
             <TouchableOpacity
-              onPress={() => setQuantity(q => Math.max(0, q - 1))}
+              onPress={() =>
+                setQuantity(q => {
+                  const num = Math.max(0, (parseFloat(q) || 0) - 1);
+                  return String(num);
+                })
+              }
               style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
             >
               <Text>◀</Text>
             </TouchableOpacity>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                padding: 5,
+                marginRight: 5,
+                width: 60,
+                textAlign: 'center',
+              }}
+              keyboardType="numeric"
+              value={quantity}
+              onChangeText={t => setQuantity(t.replace(/[^0-9.]/g, ''))}
+            />
             <TouchableOpacity
-              onPress={() => setQuantity(q => q + 1)}
+              onPress={() =>
+                setQuantity(q => {
+                  const num = (parseFloat(q) || 0) + 1;
+                  return String(num);
+                })
+              }
               style={{ borderWidth: 1, padding: 5 }}
             >
               <Text>▶</Text>
@@ -185,7 +207,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
         foodIcon={item?.icon}
         initialUnit={item?.unit}
         onSave={({ quantity, unit }) => {
-          addShoppingItem(item.name, quantity, unit);
+          addShoppingItem(item.name, parseFloat(quantity) || 0, unit);
           setShoppingVisible(false);
         }}
         onClose={() => setShoppingVisible(false)}
