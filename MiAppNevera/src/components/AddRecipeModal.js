@@ -10,7 +10,7 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
-import QuillEditor, {QuillToolbar} from './QuillEditor';
+import QuillEditor, {QuillToolbar} from 'react-native-cn-quill';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 
