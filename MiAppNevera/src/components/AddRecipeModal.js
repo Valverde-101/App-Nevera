@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   Modal,
   View,
@@ -10,6 +10,7 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
+import QuillEditor, {QuillToolbar} from 'react-native-cn-quill';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 
@@ -24,12 +25,13 @@ export default function AddRecipeModal({
   const [persons, setPersons] = useState('1');
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
-  const [steps, setSteps] = useState('');
+  const [steps, setSteps] = useState({ops: [{insert: '\n'}]});
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
+  const editorRef = useRef(null);
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -37,7 +39,11 @@ export default function AddRecipeModal({
       setImage(initialRecipe.image || '');
       setPersons(String(initialRecipe.persons || 1));
       setDifficulty(initialRecipe.difficulty || '');
-      setSteps(initialRecipe.steps || '');
+      const delta = initialRecipe.steps
+        ? JSON.parse(initialRecipe.steps)
+        : {ops: [{insert: '\n'}]};
+      setSteps(delta);
+      setTimeout(() => editorRef.current?.setContents(delta), 0);
       setIngredients(
         initialRecipe.ingredients
           ? initialRecipe.ingredients.map(ing => ({
@@ -53,7 +59,9 @@ export default function AddRecipeModal({
       setImage('');
       setPersons('1');
       setDifficulty('');
-      setSteps('');
+      const empty = {ops: [{insert: '\n'}]};
+      setSteps(empty);
+      setTimeout(() => editorRef.current?.setContents(empty), 0);
       setIngredients([]);
       setSelectMode(false);
       setSelected([]);
@@ -129,7 +137,7 @@ export default function AddRecipeModal({
       image,
       persons: parseInt(persons, 10) || 0,
       difficulty,
-      steps,
+      steps: JSON.stringify(steps),
       ingredients: ingredients.map(ing => ({
         name: ing.name,
         quantity: parseFloat(ing.quantity) || 0,
@@ -302,12 +310,14 @@ export default function AddRecipeModal({
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
           <Text>Pasos</Text>
-          <TextInput
-            multiline
-            style={{borderWidth:1,marginBottom:10,padding:5,height:80}}
-            value={steps}
-            onChangeText={setSteps}
-          />
+          <View style={{height:150,marginBottom:10}}>
+            <QuillEditor
+              ref={editorRef}
+              style={{flex:1}}
+              onDeltaChange={e => setSteps(e.delta)}
+            />
+            <QuillToolbar editor={editorRef} options="full" theme="light" />
+          </View>
           <TouchableOpacity
             onPress={save}
             style={{backgroundColor:'#2196f3',padding:10,borderRadius:6,alignSelf:'center'}}
