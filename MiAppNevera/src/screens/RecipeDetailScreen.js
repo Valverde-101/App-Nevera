@@ -9,7 +9,7 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
-import QuillEditor from 'react-native-cn-quill';
+import QuillEditor from '../components/QuillEditor';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
