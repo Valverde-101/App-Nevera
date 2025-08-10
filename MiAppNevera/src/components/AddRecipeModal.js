@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 
 export default function AddRecipeModal({
   visible,
@@ -87,6 +89,25 @@ export default function AddRecipeModal({
     );
   };
 
+  const pickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      alert('Se requieren permisos para acceder a las imágenes');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      const fileName = asset.uri.split('/').pop();
+      const dest = FileSystem.documentDirectory + fileName;
+      await FileSystem.copyAsync({from: asset.uri, to: dest});
+      setImage(dest);
+    }
+  };
+
   const toggleSelectIngredient = index => {
     setSelected(sel =>
       sel.includes(index) ? sel.filter(i => i !== index) : [...sel, index],
@@ -148,8 +169,18 @@ export default function AddRecipeModal({
         <ScrollView>
           <Text>Nombre</Text>
           <TextInput style={{borderWidth:1,marginBottom:10,padding:5}} value={name} onChangeText={setName} />
-          <Text>Foto (URL)</Text>
-          <TextInput style={{borderWidth:1,marginBottom:10,padding:5}} value={image} onChangeText={setImage} />
+          <Text>Foto</Text>
+          {image ? (
+            <Image
+              source={{uri: image}}
+              style={{width: '100%', height: 200, marginBottom: 10}}
+            />
+          ) : null}
+          <Button
+            title={image ? 'Cambiar imagen' : 'Seleccionar imagen'}
+            onPress={pickImage}
+          />
+          <View style={{height:10}} />
           <Text>Personas</Text>
           <View style={{flexDirection:'row',alignItems:'center',marginBottom:10}}>
             <TouchableOpacity
