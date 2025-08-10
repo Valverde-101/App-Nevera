@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Button,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
@@ -24,6 +26,10 @@ export default function AddRecipeModal({
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const [unitPickerVisible, setUnitPickerVisible] = useState(false);
+  const [unitPickerIndex, setUnitPickerIndex] = useState(null);
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -49,13 +55,28 @@ export default function AddRecipeModal({
       setDifficulty('');
       setSteps('');
       setIngredients([]);
+      setSelectMode(false);
+      setSelected([]);
     }
   }, [visible, initialRecipe]);
 
   const addIngredient = foodName => {
     setIngredients([
       ...ingredients,
-      {name: foodName, quantity: '1', unit: 'units', icon: getFoodIcon(foodName)},
+      {name: foodName, quantity: '1', unit: 'unidades', icon: getFoodIcon(foodName)},
+    ]);
+    setPickerVisible(false);
+  };
+
+  const addIngredients = foodNames => {
+    setIngredients(prev => [
+      ...prev,
+      ...foodNames.map(name => ({
+        name,
+        quantity: '1',
+        unit: 'unidades',
+        icon: getFoodIcon(name),
+      })),
     ]);
     setPickerVisible(false);
   };
@@ -64,6 +85,42 @@ export default function AddRecipeModal({
     setIngredients(ings =>
       ings.map((ing, idx) => (idx === index ? {...ing, [field]: value} : ing)),
     );
+  };
+
+  const toggleSelectIngredient = index => {
+    setSelected(sel =>
+      sel.includes(index) ? sel.filter(i => i !== index) : [...sel, index],
+    );
+  };
+
+  const startSelectMode = index => {
+    setSelectMode(true);
+    toggleSelectIngredient(index);
+  };
+
+  const cancelSelect = () => {
+    setSelectMode(false);
+    setSelected([]);
+  };
+
+  const deleteSelectedIngredients = () => {
+    setIngredients(ings =>
+      ings.filter((_, idx) => !selected.includes(idx)),
+    );
+    cancelSelect();
+  };
+
+  const openUnitPicker = index => {
+    setUnitPickerIndex(index);
+    setUnitPickerVisible(true);
+  };
+
+  const selectUnit = unit => {
+    if (unitPickerIndex !== null) {
+      updateIngredient(unitPickerIndex, 'unit', unit);
+    }
+    setUnitPickerVisible(false);
+    setUnitPickerIndex(null);
   };
 
   const save = () => {
@@ -139,29 +196,108 @@ export default function AddRecipeModal({
           </View>
           <Text>Ingredientes</Text>
           {ingredients.map((ing, idx) => (
-            <View
+            <TouchableOpacity
               key={idx}
-              style={{flexDirection:'row',alignItems:'center',marginBottom:5}}>
+              onLongPress={() => startSelectMode(idx)}
+              onPress={() => selectMode && toggleSelectIngredient(idx)}
+              activeOpacity={1}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 5,
+                padding: 2,
+                backgroundColor: selected.includes(idx)
+                  ? '#e0f7fa'
+                  : 'transparent',
+              }}
+            >
               {ing.icon ? (
                 <Image
                   source={ing.icon}
-                  style={{width:30,height:30,marginRight:5}}
+                  style={{ width: 30, height: 30, marginRight: 5 }}
                 />
               ) : null}
-              <Text style={{flex:1}}>{ing.name}</Text>
+              <Text style={{ flex: 1 }}>{ing.name}</Text>
+              <TouchableOpacity
+                disabled={selectMode}
+                onPress={() =>
+                  updateIngredient(
+                    idx,
+                    'quantity',
+                    String(
+                      Math.max(0, (parseFloat(ing.quantity) || 0) - 1),
+                    ),
+                  )
+                }
+                style={{
+                  borderWidth: 1,
+                  padding: 5,
+                  borderRadius: 4,
+                  marginRight: 5,
+                }}
+              >
+                <Text>-</Text>
+              </TouchableOpacity>
               <TextInput
-                style={{borderWidth:1,width:60,marginHorizontal:5,padding:5}}
-                keyboardType='numeric'
+                style={{
+                  borderWidth: 1,
+                  width: 40,
+                  textAlign: 'center',
+                  padding: 5,
+                }}
+                keyboardType="numeric"
+                editable={!selectMode}
                 value={ing.quantity}
                 onChangeText={t => updateIngredient(idx, 'quantity', t)}
               />
-              <TextInput
-                style={{borderWidth:1,width:60,padding:5}}
-                value={ing.unit}
-                onChangeText={t => updateIngredient(idx, 'unit', t)}
+              <TouchableOpacity
+                disabled={selectMode}
+                onPress={() =>
+                  updateIngredient(
+                    idx,
+                    'quantity',
+                    String((parseFloat(ing.quantity) || 0) + 1),
+                  )
+                }
+                style={{
+                  borderWidth: 1,
+                  padding: 5,
+                  borderRadius: 4,
+                  marginLeft: 5,
+                }}
+              >
+                <Text>+</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={selectMode}
+                onPress={() => openUnitPicker(idx)}
+                style={{
+                  borderWidth: 1,
+                  padding: 5,
+                  borderRadius: 4,
+                  marginLeft: 5,
+                }}
+              >
+                <Text>{ing.unit}</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          ))}
+          {selectMode && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 5,
+              }}
+            >
+              <Button title="Cancelar" onPress={cancelSelect} />
+              <Button
+                title="Eliminar"
+                color="red"
+                onPress={deleteSelectedIngredients}
               />
             </View>
-          ))}
+          )}
           <TouchableOpacity onPress={() => setPickerVisible(true)} style={{marginBottom:10}}>
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
@@ -179,9 +315,40 @@ export default function AddRecipeModal({
             <Text style={{color:'#fff'}}>Guardar</Text>
           </TouchableOpacity>
         </ScrollView>
+        <Modal
+          visible={unitPickerVisible}
+          transparent
+          animationType="fade"
+        >
+          <TouchableWithoutFeedback
+            onPress={() => setUnitPickerVisible(false)}
+          >
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'rgba(0,0,0,0.3)',
+              }}
+            >
+              <View style={{backgroundColor:'#fff',padding:20,borderRadius:6}}>
+                {['unidades','kg','l'].map(u => (
+                  <TouchableOpacity
+                    key={u}
+                    onPress={() => selectUnit(u)}
+                    style={{paddingVertical:5}}
+                  >
+                    <Text>{u}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
         <FoodPickerModal
           visible={pickerVisible}
           onSelect={addIngredient}
+          onMultiSelect={addIngredients}
           onClose={() => setPickerVisible(false)}
         />
       </View>
