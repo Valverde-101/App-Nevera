@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Button, TouchableOpacity, Image } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from 'react-native';
+import {useShopping} from '../context/ShoppingContext';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const [location, setLocation] = useState(initialLocation);
@@ -8,6 +18,8 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   const [regDate, setRegDate] = useState('');
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
+
+  const {addItem: addShoppingItem} = useShopping();
 
   useEffect(() => {
     if (visible) {
@@ -101,7 +113,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           value={note}
           onChangeText={setNote}
         />
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
           <Button title="Volver" onPress={onClose} />
           <Button
             title="Guardar"
@@ -117,6 +129,13 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             }
           />
         </View>
+        <Button
+          title="Añadir a compras"
+          onPress={() => {
+            addShoppingItem(foodName, parseInt(quantity, 10) || 0, unit);
+            Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
+          }}
+        />
       </View>
     </Modal>
   );
