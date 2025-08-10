@@ -4,6 +4,7 @@ import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
 import AddRecipeModal from '../components/AddRecipeModal';
+import {getFoodIcon} from '../foodIcons';
 
 export default function RecipeDetailScreen({route, navigation}) {
   const {index} = route.params;
@@ -67,7 +68,15 @@ export default function RecipeDetailScreen({route, navigation}) {
         <Text>Dificultad: {recipe.difficulty}</Text>
         <Text style={{marginTop:10,fontWeight:'bold'}}>Ingredientes</Text>
         {recipe.ingredients.map((ing, idx) => (
-          <Text key={idx}>- {ing.quantity} {ing.unit} {ing.name}</Text>
+          <View key={idx} style={{flexDirection:'row',alignItems:'center'}}>
+            { (ing.icon || getFoodIcon(ing.name)) ? (
+              <Image
+                source={ing.icon || getFoodIcon(ing.name)}
+                style={{width:20,height:20,marginRight:5}}
+              />
+            ) : null }
+            <Text>{ing.quantity} {ing.unit} {ing.name}</Text>
+          </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
         <Text>{recipe.steps}</Text>
