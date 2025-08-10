@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
+import { useShopping } from '../context/ShoppingContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
@@ -36,6 +37,7 @@ function StorageSelector({ current, onChange }) {
 
 export default function InventoryScreen({ navigation }) {
   const { inventory, addItem, updateItem, removeItem } = useInventory();
+  const { addItems: addShoppingItems } = useShopping();
   const [storage, setStorage] = useState('fridge');
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -59,6 +61,7 @@ export default function InventoryScreen({ navigation }) {
   const [selectedItems, setSelectedItems] = useState([]);
   const [transferType, setTransferType] = useState(null); // 'move' | 'copy'
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [shoppingVisible, setShoppingVisible] = useState(false);
 
   useEffect(() => {
     if (sortVisible) {
@@ -274,6 +277,17 @@ export default function InventoryScreen({ navigation }) {
     });
     clearSelection();
     setTransferType(null);
+  };
+
+  const handleAddToShopping = () => {
+    const items = getSelectedFullItems().map(it => ({
+      name: it.name,
+      quantity: it.quantity,
+      unit: it.unit,
+    }));
+    addShoppingItems(items);
+    clearSelection();
+    setShoppingVisible(false);
   };
 
   const handleDelete = () => {
@@ -497,6 +511,18 @@ export default function InventoryScreen({ navigation }) {
             onPress={() => setTransferType('copy')}
           >
             <Text style={{ color: '#fff', fontSize: 16 }}>Copiar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#4caf50',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
+            onPress={() => setShoppingVisible(true)}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>🛒</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -727,6 +753,62 @@ export default function InventoryScreen({ navigation }) {
         }}
         onClose={() => setEditingItem(null)}
       />
+
+      <Modal
+        visible={shoppingVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShoppingVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShoppingVisible(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8, maxHeight: '80%', width: '80%' }}>
+                <Text style={{ marginBottom: 10 }}>
+                  Añadir los siguientes {selectedItems.length} elementos a la lista de compras?
+                </Text>
+                <ScrollView style={{ marginBottom: 10 }}>
+                  {getSelectedFullItems().map((item, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: '#ccc',
+                        padding: 5,
+                        marginBottom: 5,
+                        borderRadius: 4,
+                      }}
+                    >
+                      {item.icon && (
+                        <Image
+                          source={item.icon}
+                          style={{ width: 30, height: 30, marginRight: 10 }}
+                        />
+                      )}
+                      <Text>
+                        {item.name} - {item.quantity} {item.unit}
+                      </Text>
+                    </View>
+                  ))}
+                </ScrollView>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                  <Button title="Cancelar" onPress={() => setShoppingVisible(false)} />
+                  <Button title="Añadir" onPress={handleAddToShopping} />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       <Modal visible={!!transferType} transparent animationType="fade" onRequestClose={() => setTransferType(null)}>
         <TouchableWithoutFeedback onPress={() => setTransferType(null)}>
