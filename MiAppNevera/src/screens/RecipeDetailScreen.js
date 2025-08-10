@@ -67,15 +67,7 @@ export default function RecipeDetailScreen({route, navigation}) {
         <Text>Dificultad: {recipe.difficulty}</Text>
         <Text style={{marginTop:10,fontWeight:'bold'}}>Ingredientes</Text>
         {recipe.ingredients.map((ing, idx) => (
-          <View key={idx} style={{flexDirection:'row',alignItems:'center'}}>
-            {ing.icon ? (
-              <Image
-                source={ing.icon}
-                style={{width:20,height:20,marginRight:5}}
-              />
-            ) : null}
-            <Text>{ing.quantity} {ing.unit} {ing.name}</Text>
-          </View>
+          <Text key={idx}>- {ing.quantity} {ing.unit} {ing.name}</Text>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
         <Text>{recipe.steps}</Text>
