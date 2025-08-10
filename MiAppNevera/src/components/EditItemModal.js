@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { useShopping } from '../context/ShoppingContext';
+import AddShoppingItemModal from './AddShoppingItemModal';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
@@ -19,6 +20,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [shoppingVisible, setShoppingVisible] = useState(false);
 
   useEffect(() => {
     if (visible && item) {
@@ -58,14 +60,12 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               <Text style={{ fontSize: 24 }}>←</Text>
             </TouchableOpacity>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity
-                onPress={() =>
-                  addShoppingItem(item.name, 1, item.unit)
-                }
-                style={{ marginRight: 15 }}
-              >
-                <Text style={{ fontSize: 24 }}>🧺</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShoppingVisible(true)}
+              style={{ marginRight: 15 }}
+            >
+              <Text style={{ fontSize: 24 }}>🧺</Text>
+            </TouchableOpacity>
               <TouchableOpacity onPress={() => setConfirmVisible(true)}>
                 <Text style={{ fontSize: 24 }}>🗑️</Text>
               </TouchableOpacity>
@@ -165,6 +165,17 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
           </TouchableOpacity>
         </View>
       </Modal>
+      <AddShoppingItemModal
+        visible={shoppingVisible}
+        foodName={item?.name}
+        foodIcon={item?.icon}
+        initialUnit={item?.unit}
+        onSave={({ quantity, unit }) => {
+          addShoppingItem(item.name, quantity, unit);
+          setShoppingVisible(false);
+        }}
+        onClose={() => setShoppingVisible(false)}
+      />
       <Modal visible={confirmVisible} transparent animationType="fade">
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <View style={{ backgroundColor: '#fff', padding: 20, alignItems: 'center', width: '80%' }}>

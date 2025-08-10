@@ -1,24 +1,34 @@
 import React, {useEffect, useState} from 'react';
 import {Modal, View, Text, TextInput, Button, TouchableOpacity, Image} from 'react-native';
 
-export default function AddShoppingItemModal({visible, foodName, foodIcon, onSave, onClose}) {
+export default function AddShoppingItemModal({
+  visible,
+  foodName,
+  foodIcon,
+  onSave,
+  onClose,
+  initialQuantity,
+  initialUnit,
+}) {
   const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('units');
 
   useEffect(() => {
     if (visible) {
-      setQuantity('1');
-      setUnit('units');
+      setQuantity(String(initialQuantity ?? 1));
+      setUnit(initialUnit || 'units');
     }
-  }, [visible]);
+  }, [visible, initialQuantity, initialUnit]);
 
   return (
     <Modal visible={visible} animationType="slide">
       <View style={{flex:1, padding:20}}>
-        <Text style={{fontSize:18, fontWeight:'bold', marginBottom:10}}>{foodName}</Text>
         {foodIcon && (
           <Image source={foodIcon} style={{width:60, height:60, alignSelf:'center', marginBottom:10}} />
         )}
+        <Text style={{fontSize:18, fontWeight:'bold', marginBottom:10}}>
+          ¿Añadir {foodName} a la lista de compras?
+        </Text>
         <Text>Cantidad</Text>
         <TextInput
           style={{borderWidth:1, marginBottom:10, padding:5}}
