@@ -13,15 +13,27 @@ import {useShopping} from '../context/ShoppingContext';
 import {useInventory} from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddShoppingItemModal from '../components/AddShoppingItemModal';
+import BatchAddItemModal from '../components/BatchAddItemModal';
 import {getFoodIcon} from '../foodIcons';
 
 export default function ShoppingListScreen() {
-  const {list, addItem, togglePurchased, removeItem} = useShopping();
-  const {inventory} = useInventory();
+  const {
+    list,
+    addItem,
+    addItems,
+    togglePurchased,
+    removeItem,
+    removeItems,
+    markPurchased,
+  } = useShopping();
+  const {inventory, addItem: addInventoryItem} = useInventory();
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
   const [autoVisible, setAutoVisible] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const [batchVisible, setBatchVisible] = useState(false);
 
   const onSelectFood = name => {
     setSelectedFood({name, icon: getFoodIcon(name)});
@@ -41,12 +53,54 @@ export default function ShoppingListScreen() {
     const zeroItems = ['fridge', 'freezer', 'pantry'].flatMap(loc =>
       inventory[loc].filter(item => item.quantity === 0),
     );
-    zeroItems.forEach(it => {
-      if (!list.some(l => l.name === it.name)) {
-        addItem(it.name, 1, it.unit);
-      }
-    });
+    const newItems = zeroItems
+      .filter(it => !list.some(l => l.name === it.name))
+      .map(it => ({name: it.name, quantity: 1, unit: it.unit}));
+    if (newItems.length) {
+      addItems(newItems);
+    }
     setAutoVisible(false);
+  };
+
+  const toggleSelect = index => {
+    setSelected(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index],
+    );
+  };
+
+  const selectAll = () => {
+    if (selected.length === list.length) {
+      setSelected([]);
+    } else {
+      setSelected(list.map((_, idx) => idx));
+    }
+  };
+
+  const deleteSelected = () => {
+    removeItems(selected);
+    setSelected([]);
+    setSelectMode(false);
+  };
+
+  const handleBatchSave = entries => {
+    entries.forEach((entry, idx) => {
+      const {location, quantity, unit, regDate, expDate} = entry;
+      const item = list[selected[idx]];
+      addInventoryItem(
+        location,
+        item.name,
+        parseInt(quantity, 10) || 0,
+        unit,
+        regDate,
+        expDate,
+      );
+    });
+    markPurchased(selected);
+    setBatchVisible(false);
+    setSelected([]);
+    setSelectMode(false);
   };
 
   const grouped = {};
@@ -59,10 +113,21 @@ export default function ShoppingListScreen() {
   return (
     <View style={{flex:1, padding:20}}>
       <View style={{flexDirection:'row', justifyContent:'space-between', marginBottom:10}}>
-        <Button title="Añadir" onPress={() => setPickerVisible(true)} />
-        <TouchableOpacity onPress={() => setAutoVisible(true)}>
-          <Text style={{fontSize:24}}>⚡</Text>
-        </TouchableOpacity>
+        {!selectMode ? (
+          <>
+            <Button title="Añadir" onPress={() => setPickerVisible(true)} />
+            <TouchableOpacity onPress={() => setAutoVisible(true)}>
+              <Text style={{fontSize:24}}>⚡</Text>
+            </TouchableOpacity>
+            <Button title="Seleccionar" onPress={() => setSelectMode(true)} />
+          </>
+        ) : (
+          <>
+            <Button title="Seleccionar todo" onPress={selectAll} />
+            <Button title="Eliminar" onPress={deleteSelected} />
+            <Button title="Guardar" onPress={() => setBatchVisible(true)} />
+          </>
+        )}
       </View>
       <ScrollView>
         {Object.entries(grouped).map(([cat, items]) => (
@@ -71,17 +136,28 @@ export default function ShoppingListScreen() {
             {items.map(({item, index}) => (
               <TouchableOpacity
                 key={index}
-                onPress={() => togglePurchased(index)}
-                onLongPress={() => removeItem(index)}
+                onPress={() =>
+                  selectMode ? toggleSelect(index) : togglePurchased(index)
+                }
+                onLongPress={() => !selectMode && removeItem(index)}
               >
                 <View
                   style={{
                     flexDirection:'row',
                     alignItems:'center',
                     padding:5,
-                    backgroundColor: item.purchased ? '#ddd' : 'transparent',
+                    backgroundColor: selectMode && selected.includes(index)
+                      ? '#e0f7fa'
+                      : item.purchased
+                      ? '#ddd'
+                      : 'transparent',
                   }}
                 >
+                  {selectMode && (
+                    <Text style={{marginRight:10}}>
+                      {selected.includes(index) ? '☑️' : '⬜'}
+                    </Text>
+                  )}
                   {item.icon && (
                     <Image
                       source={item.icon}
@@ -114,6 +190,13 @@ export default function ShoppingListScreen() {
         foodIcon={selectedFood?.icon}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
+      />
+
+      <BatchAddItemModal
+        visible={batchVisible}
+        items={selected.map(idx => list[idx])}
+        onSave={handleBatchSave}
+        onClose={() => setBatchVisible(false)}
       />
 
       <Modal
