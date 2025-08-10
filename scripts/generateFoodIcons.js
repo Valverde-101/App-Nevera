@@ -112,6 +112,16 @@ lines.push('export function getFoodIcon(name) {');
 lines.push('  return foodIcons[normalizeFoodName(name)];');
 lines.push('}');
 lines.push('');
+lines.push('export function getFoodCategory(name) {');
+lines.push('  const normalized = normalizeFoodName(name);');
+lines.push('  for (const [cat, data] of Object.entries(categories)) {');
+lines.push('    if (data.items.includes(normalized)) {');
+lines.push('      return cat;');
+lines.push('    }');
+lines.push('  }');
+lines.push('  return null;');
+lines.push('}');
+lines.push('');
 lines.push('export default foodIcons;');
 
 fs.writeFileSync(targetFile, lines.join('\n'));
