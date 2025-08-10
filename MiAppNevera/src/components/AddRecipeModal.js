@@ -220,6 +220,18 @@ export default function AddRecipeModal({
               <Text style={{ flex: 1 }}>{ing.name}</Text>
               <TouchableOpacity
                 disabled={selectMode}
+                onPress={() => openUnitPicker(idx)}
+                style={{
+                  borderWidth: 1,
+                  padding: 5,
+                  borderRadius: 4,
+                  marginRight: 5,
+                }}
+              >
+                <Text>{ing.unit}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                disabled={selectMode}
                 onPress={() =>
                   updateIngredient(
                     idx,
@@ -267,18 +279,6 @@ export default function AddRecipeModal({
                 }}
               >
                 <Text>+</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                disabled={selectMode}
-                onPress={() => openUnitPicker(idx)}
-                style={{
-                  borderWidth: 1,
-                  padding: 5,
-                  borderRadius: 4,
-                  marginLeft: 5,
-                }}
-              >
-                <Text>{ing.unit}</Text>
               </TouchableOpacity>
             </TouchableOpacity>
           ))}

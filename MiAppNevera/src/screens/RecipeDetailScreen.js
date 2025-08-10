@@ -1,10 +1,10 @@
 import React, {useLayoutEffect, useState} from 'react';
-import {View, Text, Image, ScrollView, TouchableOpacity} from 'react-native';
+import {View, Text, Image, ScrollView, TouchableOpacity, Alert} from 'react-native';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
 import AddRecipeModal from '../components/AddRecipeModal';
-import {getFoodIcon} from '../foodIcons';
+import {getFoodIcon, getFoodCategory, categories} from '../foodIcons';
 
 export default function RecipeDetailScreen({route, navigation}) {
   const {index} = route.params;
@@ -13,6 +13,21 @@ export default function RecipeDetailScreen({route, navigation}) {
   const {addItems} = useShopping();
   const recipe = recipes[index];
   const [editVisible, setEditVisible] = useState(false);
+  const groupedIngredients = recipe
+    ? recipe.ingredients.reduce((acc, ing) => {
+        const cat = getFoodCategory(ing.name) || 'otros';
+        acc[cat] = acc[cat] || [];
+        acc[cat].push(ing);
+        return acc;
+      }, {})
+    : {};
+  const categoryOrder = Object.keys(categories);
+  const groupedOrder = [
+    ...categoryOrder.filter(cat => groupedIngredients[cat]),
+    ...Object.keys(groupedIngredients).filter(
+      cat => !categoryOrder.includes(cat),
+    ),
+  ];
 
   const missing = recipe ? recipe.ingredients.filter(ing => {
     const available = ['fridge','freezer','pantry'].reduce((sum, loc) => {
@@ -38,7 +53,18 @@ export default function RecipeDetailScreen({route, navigation}) {
                 quantity: ing.quantity,
                 unit: ing.unit,
               }));
-              if (items.length > 0) addItems(items);
+              if (items.length > 0) {
+                Alert.alert(
+                  'Añadir a la lista de compras',
+                  `¿Quieres añadir los siguientes ingredientes a la lista de compras?\n${items
+                    .map(i => `- ${i.name}`)
+                    .join('\n')}`,
+                  [
+                    {text: 'Cancelar', style: 'cancel'},
+                    {text: 'Añadir', onPress: () => addItems(items)},
+                  ],
+                );
+              }
             }}
           >
             <Text style={{fontSize:24}}>🛒</Text>
@@ -67,15 +93,28 @@ export default function RecipeDetailScreen({route, navigation}) {
         <Text>Para {recipe.persons} personas</Text>
         <Text>Dificultad: {recipe.difficulty}</Text>
         <Text style={{marginTop:10,fontWeight:'bold'}}>Ingredientes</Text>
-        {recipe.ingredients.map((ing, idx) => (
-          <View key={idx} style={{flexDirection:'row',alignItems:'center'}}>
-            { (ing.icon || getFoodIcon(ing.name)) ? (
-              <Image
-                source={ing.icon || getFoodIcon(ing.name)}
-                style={{width:20,height:20,marginRight:5}}
-              />
-            ) : null }
-            <Text>{ing.quantity} {ing.unit} {ing.name}</Text>
+        {groupedOrder.map(cat => (
+          <View key={cat} style={{marginTop:5}}>
+            <View style={{flexDirection:'row',alignItems:'center'}}>
+              {categories[cat]?.icon && (
+                <Image
+                  source={categories[cat].icon}
+                  style={{width:20,height:20,marginRight:5}}
+                />
+              )}
+              <Text style={{fontWeight:'bold',textTransform:'capitalize'}}>{cat}</Text>
+            </View>
+            {groupedIngredients[cat].map((ing, idx) => (
+              <View key={idx} style={{flexDirection:'row',alignItems:'center',marginLeft:10}}>
+                {(ing.icon || getFoodIcon(ing.name)) && (
+                  <Image
+                    source={ing.icon || getFoodIcon(ing.name)}
+                    style={{width:20,height:20,marginRight:5}}
+                  />
+                )}
+                <Text>{ing.unit} {ing.quantity} {ing.name}</Text>
+              </View>
+            ))}
           </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
