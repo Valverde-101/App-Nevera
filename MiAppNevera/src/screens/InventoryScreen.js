@@ -62,6 +62,7 @@ export default function InventoryScreen({ navigation }) {
   const [transferType, setTransferType] = useState(null); // 'move' | 'copy'
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [shoppingVisible, setShoppingVisible] = useState(false);
+  const unitMap = { units: 'u', kg: 'kg', l: 'l' };
 
   useEffect(() => {
     if (sortVisible) {
@@ -189,7 +190,7 @@ export default function InventoryScreen({ navigation }) {
       addItem(
         location,
         item.name,
-        parseInt(quantity, 10) || 0,
+        parseFloat(quantity) || 0,
         unit,
         regDate,
         expDate,
@@ -418,7 +419,7 @@ export default function InventoryScreen({ navigation }) {
                               />
                             )}
                             <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                              {item.name} - {item.quantity}
+                              {item.name} - {item.quantity} {unitMap[item.unit] || item.unit}
                             </Text>
                           </View>
                         </TouchableOpacity>

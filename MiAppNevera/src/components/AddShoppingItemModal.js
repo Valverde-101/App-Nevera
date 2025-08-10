@@ -6,6 +6,7 @@ import {
   Button,
   TouchableOpacity,
   Image,
+  TextInput,
 } from 'react-native';
 
 export default function AddShoppingItemModal({
@@ -17,12 +18,12 @@ export default function AddShoppingItemModal({
   initialQuantity,
   initialUnit,
 }) {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('units');
 
   useEffect(() => {
     if (visible) {
-      setQuantity(initialQuantity ?? 1);
+      setQuantity(String(initialQuantity ?? 1));
       setUnit(initialUnit || 'units');
     }
   }, [visible, initialQuantity, initialUnit]);
@@ -43,15 +44,31 @@ export default function AddShoppingItemModal({
             marginBottom: 10,
           }}
         >
-          <Text style={{marginRight: 10}}>Cantidad: {quantity}</Text>
+          <Text style={{marginRight: 10}}>Cantidad:</Text>
           <TouchableOpacity
-            onPress={() => setQuantity(q => Math.max(0, q - 1))}
+            onPress={() =>
+              setQuantity(q => {
+                const num = Math.max(0, (parseFloat(q) || 0) - 1);
+                return String(num);
+              })
+            }
             style={{borderWidth: 1, padding: 5, marginRight: 5}}
           >
             <Text>◀</Text>
           </TouchableOpacity>
+          <TextInput
+            style={{borderWidth: 1, padding: 5, marginRight: 5, width: 60, textAlign: 'center'}}
+            keyboardType="numeric"
+            value={quantity}
+            onChangeText={t => setQuantity(t.replace(/[^0-9.]/g, ''))}
+          />
           <TouchableOpacity
-            onPress={() => setQuantity(q => q + 1)}
+            onPress={() =>
+              setQuantity(q => {
+                const num = (parseFloat(q) || 0) + 1;
+                return String(num);
+              })
+            }
             style={{borderWidth: 1, padding: 5}}
           >
             <Text>▶</Text>
@@ -83,7 +100,7 @@ export default function AddShoppingItemModal({
           <Button title="Volver" onPress={onClose} />
           <Button
             title="Guardar"
-            onPress={() => onSave({quantity, unit})}
+            onPress={() => onSave({quantity: parseFloat(quantity) || 0, unit})}
           />
         </View>
       </View>

@@ -19,7 +19,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
       setData(
         items.map(() => ({
           location: 'fridge',
-          quantity: 1,
+          quantity: '1',
           unit: 'units',
           regDate: today,
           expDate: '',
@@ -85,20 +85,42 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
                 marginBottom: 10,
               }}
             >
-              <Text style={{ marginRight: 10 }}>
-                Cantidad: {data[idx]?.quantity}
-              </Text>
+              <Text style={{ marginRight: 10 }}>Cantidad:</Text>
               <TouchableOpacity
                 onPress={() =>
-                  updateField(idx, 'quantity', Math.max(0, (data[idx]?.quantity || 0) - 1))
+                  updateField(
+                    idx,
+                    'quantity',
+                    String(
+                      Math.max(0, (parseFloat(data[idx]?.quantity) || 0) - 1),
+                    ),
+                  )
                 }
                 style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
               >
                 <Text>◀</Text>
               </TouchableOpacity>
+              <TextInput
+                style={{
+                  borderWidth: 1,
+                  padding: 5,
+                  marginRight: 5,
+                  width: 60,
+                  textAlign: 'center',
+                }}
+                keyboardType="numeric"
+                value={data[idx]?.quantity}
+                onChangeText={t =>
+                  updateField(idx, 'quantity', t.replace(/[^0-9.]/g, ''))
+                }
+              />
               <TouchableOpacity
                 onPress={() =>
-                  updateField(idx, 'quantity', (data[idx]?.quantity || 0) + 1)
+                  updateField(
+                    idx,
+                    'quantity',
+                    String((parseFloat(data[idx]?.quantity) || 0) + 1),
+                  )
                 }
                 style={{ borderWidth: 1, padding: 5 }}
               >
