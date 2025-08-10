@@ -12,7 +12,18 @@ export const RecipeProvider = ({children}) => {
       try {
         const stored = await AsyncStorage.getItem('recipes');
         if (stored) {
-          setRecipes(JSON.parse(stored));
+          const data = JSON.parse(stored);
+          const withIcons = data.map(rec => ({
+            ...rec,
+            ingredients: rec.ingredients.map(ing => ({
+              ...ing,
+              icon: ing.icon || getFoodIcon(ing.name),
+            })),
+          }));
+          setRecipes(withIcons);
+          AsyncStorage.setItem('recipes', JSON.stringify(withIcons)).catch(e => {
+            console.error('Failed to save recipes', e);
+          });
         }
       } catch (e) {
         console.error('Failed to load recipes', e);
