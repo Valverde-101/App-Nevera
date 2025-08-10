@@ -9,7 +9,7 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
-import QuillEditor from 'react-native-cn-quill';
+import Markdown from 'react-native-markdown-display';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
@@ -115,9 +115,7 @@ export default function RecipeDetailScreen({route, navigation}) {
           </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
-        <View style={{minHeight:100,marginTop:5}}>
-          <QuillEditor initialHtml={recipe.steps} readonly style={{flex:1}} />
-        </View>
+        <Markdown>{recipe.steps}</Markdown>
       </ScrollView>
       <AddRecipeModal
         visible={editVisible}
