@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Button, TouchableOpacity, Image, ScrollView } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from 'react-native';
 
 export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -14,6 +23,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
           unit: 'units',
           regDate: today,
           expDate: '',
+          note: '',
         })),
       );
     }
@@ -27,7 +37,16 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
     <Modal visible={visible} animationType="slide">
       <ScrollView style={{ flex: 1, padding: 20 }}>
         {items.map((item, idx) => (
-          <View key={idx} style={{ marginBottom: 20 }}>
+          <View
+            key={idx}
+            style={{
+              marginBottom: 20,
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 8,
+              padding: 10,
+            }}
+          >
             <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
               {item.name}
             </Text>
@@ -101,6 +120,12 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
               placeholder="YYYY-MM-DD"
               value={data[idx]?.expDate}
               onChangeText={t => updateField(idx, 'expDate', t)}
+            />
+            <Text>Nota</Text>
+            <TextInput
+              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+              value={data[idx]?.note}
+              onChangeText={t => updateField(idx, 'note', t)}
             />
           </View>
         ))}

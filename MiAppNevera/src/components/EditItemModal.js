@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TextInput, Button, TouchableOpacity, Image } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  Button,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { useShopping } from '../context/ShoppingContext';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
+  const { addItem: addShoppingItem } = useShopping();
   const [location, setLocation] = useState('fridge');
   const [quantity, setQuantity] = useState('1');
   const [unit, setUnit] = useState('units');
@@ -36,6 +46,31 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
     <>
       <Modal visible={visible} animationType="slide">
         <View style={{ flex: 1, padding: 20 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 10,
+            }}
+          >
+            <TouchableOpacity onPress={onClose}>
+              <Text style={{ fontSize: 24 }}>←</Text>
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={() =>
+                  addShoppingItem(item.name, 1, item.unit)
+                }
+                style={{ marginRight: 15 }}
+              >
+                <Text style={{ fontSize: 24 }}>🧺</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setConfirmVisible(true)}>
+                <Text style={{ fontSize: 24 }}>🗑️</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           {item?.icon && (
             <Image
               source={item.icon}
@@ -114,13 +149,20 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             value={note}
             onChangeText={setNote}
           />
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Button title="Volver" onPress={onClose} />
-            <Button title="Guardar" onPress={handleSave} />
-          </View>
-          <View style={{ marginTop: 20 }}>
-            <Button title="Eliminar" color="red" onPress={() => setConfirmVisible(true)} />
-          </View>
+          <TouchableOpacity
+            onPress={handleSave}
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              alignSelf: 'center',
+              backgroundColor: '#2196f3',
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              borderRadius: 6,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>Guardar</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
       <Modal visible={confirmVisible} transparent animationType="fade">
