@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Modal, View, Text, TextInput, Button, TouchableOpacity, Image} from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  Button,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 
 export default function AddShoppingItemModal({
   visible,
@@ -10,12 +17,12 @@ export default function AddShoppingItemModal({
   initialQuantity,
   initialUnit,
 }) {
-  const [quantity, setQuantity] = useState('1');
+  const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState('units');
 
   useEffect(() => {
     if (visible) {
-      setQuantity(String(initialQuantity ?? 1));
+      setQuantity(initialQuantity ?? 1);
       setUnit(initialUnit || 'units');
     }
   }, [visible, initialQuantity, initialUnit]);
@@ -29,13 +36,27 @@ export default function AddShoppingItemModal({
         <Text style={{fontSize:18, fontWeight:'bold', marginBottom:10}}>
           ¿Añadir {foodName} a la lista de compras?
         </Text>
-        <Text>Cantidad</Text>
-        <TextInput
-          style={{borderWidth:1, marginBottom:10, padding:5}}
-          value={quantity}
-          onChangeText={setQuantity}
-          keyboardType="numeric"
-        />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{marginRight: 10}}>Cantidad: {quantity}</Text>
+          <TouchableOpacity
+            onPress={() => setQuantity(q => Math.max(0, q - 1))}
+            style={{borderWidth: 1, padding: 5, marginRight: 5}}
+          >
+            <Text>◀</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setQuantity(q => q + 1)}
+            style={{borderWidth: 1, padding: 5}}
+          >
+            <Text>▶</Text>
+          </TouchableOpacity>
+        </View>
         <Text>Unidad</Text>
         <View style={{flexDirection:'row', marginBottom:10}}>
           {[
@@ -62,7 +83,7 @@ export default function AddShoppingItemModal({
           <Button title="Volver" onPress={onClose} />
           <Button
             title="Guardar"
-            onPress={() => onSave({quantity: parseInt(quantity,10) || 0, unit})}
+            onPress={() => onSave({quantity, unit})}
           />
         </View>
       </View>

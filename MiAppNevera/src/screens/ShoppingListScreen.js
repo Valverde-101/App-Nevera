@@ -33,6 +33,7 @@ export default function ShoppingListScreen() {
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
   const [batchVisible, setBatchVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   const onSelectFood = name => {
     setSelectedFood({name, icon: getFoodIcon(name)});
@@ -84,6 +85,7 @@ export default function ShoppingListScreen() {
     removeItems(selected);
     setSelected([]);
     setSelectMode(false);
+    setConfirmVisible(false);
   };
 
   const handleBatchSave = entries => {
@@ -126,7 +128,7 @@ export default function ShoppingListScreen() {
         ) : (
           <>
             <Button title="Seleccionar todo" onPress={selectAll} />
-            <Button title="Eliminar" onPress={deleteSelected} />
+            <Button title="Eliminar" onPress={() => setConfirmVisible(true)} />
             <Button title="Guardar" onPress={() => setBatchVisible(true)} />
           </>
         )}
@@ -207,6 +209,36 @@ export default function ShoppingListScreen() {
         onSave={handleBatchSave}
         onClose={() => setBatchVisible(false)}
       />
+
+      <Modal
+        visible={confirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setConfirmVisible(false)}>
+          <View
+            style={{
+              flex:1,
+              justifyContent:'center',
+              alignItems:'center',
+              backgroundColor:'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View style={{backgroundColor:'#fff', padding:20, borderRadius:8}}>
+                <Text style={{marginBottom:10}}>
+                  ¿Está seguro de eliminar {selected.length} alimentos de la lista de compras?
+                </Text>
+                <View style={{flexDirection:'row', justifyContent:'space-around'}}>
+                  <Button title="Cancelar" onPress={() => setConfirmVisible(false)} />
+                  <Button title="Eliminar" onPress={deleteSelected} />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       <Modal
         visible={autoVisible}
