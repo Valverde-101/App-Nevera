@@ -14,7 +14,7 @@ import AddShoppingItemModal from './AddShoppingItemModal';
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
   const [location, setLocation] = useState('fridge');
-  const [quantity, setQuantity] = useState('1');
+  const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState('units');
   const [regDate, setRegDate] = useState('');
   const [expDate, setExpDate] = useState('');
@@ -25,7 +25,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   useEffect(() => {
     if (visible && item) {
       setLocation(item.location || 'fridge');
-      setQuantity(String(item.quantity));
+      setQuantity(item.quantity);
       setUnit(item.unit);
       setRegDate(item.registered || '');
       setExpDate(item.expiration || '');
@@ -36,7 +36,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const handleSave = () => {
     onSave({
       location,
-      quantity: parseInt(quantity, 10) || 0,
+      quantity,
       unit,
       registered: regDate,
       expiration: expDate,
@@ -100,13 +100,27 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               </TouchableOpacity>
             ))}
           </View>
-          <Text>Cantidad</Text>
-          <TextInput
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            value={quantity}
-            onChangeText={setQuantity}
-            keyboardType="numeric"
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ marginRight: 10 }}>Cantidad: {quantity}</Text>
+            <TouchableOpacity
+              onPress={() => setQuantity(q => Math.max(0, q - 1))}
+              style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
+            >
+              <Text>◀</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setQuantity(q => q + 1)}
+              style={{ borderWidth: 1, padding: 5 }}
+            >
+              <Text>▶</Text>
+            </TouchableOpacity>
+          </View>
           <Text>Unidad</Text>
           <View style={{ flexDirection: 'row', marginBottom: 10 }}>
             {[

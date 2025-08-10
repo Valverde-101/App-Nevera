@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   Image,
   Alert,
@@ -12,10 +11,11 @@ import {
 import {useShopping} from '../context/ShoppingContext';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
+  const today = new Date().toISOString().split('T')[0];
   const [location, setLocation] = useState(initialLocation);
-  const [quantity, setQuantity] = useState('1');
+  const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState('units');
-  const [regDate, setRegDate] = useState('');
+  const [regDate, setRegDate] = useState(today);
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
 
@@ -24,17 +24,37 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   useEffect(() => {
     if (visible) {
       setLocation(initialLocation);
-      setQuantity('1');
+      setQuantity(1);
       setUnit('units');
-      setRegDate('');
+      setRegDate(today);
       setExpDate('');
       setNote('');
     }
-  }, [visible, initialLocation]);
+  }, [visible, initialLocation, today]);
 
   return (
     <Modal visible={visible} animationType="slide">
       <View style={{ flex: 1, padding: 20 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <TouchableOpacity onPress={onClose}>
+            <Text style={{ fontSize: 24 }}>←</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              addShoppingItem(foodName, quantity, unit);
+              Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
+            }}
+          >
+            <Text style={{ fontSize: 24 }}>🧺</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>{foodName}</Text>
         {foodIcon && (
           <Image
@@ -64,13 +84,27 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </TouchableOpacity>
           ))}
         </View>
-        <Text>Cantidad</Text>
-        <TextInput
-          style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-          value={quantity}
-          onChangeText={setQuantity}
-          keyboardType="numeric"
-        />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ marginRight: 10 }}>Cantidad: {quantity}</Text>
+          <TouchableOpacity
+            onPress={() => setQuantity(q => Math.max(0, q - 1))}
+            style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
+          >
+            <Text>◀</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setQuantity(q => q + 1)}
+            style={{ borderWidth: 1, padding: 5 }}
+          >
+            <Text>▶</Text>
+          </TouchableOpacity>
+        </View>
         <Text>Unidad</Text>
         <View style={{ flexDirection: 'row', marginBottom: 10 }}>
           {[
@@ -113,29 +147,29 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           value={note}
           onChangeText={setNote}
         />
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-          <Button title="Volver" onPress={onClose} />
-          <Button
-            title="Guardar"
-            onPress={() =>
-              onSave({
-                location,
-                quantity: parseInt(quantity, 10) || 0,
-                unit,
-                registered: regDate,
-                expiration: expDate,
-                note,
-              })
-            }
-          />
-        </View>
-        <Button
-          title="Añadir a compras"
-          onPress={() => {
-            addShoppingItem(foodName, parseInt(quantity, 10) || 0, unit);
-            Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
+        <TouchableOpacity
+          onPress={() =>
+            onSave({
+              location,
+              quantity,
+              unit,
+              registered: regDate,
+              expiration: expDate,
+              note,
+            })
+          }
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            backgroundColor: '#2196f3',
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            borderRadius: 6,
           }}
-        />
+        >
+          <Text style={{ color: '#fff', fontSize: 16 }}>Guardar</Text>
+        </TouchableOpacity>
       </View>
     </Modal>
   );

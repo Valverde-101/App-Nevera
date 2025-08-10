@@ -19,7 +19,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
       setData(
         items.map(() => ({
           location: 'fridge',
-          quantity: '1',
+          quantity: 1,
           unit: 'units',
           regDate: today,
           expDate: '',
@@ -78,13 +78,33 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
                 </TouchableOpacity>
               ))}
             </View>
-            <Text>Cantidad</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              value={data[idx]?.quantity}
-              onChangeText={t => updateField(idx, 'quantity', t)}
-              keyboardType="numeric"
-            />
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}
+            >
+              <Text style={{ marginRight: 10 }}>
+                Cantidad: {data[idx]?.quantity}
+              </Text>
+              <TouchableOpacity
+                onPress={() =>
+                  updateField(idx, 'quantity', Math.max(0, (data[idx]?.quantity || 0) - 1))
+                }
+                style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
+              >
+                <Text>◀</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  updateField(idx, 'quantity', (data[idx]?.quantity || 0) + 1)
+                }
+                style={{ borderWidth: 1, padding: 5 }}
+              >
+                <Text>▶</Text>
+              </TouchableOpacity>
+            </View>
             <Text>Unidad</Text>
             <View style={{ flexDirection: 'row', marginBottom: 10 }}>
               {[
