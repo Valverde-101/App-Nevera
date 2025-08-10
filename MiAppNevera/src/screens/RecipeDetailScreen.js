@@ -150,10 +150,24 @@ export default function RecipeDetailScreen({route, navigation}) {
                 }}
               >
                 <Text style={{marginBottom: 10}}>
-                  ¿Quieres añadir los siguientes ingredientes a la lista de compras?
+                  ¿Quieres añadir los siguientes ingredientes faltantes a la lista de compras?
+                </Text>
+                <Text style={{marginBottom: 10}}>
+                  ¿O deseas añadir todos los ingredientes a la lista de compra?
                 </Text>
                 {missing.map((ing, idx) => (
-                  <Text key={idx}>- {ing.name}</Text>
+                  <View
+                    key={idx}
+                    style={{flexDirection: 'row', alignItems: 'center'}}
+                  >
+                    {(ing.icon || getFoodIcon(ing.name)) && (
+                      <Image
+                        source={ing.icon || getFoodIcon(ing.name)}
+                        style={{width: 20, height: 20, marginRight: 5}}
+                      />
+                    )}
+                    <Text>- {ing.name}</Text>
+                  </View>
                 ))}
                 <View
                   style={{
@@ -167,10 +181,23 @@ export default function RecipeDetailScreen({route, navigation}) {
                     onPress={() => setConfirmVisible(false)}
                   />
                   <Button
-                    title="Añadir"
+                    title="Añadir faltantes"
                     onPress={() => {
                       addItems(
                         missing.map(ing => ({
+                          name: ing.name,
+                          quantity: ing.quantity,
+                          unit: ing.unit,
+                        })),
+                      );
+                      setConfirmVisible(false);
+                    }}
+                  />
+                  <Button
+                    title="Añadir todos"
+                    onPress={() => {
+                      addItems(
+                        recipe.ingredients.map(ing => ({
                           name: ing.name,
                           quantity: ing.quantity,
                           unit: ing.unit,
