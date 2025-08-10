@@ -8,8 +8,9 @@ import {
   Modal,
   Button,
   TouchableWithoutFeedback,
+  useWindowDimensions,
 } from 'react-native';
-import Markdown from 'react-native-markdown-display';
+import RenderHtml from 'react-native-render-html';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
@@ -22,6 +23,7 @@ export default function RecipeDetailScreen({route, navigation}) {
   const {inventory} = useInventory();
   const {addItems} = useShopping();
   const recipe = recipes[index];
+  const {width} = useWindowDimensions();
   const [editVisible, setEditVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const groupedIngredients = recipe
@@ -115,7 +117,7 @@ export default function RecipeDetailScreen({route, navigation}) {
           </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
-        <Markdown>{recipe.steps}</Markdown>
+        <RenderHtml contentWidth={width} source={{html: recipe.steps}} />
       </ScrollView>
       <AddRecipeModal
         visible={editVisible}
