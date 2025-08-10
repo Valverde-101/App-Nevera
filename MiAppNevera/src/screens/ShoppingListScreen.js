@@ -86,7 +86,7 @@ export default function ShoppingListScreen() {
 
   const handleBatchSave = entries => {
     entries.forEach((entry, idx) => {
-      const {location, quantity, unit, regDate, expDate} = entry;
+      const {location, quantity, unit, regDate, expDate, note} = entry;
       const item = list[selected[idx]];
       addInventoryItem(
         location,
@@ -95,6 +95,7 @@ export default function ShoppingListScreen() {
         unit,
         regDate,
         expDate,
+        note,
       );
     });
     markPurchased(selected);

@@ -14,6 +14,7 @@ import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
+import BatchAddItemModal from '../components/BatchAddItemModal';
 import { categories, getFoodIcon } from '../foodIcons';
 
 function StorageSelector({ current, onChange }) {
@@ -40,6 +41,8 @@ export default function InventoryScreen({ navigation }) {
   const [selectedFood, setSelectedFood] = useState(null);
   const [addVisible, setAddVisible] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [multiAddVisible, setMultiAddVisible] = useState(false);
+  const [multiItems, setMultiItems] = useState([]);
 
   const [search, setSearch] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
@@ -47,7 +50,7 @@ export default function InventoryScreen({ navigation }) {
   const [viewVisible, setViewVisible] = useState(false);
   const [sortOrder, setSortOrder] = useState('name');
   const [groupBy, setGroupBy] = useState('category');
-  const [viewType, setViewType] = useState('list');
+  const [viewType, setViewType] = useState('grid');
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
   const [tempGroupBy, setTempGroupBy] = useState(groupBy);
   const [tempViewType, setTempViewType] = useState(viewType);
@@ -156,6 +159,13 @@ export default function InventoryScreen({ navigation }) {
     setAddVisible(true);
   };
 
+  const onMultiSelectFoods = names => {
+    const items = names.map(name => ({ name, icon: getFoodIcon(name) }));
+    setMultiItems(items);
+    setPickerVisible(false);
+    setMultiAddVisible(true);
+  };
+
   const onSave = data => {
     addItem(
       data.location,
@@ -167,6 +177,24 @@ export default function InventoryScreen({ navigation }) {
       data.note,
     );
     setAddVisible(false);
+  };
+
+  const handleBatchAddSave = entries => {
+    entries.forEach((entry, idx) => {
+      const { location, quantity, unit, regDate, expDate, note } = entry;
+      const item = multiItems[idx];
+      addItem(
+        location,
+        item.name,
+        parseInt(quantity, 10) || 0,
+        unit,
+        regDate,
+        expDate,
+        note,
+      );
+    });
+    setMultiAddVisible(false);
+    setMultiItems([]);
   };
 
   const toggleSelection = (location, index) => {
@@ -669,6 +697,7 @@ export default function InventoryScreen({ navigation }) {
       <FoodPickerModal
         visible={pickerVisible}
         onSelect={onSelectFood}
+        onMultiSelect={onMultiSelectFoods}
         onClose={() => setPickerVisible(false)}
       />
       <AddItemModal
@@ -678,6 +707,12 @@ export default function InventoryScreen({ navigation }) {
         initialLocation={storage}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
+      />
+      <BatchAddItemModal
+        visible={multiAddVisible}
+        items={multiItems}
+        onSave={handleBatchAddSave}
+        onClose={() => setMultiAddVisible(false)}
       />
       <EditItemModal
         visible={!!editingItem}
