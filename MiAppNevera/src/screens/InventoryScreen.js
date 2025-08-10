@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import {
   View,
   Text,
@@ -48,11 +48,27 @@ export default function InventoryScreen({ navigation }) {
   const [sortOrder, setSortOrder] = useState('name');
   const [groupBy, setGroupBy] = useState('category');
   const [viewType, setViewType] = useState('list');
+  const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
+  const [tempGroupBy, setTempGroupBy] = useState(groupBy);
+  const [tempViewType, setTempViewType] = useState(viewType);
   const [searchVisible, setSearchVisible] = useState(false);
   const [multiSelect, setMultiSelect] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [transferType, setTransferType] = useState(null); // 'move' | 'copy'
   const [confirmVisible, setConfirmVisible] = useState(false);
+
+  useEffect(() => {
+    if (sortVisible) {
+      setTempSortOrder(sortOrder);
+      setTempGroupBy(groupBy);
+    }
+  }, [sortVisible]);
+
+  useEffect(() => {
+    if (viewVisible) {
+      setTempViewType(viewType);
+    }
+  }, [viewVisible]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -171,6 +187,34 @@ export default function InventoryScreen({ navigation }) {
   const clearSelection = () => {
     setSelectedItems([]);
     setMultiSelect(false);
+  };
+
+  const selectAll = () => {
+    const allKeys = sortedItems.map(item => ({
+      key: `${item.location}-${item.index}`,
+      location: item.location,
+      index: item.index,
+    }));
+    setSelectedItems(allKeys);
+    setMultiSelect(true);
+  };
+
+  const selectIntersection = () => {
+    if (selectedItems.length < 2) return;
+    const keyOrder = sortedItems.map(item => `${item.location}-${item.index}`);
+    const indices = selectedItems
+      .map(sel => keyOrder.indexOf(sel.key))
+      .filter(i => i !== -1)
+      .sort((a, b) => a - b);
+    if (indices.length < 2) return;
+    const start = indices[0];
+    const end = indices[indices.length - 1];
+    const newSelection = keyOrder.slice(start, end + 1).map(k => {
+      const [location, indexStr] = k.split('-');
+      return { key: k, location, index: parseInt(indexStr, 10) };
+    });
+    setSelectedItems(newSelection);
+    setMultiSelect(true);
   };
 
   const handleTransfer = target => {
@@ -364,6 +408,7 @@ export default function InventoryScreen({ navigation }) {
             right: 0,
             bottom: 0,
             flexDirection: 'row',
+            flexWrap: 'wrap',
             justifyContent: 'space-around',
             backgroundColor: '#fff',
             padding: 10,
@@ -371,9 +416,66 @@ export default function InventoryScreen({ navigation }) {
             borderColor: '#ccc',
           }}
         >
-          <Button title="Mover" onPress={() => setTransferType('move')} />
-          <Button title="Copiar" onPress={() => setTransferType('copy')} />
-          <Button title="Eliminar" onPress={() => setConfirmVisible(true)} />
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#e0e0e0',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
+            onPress={selectAll}
+          >
+            <Text style={{ fontSize: 16 }}>Seleccionar todo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#e0e0e0',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
+            onPress={selectIntersection}
+          >
+            <Text style={{ fontSize: 16 }}>Intersección</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#2196f3',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
+            onPress={() => setTransferType('move')}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>Mover</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#2196f3',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
+            onPress={() => setTransferType('copy')}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>Copiar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#e53935',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
+            onPress={() => setConfirmVisible(true)}
+          >
+            <Text style={{ color: '#fff', fontSize: 16 }}>Eliminar</Text>
+          </TouchableOpacity>
         </View>
       )}
 
@@ -411,60 +513,151 @@ export default function InventoryScreen({ navigation }) {
         </TouchableWithoutFeedback>
       </Modal>
 
-      <Modal visible={sortVisible} animationType="slide">
-        <View style={{ flex: 1, padding: 20 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Ordenar por</Text>
-          {[
-            { key: 'name', label: 'Nombre' },
-            { key: 'expiration', label: 'Fecha de caducidad' },
-            { key: 'registered', label: 'Fecha de registro' },
-          ].map(opt => (
-            <TouchableOpacity
-              key={opt.key}
-              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
-              onPress={() => setSortOrder(opt.key)}
-            >
-              <Text>{sortOrder === opt.key ? '◉' : '○'}</Text>
-              <Text style={{ marginLeft: 5 }}>{opt.label}</Text>
-            </TouchableOpacity>
-          ))}
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10 }}>Agrupar por</Text>
-          {[
-            { key: 'category', label: 'Categoría' },
-            { key: 'none', label: 'Sin agrupación' },
-            { key: 'registered', label: 'Fecha de registro' },
-          ].map(opt => (
-            <TouchableOpacity
-              key={opt.key}
-              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
-              onPress={() => setGroupBy(opt.key)}
-            >
-              <Text>{groupBy === opt.key ? '◉' : '○'}</Text>
-              <Text style={{ marginLeft: 5 }}>{opt.label}</Text>
-            </TouchableOpacity>
-          ))}
-          <Button title="Cerrar" onPress={() => setSortVisible(false)} />
-        </View>
+      <Modal
+        visible={sortVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSortVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setSortVisible(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View
+                style={{
+                  backgroundColor: '#fff',
+                  padding: 20,
+                  borderRadius: 8,
+                  width: '80%',
+                  maxWidth: 300,
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+                  Ordenar por
+                </Text>
+                {[
+                  { key: 'name', label: 'Nombre' },
+                  { key: 'expiration', label: 'Fecha de caducidad' },
+                  { key: 'registered', label: 'Fecha de registro' },
+                ].map(opt => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                    onPress={() => setTempSortOrder(opt.key)}
+                  >
+                    <Text>{tempSortOrder === opt.key ? '◉' : '○'}</Text>
+                    <Text style={{ marginLeft: 5 }}>{opt.label}</Text>
+                  </TouchableOpacity>
+                ))}
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10 }}>
+                  Agrupar por
+                </Text>
+                {[
+                  { key: 'category', label: 'Categoría' },
+                  { key: 'none', label: 'Sin agrupación' },
+                  { key: 'registered', label: 'Fecha de registro' },
+                ].map(opt => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                    onPress={() => setTempGroupBy(opt.key)}
+                  >
+                    <Text>{tempGroupBy === opt.key ? '◉' : '○'}</Text>
+                    <Text style={{ marginLeft: 5 }}>{opt.label}</Text>
+                  </TouchableOpacity>
+                ))}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setSortVisible(false)}
+                    style={{ padding: 10, marginRight: 10 }}
+                  >
+                    <Text style={{ color: '#2196f3' }}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSortOrder(tempSortOrder);
+                      setGroupBy(tempGroupBy);
+                      setSortVisible(false);
+                    }}
+                    style={{ backgroundColor: '#2196f3', padding: 10, borderRadius: 4 }}
+                  >
+                    <Text style={{ color: '#fff' }}>Confirmar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
-      <Modal visible={viewVisible} animationType="slide">
-        <View style={{ flex: 1, padding: 20 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>Tipo de vista</Text>
-          {[
-            { key: 'list', label: 'Lista' },
-            { key: 'grid', label: 'Cuadrícula' },
-          ].map(opt => (
-            <TouchableOpacity
-              key={opt.key}
-              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
-              onPress={() => setViewType(opt.key)}
-            >
-              <Text>{viewType === opt.key ? '◉' : '○'}</Text>
-              <Text style={{ marginLeft: 5 }}>{opt.label}</Text>
-            </TouchableOpacity>
-          ))}
-          <Button title="Cerrar" onPress={() => setViewVisible(false)} />
-        </View>
+      <Modal
+        visible={viewVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setViewVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setViewVisible(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View
+                style={{
+                  backgroundColor: '#fff',
+                  padding: 20,
+                  borderRadius: 8,
+                  width: '80%',
+                  maxWidth: 300,
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+                  Tipo de vista
+                </Text>
+                {[
+                  { key: 'list', label: 'Lista' },
+                  { key: 'grid', label: 'Cuadrícula' },
+                ].map(opt => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                    onPress={() => setTempViewType(opt.key)}
+                  >
+                    <Text>{tempViewType === opt.key ? '◉' : '○'}</Text>
+                    <Text style={{ marginLeft: 5 }}>{opt.label}</Text>
+                  </TouchableOpacity>
+                ))}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setViewVisible(false)}
+                    style={{ padding: 10, marginRight: 10 }}
+                  >
+                    <Text style={{ color: '#2196f3' }}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setViewType(tempViewType);
+                      setViewVisible(false);
+                    }}
+                    style={{ backgroundColor: '#2196f3', padding: 10, borderRadius: 4 }}
+                  >
+                    <Text style={{ color: '#fff' }}>Confirmar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
 
       <FoodPickerModal
