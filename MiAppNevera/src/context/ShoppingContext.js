@@ -1,5 +1,6 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 
 const ShoppingContext = createContext();
 
@@ -11,7 +12,12 @@ export const ShoppingProvider = ({children}) => {
       try {
         const stored = await AsyncStorage.getItem('shopping');
         if (stored) {
-          setList(JSON.parse(stored));
+          const parsed = JSON.parse(stored).map(item => ({
+            ...item,
+            icon: item.icon || getFoodIcon(item.name),
+            foodCategory: item.foodCategory || getFoodCategory(item.name),
+          }));
+          setList(parsed);
         }
       } catch (e) {
         console.error('Failed to load shopping list', e);
@@ -28,10 +34,16 @@ export const ShoppingProvider = ({children}) => {
     }
   };
 
-  const addItem = (name, category = 'general', quantity = 1, unit = 'units') => {
-    const newItem = {name, category, quantity, unit, purchased: false};
-    const updated = [...list, newItem];
-    persist(updated);
+  const addItem = (name, quantity = 1, unit = 'units') => {
+    const newItem = {
+      name,
+      quantity,
+      unit,
+      icon: getFoodIcon(name),
+      foodCategory: getFoodCategory(name),
+      purchased: false,
+    };
+    persist([...list, newItem]);
   };
 
   const togglePurchased = (index) => {

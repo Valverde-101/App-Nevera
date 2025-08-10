@@ -85,6 +85,12 @@ export default function InventoryScreen({ navigation }) {
           >
             <Text style={{ fontSize: 18 }}>🔍</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Shopping')}
+            style={{ marginRight: 15 }}
+          >
+            <Text style={{ fontSize: 18 }}>🛒</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => setMenuVisible(true)}>
             <Text style={{ fontSize: 24 }}>⋮</Text>
           </TouchableOpacity>
