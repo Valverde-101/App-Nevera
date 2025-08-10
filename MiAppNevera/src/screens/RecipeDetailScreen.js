@@ -1,5 +1,14 @@
 import React, {useLayoutEffect, useState} from 'react';
-import {View, Text, Image, ScrollView, TouchableOpacity, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Button,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
@@ -13,6 +22,7 @@ export default function RecipeDetailScreen({route, navigation}) {
   const {addItems} = useShopping();
   const recipe = recipes[index];
   const [editVisible, setEditVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
   const groupedIngredients = recipe
     ? recipe.ingredients.reduce((acc, ing) => {
         const cat = getFoodCategory(ing.name) || 'otros';
@@ -48,22 +58,8 @@ export default function RecipeDetailScreen({route, navigation}) {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              const items = missing.map(ing => ({
-                name: ing.name,
-                quantity: ing.quantity,
-                unit: ing.unit,
-              }));
-              if (items.length > 0) {
-                Alert.alert(
-                  'Añadir a la lista de compras',
-                  `¿Quieres añadir los siguientes ingredientes a la lista de compras?\n${items
-                    .map(i => `- ${i.name}`)
-                    .join('\n')}`,
-                  [
-                    {text: 'Cancelar', style: 'cancel'},
-                    {text: 'Añadir', onPress: () => addItems(items)},
-                  ],
-                );
+              if (missing.length > 0) {
+                setConfirmVisible(true);
               }
             }}
           >
@@ -129,6 +125,66 @@ export default function RecipeDetailScreen({route, navigation}) {
         }}
         onClose={() => setEditVisible(false)}
       />
+      <Modal
+        visible={confirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setConfirmVisible(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View
+                style={{
+                  backgroundColor: '#fff',
+                  padding: 20,
+                  borderRadius: 8,
+                  maxWidth: '80%',
+                }}
+              >
+                <Text style={{marginBottom: 10}}>
+                  ¿Quieres añadir los siguientes ingredientes a la lista de compras?
+                </Text>
+                {missing.map((ing, idx) => (
+                  <Text key={idx}>- {ing.name}</Text>
+                ))}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    marginTop: 20,
+                  }}
+                >
+                  <Button
+                    title="Cancelar"
+                    onPress={() => setConfirmVisible(false)}
+                  />
+                  <Button
+                    title="Añadir"
+                    onPress={() => {
+                      addItems(
+                        missing.map(ing => ({
+                          name: ing.name,
+                          quantity: ing.quantity,
+                          unit: ing.unit,
+                        })),
+                      );
+                      setConfirmVisible(false);
+                    }}
+                  />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </>
   );
 }
