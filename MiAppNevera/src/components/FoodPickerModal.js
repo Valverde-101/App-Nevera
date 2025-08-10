@@ -70,7 +70,18 @@ export default function FoodPickerModal({
     <>
       <Modal visible={visible} animationType="slide">
         <View style={{ flex: 1, padding: 20 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 10 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <TouchableOpacity onPress={onClose}>
+            <Text style={{ fontSize: 24 }}>←</Text>
+          </TouchableOpacity>
+          <View style={{ flexDirection: 'row' }}>
             <TouchableOpacity
               onPress={() =>
                 setSearchVisible(v => {
@@ -86,6 +97,7 @@ export default function FoodPickerModal({
               <Text style={{ fontSize: 24 }}>⋮</Text>
             </TouchableOpacity>
           </View>
+        </View>
           {/* Top half: category icons */}
           <View style={{ flex: 1 }}>
             <ScrollView horizontal contentContainerStyle={{ alignItems: 'center' }}>
@@ -173,9 +185,7 @@ export default function FoodPickerModal({
               />
               <Button title="Guardar" onPress={handleSave} />
             </View>
-          ) : (
-            <Button title="Cerrar" onPress={onClose} />
-          )}
+          ) : null}
         </View>
       </View>
     </Modal>

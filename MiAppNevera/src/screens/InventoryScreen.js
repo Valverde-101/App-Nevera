@@ -473,6 +473,21 @@ export default function InventoryScreen({ navigation }) {
               borderRadius: 6,
               margin: 4,
             }}
+            onPress={() => {
+              setSelectedItems([]);
+              setMultiSelect(false);
+            }}
+          >
+            <Text style={{ fontSize: 16 }}>❌</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#e0e0e0',
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 6,
+              margin: 4,
+            }}
             onPress={selectAll}
           >
             <Text style={{ fontSize: 16 }}>Seleccionar todo</Text>
@@ -499,7 +514,7 @@ export default function InventoryScreen({ navigation }) {
             }}
             onPress={() => setTransferType('move')}
           >
-            <Text style={{ color: '#fff', fontSize: 16 }}>Mover</Text>
+            <Text style={{ color: '#fff', fontSize: 16 }}>🔀</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -511,7 +526,7 @@ export default function InventoryScreen({ navigation }) {
             }}
             onPress={() => setTransferType('copy')}
           >
-            <Text style={{ color: '#fff', fontSize: 16 }}>Copiar</Text>
+            <Text style={{ color: '#fff', fontSize: 16 }}>📄</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -535,7 +550,7 @@ export default function InventoryScreen({ navigation }) {
             }}
             onPress={() => setConfirmVisible(true)}
           >
-            <Text style={{ color: '#fff', fontSize: 16 }}>Eliminar</Text>
+            <Text style={{ color: '#fff', fontSize: 16 }}>🗑️</Text>
           </TouchableOpacity>
         </View>
       )}
