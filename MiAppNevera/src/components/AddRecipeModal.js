@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Modal,
   View,
@@ -10,7 +10,6 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
-import QuillEditor, {QuillToolbar} from 'react-native-cn-quill';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 
@@ -31,7 +30,6 @@ export default function AddRecipeModal({
   const [selected, setSelected] = useState([]);
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
-  const editorRef = useRef(null);
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -125,14 +123,13 @@ export default function AddRecipeModal({
     setUnitPickerIndex(null);
   };
 
-  const save = async () => {
-    const html = (await editorRef.current?.getHtml()) || steps;
+  const save = () => {
     onSave({
       name,
       image,
       persons: parseInt(persons, 10) || 0,
       difficulty,
-      steps: html,
+      steps,
       ingredients: ingredients.map(ing => ({
         name: ing.name,
         quantity: parseFloat(ing.quantity) || 0,
@@ -305,15 +302,12 @@ export default function AddRecipeModal({
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
           <Text>Pasos</Text>
-          <View style={{height:200,marginBottom:10}}>
-            <QuillEditor
-              ref={editorRef}
-              initialHtml={steps}
-              onHtmlChange={d => setSteps(d.html)}
-              style={{flex:1,borderWidth:1}}
-            />
-          </View>
-          <QuillToolbar editor={editorRef} options="full" theme="light" />
+          <TextInput
+            multiline
+            value={steps}
+            onChangeText={setSteps}
+            style={{height:200,borderWidth:1,marginBottom:10,padding:5,textAlignVertical:'top'}}
+          />
           <TouchableOpacity
             onPress={save}
             style={{backgroundColor:'#2196f3',padding:10,borderRadius:6,alignSelf:'center'}}
