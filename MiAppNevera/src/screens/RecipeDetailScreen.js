@@ -109,7 +109,7 @@ export default function RecipeDetailScreen({route, navigation}) {
                     style={{width:20,height:20,marginRight:5}}
                   />
                 )}
-                <Text>{ing.unit} {ing.quantity} {ing.name}</Text>
+                <Text>{ing.quantity} {ing.unit} de {ing.name}</Text>
               </View>
             ))}
           </View>
