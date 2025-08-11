@@ -17,6 +17,7 @@ import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
 import { categories, getFoodIcon } from '../foodIcons';
+import { getUnitLabel } from '../utils/units';
 
 function StorageSelector({ current, onChange }) {
   const opts = [
@@ -62,7 +63,6 @@ export default function InventoryScreen({ navigation }) {
   const [transferType, setTransferType] = useState(null); // 'move' | 'copy'
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [shoppingVisible, setShoppingVisible] = useState(false);
-  const unitMap = { units: 'Unidades', kg: 'Kilos', l: 'Litros', unidades: 'Unidades' };
 
   useEffect(() => {
     if (sortVisible) {
@@ -376,7 +376,7 @@ export default function InventoryScreen({ navigation }) {
                         )}
                         <Text>{item.name}</Text>
                         <Text style={{ marginLeft: 10 }}>
-                          {item.quantity} {unitMap[item.unit] || item.unit}
+                          {item.quantity} {getUnitLabel(item.quantity, item.unit)}
                         </Text>
                         {search && (
                           <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
@@ -425,7 +425,7 @@ export default function InventoryScreen({ navigation }) {
                               />
                             )}
                             <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                              {item.name} - {item.quantity} {unitMap[item.unit] || item.unit}
+                              {item.name} - {item.quantity} {getUnitLabel(item.quantity, item.unit)}
                             </Text>
                           </View>
                         </TouchableOpacity>
@@ -817,7 +817,7 @@ export default function InventoryScreen({ navigation }) {
                         />
                       )}
                       <Text>
-                        {item.name} - {item.quantity} {unitMap[item.unit] || item.unit}
+                        {item.name} - {item.quantity} {getUnitLabel(item.quantity, item.unit)}
                       </Text>
                     </View>
                   ))}
