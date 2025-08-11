@@ -3,10 +3,12 @@ import {View, Text, ScrollView, Image, TouchableOpacity} from 'react-native';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import AddRecipeModal from '../components/AddRecipeModal';
+import { useLocations } from '../context/LocationsContext';
 
 export default function RecipeBookScreen({navigation}) {
   const {recipes, addRecipe} = useRecipes();
   const {inventory} = useInventory();
+  const { locations } = useLocations();
   const [addVisible, setAddVisible] = useState(false);
 
   useLayoutEffect(() => {
@@ -22,10 +24,10 @@ export default function RecipeBookScreen({navigation}) {
 
   const hasIngredients = recipe => {
     return recipe.ingredients.every(ing => {
-      const available = ['fridge','freezer','pantry'].reduce((sum, loc) => {
-        const item = inventory[loc].find(it => it.name === ing.name);
+      const available = locations.reduce((sum, loc) => {
+        const item = inventory[loc.key].find(it => it.name === ing.name);
         return sum + (item ? item.quantity : 0);
-      },0);
+      }, 0);
       return available >= ing.quantity;
     });
   };

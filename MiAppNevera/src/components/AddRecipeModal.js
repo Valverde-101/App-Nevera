@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
-import {getUnitLabel, UNIT_OPTIONS} from '../utils/units';
+import { useUnits } from '../context/UnitsContext';
 
 export default function AddRecipeModal({
   visible,
@@ -20,6 +20,7 @@ export default function AddRecipeModal({
   onClose,
   initialRecipe,
 }) {
+  const { units, getLabel } = useUnits();
   const [name, setName] = useState('');
   const [image, setImage] = useState('');
   const [persons, setPersons] = useState('1');
@@ -64,7 +65,7 @@ export default function AddRecipeModal({
   const addIngredient = foodName => {
     setIngredients([
       ...ingredients,
-      {name: foodName, quantity: '1', unit: 'unidades', icon: getFoodIcon(foodName)},
+      {name: foodName, quantity: '1', unit: units[0]?.key || 'units', icon: getFoodIcon(foodName)},
     ]);
     setPickerVisible(false);
   };
@@ -75,7 +76,7 @@ export default function AddRecipeModal({
       ...foodNames.map(name => ({
         name,
         quantity: '1',
-        unit: 'unidades',
+        unit: units[0]?.key || 'units',
         icon: getFoodIcon(name),
       })),
     ]);
@@ -229,7 +230,7 @@ export default function AddRecipeModal({
                   marginRight: 5,
                 }}
               >
-                <Text>{getUnitLabel(ing.quantity, ing.unit)}</Text>
+                <Text>{getLabel(ing.quantity, ing.unit)}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={selectMode}
@@ -334,13 +335,13 @@ export default function AddRecipeModal({
               }}
             >
               <View style={{backgroundColor:'#fff',padding:20,borderRadius:6}}>
-                {Object.entries(UNIT_OPTIONS).map(([key, label]) => (
+                {units.map(opt => (
                   <TouchableOpacity
-                    key={key}
-                    onPress={() => selectUnit(key)}
+                    key={opt.key}
+                    onPress={() => selectUnit(opt.key)}
                     style={{paddingVertical:5}}
                   >
-                    <Text>{label}</Text>
+                    <Text>{opt.plural}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

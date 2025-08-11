@@ -9,25 +9,29 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
+import { useUnits } from '../context/UnitsContext';
+import { useLocations } from '../context/LocationsContext';
 
 export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
+  const { units } = useUnits();
+  const { locations } = useLocations();
   const [data, setData] = useState([]);
 
   useEffect(() => {
     if (visible) {
       setData(
         items.map(() => ({
-          location: 'fridge',
+          location: locations[0]?.key || 'fridge',
           quantity: '1',
-          unit: 'units',
+          unit: units[0]?.key || 'units',
           regDate: today,
           expDate: '',
           note: '',
         })),
       );
     }
-  }, [visible, items, today]);
+  }, [visible, items, today, units, locations]);
 
   const updateField = (index, field, value) => {
     setData(prev => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
@@ -58,11 +62,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
             )}
             <Text style={{ marginBottom: 5 }}>Ubicación</Text>
             <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-              {[
-                { key: 'fridge', label: 'Nevera' },
-                { key: 'freezer', label: 'Congelador' },
-                { key: 'pantry', label: 'Despensa' },
-              ].map(opt => (
+              {locations.map(opt => (
                 <TouchableOpacity
                   key={opt.key}
                   style={{
@@ -74,7 +74,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
                   }}
                   onPress={() => updateField(idx, 'location', opt.key)}
                 >
-                  <Text>{opt.label}</Text>
+                  <Text>{opt.name}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -129,11 +129,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
             </View>
             <Text>Unidad</Text>
             <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-              {[
-              { key: 'units', label: 'Unidades' },
-              { key: 'kg', label: 'Kilos' },
-              { key: 'l', label: 'Litros' },
-            ].map(opt => (
+              {units.map(opt => (
                 <TouchableOpacity
                   key={opt.key}
                   style={{
@@ -145,7 +141,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
                   }}
                   onPress={() => updateField(idx, 'unit', opt.key)}
                 >
-                  <Text>{opt.label}</Text>
+                  <Text>{opt.plural}</Text>
                 </TouchableOpacity>
               ))}
             </View>

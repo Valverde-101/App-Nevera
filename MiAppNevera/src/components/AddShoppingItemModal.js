@@ -8,6 +8,7 @@ import {
   Image,
   TextInput,
 } from 'react-native';
+import { useUnits } from '../context/UnitsContext';
 
 export default function AddShoppingItemModal({
   visible,
@@ -18,15 +19,16 @@ export default function AddShoppingItemModal({
   initialQuantity,
   initialUnit,
 }) {
+  const { units } = useUnits();
   const [quantity, setQuantity] = useState('1');
-  const [unit, setUnit] = useState('units');
+  const [unit, setUnit] = useState(units[0]?.key || 'units');
 
   useEffect(() => {
     if (visible) {
       setQuantity(String(initialQuantity ?? 1));
-      setUnit(initialUnit || 'units');
+      setUnit(initialUnit || units[0]?.key || 'units');
     }
-  }, [visible, initialQuantity, initialUnit]);
+  }, [visible, initialQuantity, initialUnit, units]);
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -76,11 +78,7 @@ export default function AddShoppingItemModal({
         </View>
         <Text>Unidad</Text>
         <View style={{flexDirection:'row', marginBottom:10}}>
-          {[
-            {key:'units', label:'Unidades'},
-            {key:'kg', label:'Kilos'},
-            {key:'l', label:'Litros'},
-          ].map(opt => (
+          {units.map(opt => (
             <TouchableOpacity
               key={opt.key}
               style={{
@@ -92,7 +90,7 @@ export default function AddShoppingItemModal({
               }}
               onPress={() => setUnit(opt.key)}
             >
-              <Text>{opt.label}</Text>
+              <Text>{opt.plural}</Text>
             </TouchableOpacity>
           ))}
         </View>

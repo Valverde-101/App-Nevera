@@ -10,12 +10,16 @@ import {
 } from 'react-native';
 import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
+import { useUnits } from '../context/UnitsContext';
+import { useLocations } from '../context/LocationsContext';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
-  const [location, setLocation] = useState('fridge');
+  const { units } = useUnits();
+  const { locations } = useLocations();
+  const [location, setLocation] = useState(locations[0]?.key || 'fridge');
   const [quantity, setQuantity] = useState('1');
-  const [unit, setUnit] = useState('units');
+  const [unit, setUnit] = useState(units[0]?.key || 'units');
   const [regDate, setRegDate] = useState('');
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
@@ -24,7 +28,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
 
   useEffect(() => {
     if (visible && item) {
-      setLocation(item.location || 'fridge');
+      setLocation(item.location || locations[0]?.key || 'fridge');
       setQuantity(String(item.quantity));
       setUnit(item.unit);
       setRegDate(item.registered || '');
@@ -80,11 +84,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
           <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>{item?.name}</Text>
           <Text style={{ marginBottom: 5 }}>Ubicación</Text>
           <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-            {[
-              { key: 'fridge', label: 'Nevera' },
-              { key: 'freezer', label: 'Congelador' },
-              { key: 'pantry', label: 'Despensa' },
-            ].map(opt => (
+            {locations.map(opt => (
               <TouchableOpacity
                 key={opt.key}
                 style={{
@@ -96,7 +96,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                 }}
                 onPress={() => setLocation(opt.key)}
               >
-                <Text>{opt.label}</Text>
+                <Text>{opt.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -145,11 +145,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
           </View>
           <Text>Unidad</Text>
           <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-            {[
-              { key: 'units', label: 'Unidades' },
-              { key: 'kg', label: 'Kilos' },
-              { key: 'l', label: 'Litros' },
-            ].map(opt => (
+            {units.map(opt => (
               <TouchableOpacity
                 key={opt.key}
                 style={{
@@ -161,7 +157,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                 }}
                 onPress={() => setUnit(opt.key)}
               >
-                <Text>{opt.label}</Text>
+                <Text>{opt.plural}</Text>
               </TouchableOpacity>
             ))}
           </View>
