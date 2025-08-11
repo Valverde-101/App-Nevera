@@ -15,6 +15,7 @@ import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
 import AddRecipeModal from '../components/AddRecipeModal';
 import {getFoodIcon, getFoodCategory, categories} from '../foodIcons';
+import {getUnitLabel} from '../utils/units';
 
 export default function RecipeDetailScreen({route, navigation}) {
   const {index} = route.params;
@@ -39,7 +40,6 @@ export default function RecipeDetailScreen({route, navigation}) {
       cat => !categoryOrder.includes(cat),
     ),
   ];
-  const unitLabels = { unidades: 'Unidades', kg: 'Kilos', l: 'Litros', units: 'Unidades' };
 
   const missing = recipe ? recipe.ingredients.filter(ing => {
     const available = ['fridge','freezer','pantry'].reduce((sum, loc) => {
@@ -110,7 +110,7 @@ export default function RecipeDetailScreen({route, navigation}) {
                     style={{width:20,height:20,marginRight:5}}
                   />
                 )}
-                <Text>{ing.quantity} {unitLabels[ing.unit] || ing.unit} de {ing.name}</Text>
+                <Text>{ing.quantity} {getUnitLabel(ing.quantity, ing.unit)} de {ing.name}</Text>
               </View>
             ))}
           </View>
