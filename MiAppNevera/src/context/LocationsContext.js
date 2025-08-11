@@ -50,9 +50,13 @@ export const LocationsProvider = ({ children }) => {
     setLocations(prev => prev.map(l => (l.key === key ? { ...l, active: !l.active } : l)));
   };
 
+  const reorderLocations = newOrder => {
+    setLocations(newOrder);
+  };
+
   return (
     <LocationsContext.Provider
-      value={{ locations, addLocation, updateLocation, removeLocation, toggleActive }}
+      value={{ locations, addLocation, updateLocation, removeLocation, toggleActive, reorderLocations }}
     >
       {children}
     </LocationsContext.Provider>

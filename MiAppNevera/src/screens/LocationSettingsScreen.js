@@ -4,18 +4,18 @@ import {
   Text,
   TextInput,
   Button,
-  FlatList,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
+import DraggableFlatList from 'react-native-draggable-flatlist';
 import { useLocations } from '../context/LocationsContext';
 import { useInventory } from '../context/InventoryContext';
 
 const icons = ['🥶','❄️','🗃️','📦','🍽️'];
 
 export default function LocationSettingsScreen() {
-  const { locations, addLocation, updateLocation, removeLocation, toggleActive } = useLocations();
+  const { locations, addLocation, updateLocation, removeLocation, toggleActive, reorderLocations } = useLocations();
   const { inventory } = useInventory();
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(icons[0]);
@@ -50,10 +50,11 @@ export default function LocationSettingsScreen() {
 
   return (
     <View style={{ flex: 1, padding: 20 }}>
-      <FlatList
+      <DraggableFlatList
         data={locations}
         keyExtractor={item => item.key}
-        renderItem={({ item }) => (
+        onDragEnd={({ data }) => reorderLocations(data)}
+        renderItem={({ item, drag }) => (
           <View
             style={{
               flexDirection: 'row',
@@ -62,7 +63,11 @@ export default function LocationSettingsScreen() {
               marginBottom: 10,
             }}
           >
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => startEdit(item)}>
+            <TouchableOpacity
+              style={{ flex: 1 }}
+              onPress={() => startEdit(item)}
+              onLongPress={drag}
+            >
               <Text>
                 {item.icon} {item.name}
               </Text>
