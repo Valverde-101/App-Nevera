@@ -241,19 +241,23 @@ export default function InventoryScreen({ navigation }) {
     setMultiSelect(false);
   };
 
+  const getVisibleKeyOrder = () =>
+    groupOrder.flatMap(group =>
+      grouped[group]?.map(item => `${item.location}-${item.index}`) || [],
+    );
+
   const selectAll = () => {
-    const allKeys = sortedItems.map(item => ({
-      key: `${item.location}-${item.index}`,
-      location: item.location,
-      index: item.index,
-    }));
+    const allKeys = getVisibleKeyOrder().map(k => {
+      const [location, indexStr] = k.split('-');
+      return { key: k, location, index: parseInt(indexStr, 10) };
+    });
     setSelectedItems(allKeys);
     setMultiSelect(true);
   };
 
   const selectIntersection = () => {
     if (selectedItems.length < 2) return;
-    const keyOrder = sortedItems.map(item => `${item.location}-${item.index}`);
+    const keyOrder = getVisibleKeyOrder();
     const indices = selectedItems
       .map(sel => keyOrder.indexOf(sel.key))
       .filter(i => i !== -1)
