@@ -38,6 +38,10 @@ export const UnitsProvider = ({ children }) => {
     setUnits(prev => [...prev, { key, singular, plural }]);
   };
 
+  const updateUnit = (key, singular, plural) => {
+    setUnits(prev => prev.map(u => (u.key === key ? { ...u, singular, plural } : u)));
+  };
+
   const removeUnit = key => {
     setUnits(prev => prev.filter(u => u.key !== key));
   };
@@ -49,7 +53,7 @@ export const UnitsProvider = ({ children }) => {
   };
 
   return (
-    <UnitsContext.Provider value={{ units, addUnit, removeUnit, getLabel }}>
+    <UnitsContext.Provider value={{ units, addUnit, updateUnit, removeUnit, getLabel }}>
       {children}
     </UnitsContext.Provider>
   );

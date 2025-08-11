@@ -38,6 +38,10 @@ export const LocationsProvider = ({ children }) => {
     setLocations(prev => [...prev, { key, name, icon, active: true }]);
   };
 
+  const updateLocation = (key, name, icon) => {
+    setLocations(prev => prev.map(l => (l.key === key ? { ...l, name, icon } : l)));
+  };
+
   const removeLocation = key => {
     setLocations(prev => prev.filter(l => l.key !== key));
   };
@@ -47,7 +51,9 @@ export const LocationsProvider = ({ children }) => {
   };
 
   return (
-    <LocationsContext.Provider value={{ locations, addLocation, removeLocation, toggleActive }}>
+    <LocationsContext.Provider
+      value={{ locations, addLocation, updateLocation, removeLocation, toggleActive }}
+    >
       {children}
     </LocationsContext.Provider>
   );

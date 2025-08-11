@@ -219,18 +219,14 @@ export default function AddRecipeModal({
                   style={{ width: 30, height: 30, marginRight: 5 }}
                 />
               ) : null}
-              <Text style={{ flex: 1 }}>{ing.name}</Text>
               <TouchableOpacity
+                style={{ flex: 1 }}
                 disabled={selectMode}
                 onPress={() => openUnitPicker(idx)}
-                style={{
-                  borderWidth: 1,
-                  padding: 5,
-                  borderRadius: 4,
-                  marginRight: 5,
-                }}
               >
-                <Text>{getLabel(ing.quantity, ing.unit)}</Text>
+                <Text>
+                  {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} de ${ing.name}`}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={selectMode}
