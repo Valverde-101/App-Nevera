@@ -17,19 +17,18 @@ import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
 import { categories, getFoodIcon } from '../foodIcons';
-import { getUnitLabel } from '../utils/units';
+import { useUnits } from '../context/UnitsContext';
+import { useLocations } from '../context/LocationsContext';
 
 function StorageSelector({ current, onChange }) {
-  const opts = [
-    { key: 'fridge', label: '🥶' },
-    { key: 'freezer', label: '❄️' },
-    { key: 'pantry', label: '🗃️' },
-  ];
+  const { locations } = useLocations();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
-      {opts.map(opt => (
+      {locations.filter(l => l.active).map(opt => (
         <TouchableOpacity key={opt.key} onPress={() => onChange(opt.key)}>
-          <Text style={{ fontSize: 24, opacity: current === opt.key ? 1 : 0.4 }}>{opt.label}</Text>
+          <Text style={{ fontSize: 24, opacity: current === opt.key ? 1 : 0.4 }}>
+            {current === opt.key ? opt.name : opt.icon}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -39,7 +38,16 @@ function StorageSelector({ current, onChange }) {
 export default function InventoryScreen({ navigation }) {
   const { inventory, addItem, updateItem, removeItem } = useInventory();
   const { addItems: addShoppingItems } = useShopping();
-  const [storage, setStorage] = useState('fridge');
+  const { getLabel } = useUnits();
+  const { locations } = useLocations();
+  const [storage, setStorage] = useState(locations[0]?.key || 'fridge');
+
+  useEffect(() => {
+    if (!locations.find(l => l.key === storage && l.active)) {
+      const first = locations.find(l => l.active);
+      if (first) setStorage(first.key);
+    }
+  }, [locations]);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
   const [addVisible, setAddVisible] = useState(false);
@@ -105,15 +113,15 @@ export default function InventoryScreen({ navigation }) {
             <Text style={{ fontSize: 18 }}>🛒</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Text style={{ fontSize: 24 }}>⋮</Text>
+            <Text style={{ fontSize: 24, paddingHorizontal: 6, backgroundColor: '#eee', borderRadius: 4 }}>⋮</Text>
           </TouchableOpacity>
         </View>
       ),
     });
   }, [navigation]);
 
-  const allItems = ['fridge', 'freezer', 'pantry'].flatMap(loc =>
-    inventory[loc].map((item, index) => ({ ...item, location: loc, index })),
+  const allItems = locations.flatMap(loc =>
+    inventory[loc.key]?.map((item, index) => ({ ...item, location: loc.key, index })) || [],
   );
 
   const searchLower = search.toLowerCase();
@@ -125,7 +133,7 @@ export default function InventoryScreen({ navigation }) {
         (it.foodCategory && it.foodCategory.toLowerCase().includes(searchLower)) ||
         (it.note && it.note.toLowerCase().includes(searchLower)),
       )
-    : inventory[storage].map((item, index) => ({ ...item, location: storage, index }));
+    : inventory[storage]?.map((item, index) => ({ ...item, location: storage, index })) || [];
 
   const sortedItems = [...filteredItems].sort((a, b) => {
     if (sortOrder === 'name') {
@@ -376,7 +384,7 @@ export default function InventoryScreen({ navigation }) {
                         )}
                         <Text>{item.name}</Text>
                         <Text style={{ marginLeft: 10 }}>
-                          {item.quantity} {getUnitLabel(item.quantity, item.unit)}
+                          {item.quantity} {getLabel(item.quantity, item.unit)}
                         </Text>
                         {search && (
                           <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
@@ -425,7 +433,7 @@ export default function InventoryScreen({ navigation }) {
                               />
                             )}
                             <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                              {item.name} - {item.quantity} {getUnitLabel(item.quantity, item.unit)}
+                              {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                             </Text>
                           </View>
                         </TouchableOpacity>
@@ -587,6 +595,13 @@ export default function InventoryScreen({ navigation }) {
                   onPress={() => {
                     setMenuVisible(false);
                     setViewVisible(true);
+                  }}
+                />
+                <Button
+                  title="Ajustes"
+                  onPress={() => {
+                    setMenuVisible(false);
+                    navigation.navigate('Settings');
                   }}
                 />
               </View>
@@ -817,7 +832,7 @@ export default function InventoryScreen({ navigation }) {
                         />
                       )}
                       <Text>
-                        {item.name} - {item.quantity} {getUnitLabel(item.quantity, item.unit)}
+                        {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                       </Text>
                     </View>
                   ))}

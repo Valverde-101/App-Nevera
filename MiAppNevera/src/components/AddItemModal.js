@@ -9,12 +9,16 @@ import {
   Alert,
 } from 'react-native';
 import {useShopping} from '../context/ShoppingContext';
+import { useUnits } from '../context/UnitsContext';
+import { useLocations } from '../context/LocationsContext';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
+  const { units } = useUnits();
+  const { locations } = useLocations();
   const [location, setLocation] = useState(initialLocation);
   const [quantity, setQuantity] = useState('1');
-  const [unit, setUnit] = useState('units');
+  const [unit, setUnit] = useState(units[0]?.key || 'units');
   const [regDate, setRegDate] = useState(today);
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
@@ -25,12 +29,12 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
     if (visible) {
       setLocation(initialLocation);
       setQuantity(1);
-      setUnit('units');
+      setUnit(units[0]?.key || 'units');
       setRegDate(today);
       setExpDate('');
       setNote('');
     }
-  }, [visible, initialLocation, today]);
+  }, [visible, initialLocation, today, units]);
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -64,11 +68,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
         )}
         <Text style={{ marginBottom: 5 }}>Ubicación</Text>
         <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-          {[
-            { key: 'fridge', label: 'Nevera' },
-            { key: 'freezer', label: 'Congelador' },
-            { key: 'pantry', label: 'Despensa' },
-          ].map(opt => (
+          {locations.map(opt => (
             <TouchableOpacity
               key={opt.key}
               style={{
@@ -80,7 +80,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
               }}
               onPress={() => setLocation(opt.key)}
             >
-              <Text>{opt.label}</Text>
+              <Text>{opt.name}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -129,11 +129,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
         </View>
         <Text>Unidad</Text>
         <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-          {[
-            { key: 'units', label: 'Unidades' },
-            { key: 'kg', label: 'Kilos' },
-            { key: 'l', label: 'Litros' },
-          ].map(opt => (
+          {units.map(opt => (
             <TouchableOpacity
               key={opt.key}
               style={{
@@ -145,7 +141,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
               }}
               onPress={() => setUnit(opt.key)}
             >
-              <Text>{opt.label}</Text>
+              <Text>{opt.plural}</Text>
             </TouchableOpacity>
           ))}
         </View>

@@ -2,11 +2,22 @@ import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
 import {getFoodIcon, getFoodCategory} from '../foodIcons';
+import { useLocations } from './LocationsContext';
 
 const InventoryContext = createContext();
 
 export const InventoryProvider = ({children}) => {
-  const [inventory, setInventory] = useState({fridge: [], freezer: [], pantry: []});
+  const { locations } = useLocations();
+
+  const buildEmpty = () => {
+    const obj = {};
+    locations.forEach(loc => {
+      obj[loc.key] = [];
+    });
+    return obj;
+  };
+
+  const [inventory, setInventory] = useState(buildEmpty());
 
   function attachIcons(data) {
     const withIcons = {};
@@ -25,15 +36,30 @@ export const InventoryProvider = ({children}) => {
       try {
         const stored = await AsyncStorage.getItem('inventory');
         if (stored) {
-          setInventory(attachIcons(JSON.parse(stored)));
+          const data = attachIcons(JSON.parse(stored));
+          setInventory(prev => ({ ...buildEmpty(), ...data }));
         } else {
-          setInventory(attachIcons(foods));
+          setInventory(prev => ({ ...buildEmpty(), ...attachIcons(foods) }));
         }
       } catch (e) {
         console.error('Failed to load inventory', e);
       }
     })();
-  }, []);
+  }, [locations]);
+
+  useEffect(() => {
+    setInventory(prev => {
+      const updated = { ...prev };
+      let changed = false;
+      locations.forEach(loc => {
+        if (!updated[loc.key]) {
+          updated[loc.key] = [];
+          changed = true;
+        }
+      });
+      return changed ? updated : prev;
+    });
+  }, [locations]);
 
   const persist = updater => {
     setInventory(prev => {
