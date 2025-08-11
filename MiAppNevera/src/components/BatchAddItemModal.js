@@ -130,10 +130,10 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
             <Text>Unidad</Text>
             <View style={{ flexDirection: 'row', marginBottom: 10 }}>
               {[
-                { key: 'units', label: 'Unidades' },
-                { key: 'kg', label: 'Kg' },
-                { key: 'l', label: 'L' },
-              ].map(opt => (
+              { key: 'units', label: 'Unidades' },
+              { key: 'kg', label: 'Kilos' },
+              { key: 'l', label: 'Litros' },
+            ].map(opt => (
                 <TouchableOpacity
                   key={opt.key}
                   style={{

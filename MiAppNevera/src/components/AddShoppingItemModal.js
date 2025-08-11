@@ -78,8 +78,8 @@ export default function AddShoppingItemModal({
         <View style={{flexDirection:'row', marginBottom:10}}>
           {[
             {key:'units', label:'Unidades'},
-            {key:'kg', label:'Kg'},
-            {key:'l', label:'L'},
+            {key:'kg', label:'Kilos'},
+            {key:'l', label:'Litros'},
           ].map(opt => (
             <TouchableOpacity
               key={opt.key}
