@@ -49,15 +49,11 @@ export const InventoryProvider = ({children}) => {
 
   useEffect(() => {
     setInventory(prev => {
-      const updated = { ...prev };
-      let changed = false;
+      const updated = {};
       locations.forEach(loc => {
-        if (!updated[loc.key]) {
-          updated[loc.key] = [];
-          changed = true;
-        }
+        updated[loc.key] = prev[loc.key] || [];
       });
-      return changed ? updated : prev;
+      return updated;
     });
   }, [locations]);
 
