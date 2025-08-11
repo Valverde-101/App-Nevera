@@ -862,12 +862,8 @@ export default function InventoryScreen({ navigation }) {
                 <Text style={{ marginBottom: 10 }}>
                   {transferType === 'move' ? 'Mover a:' : 'Copiar a:'}
                 </Text>
-                {[
-                  { key: 'fridge', label: 'Nevera' },
-                  { key: 'freezer', label: 'Congelador' },
-                  { key: 'pantry', label: 'Estante' },
-                ].map(opt => (
-                  <Button key={opt.key} title={opt.label} onPress={() => handleTransfer(opt.key)} />
+                {locations.map(opt => (
+                  <Button key={opt.key} title={opt.name} onPress={() => handleTransfer(opt.key)} />
                 ))}
                 <Button title="Cancelar" onPress={() => setTransferType(null)} />
               </View>

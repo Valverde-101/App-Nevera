@@ -34,7 +34,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
       setExpDate('');
       setNote('');
     }
-  }, [visible, initialLocation, today, units]);
+  }, [visible, initialLocation, today, units, locations]);
 
   return (
     <Modal visible={visible} animationType="slide">

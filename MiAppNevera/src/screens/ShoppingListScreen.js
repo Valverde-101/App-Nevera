@@ -15,7 +15,8 @@ import FoodPickerModal from '../components/FoodPickerModal';
 import AddShoppingItemModal from '../components/AddShoppingItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
 import {getFoodIcon} from '../foodIcons';
-import {getUnitLabel} from '../utils/units';
+import { useUnits } from '../context/UnitsContext';
+import { useLocations } from '../context/LocationsContext';
 
 export default function ShoppingListScreen() {
   const {
@@ -27,6 +28,8 @@ export default function ShoppingListScreen() {
     markPurchased,
   } = useShopping();
   const {inventory, addItem: addInventoryItem} = useInventory();
+  const { getLabel } = useUnits();
+  const { locations } = useLocations();
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -51,8 +54,8 @@ export default function ShoppingListScreen() {
   };
 
   const handleAutoAdd = () => {
-    const zeroItems = ['fridge', 'freezer', 'pantry'].flatMap(loc =>
-      inventory[loc].filter(item => item.quantity === 0),
+    const zeroItems = locations.flatMap(loc =>
+      inventory[loc.key].filter(item => item.quantity === 0),
     );
     const newItems = zeroItems
       .filter(it => !list.some(l => l.name === it.name))
@@ -182,7 +185,7 @@ export default function ShoppingListScreen() {
                       color: item.purchased ? 'gray' : 'black',
                     }}
                   >
-                    {item.name} - {item.quantity} {getUnitLabel(item.quantity, item.unit)}
+                    {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                   </Text>
                 </View>
               </TouchableOpacity>
