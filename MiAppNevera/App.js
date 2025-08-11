@@ -14,19 +14,21 @@ import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
+import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <UnitsProvider>
-      <LocationsProvider>
-        <InventoryProvider>
-          <ShoppingProvider>
-            <RecipeProvider>
-              <NavigationContainer>
-                <StatusBar style="auto" />
-                <Stack.Navigator>
+    <CustomFoodsProvider>
+      <UnitsProvider>
+        <LocationsProvider>
+          <InventoryProvider>
+            <ShoppingProvider>
+              <RecipeProvider>
+                <NavigationContainer>
+                  <StatusBar style="auto" />
+                  <Stack.Navigator>
                   <Stack.Screen
                     name="Inventory"
                     component={InventoryScreen}
@@ -62,12 +64,13 @@ export default function App() {
                     component={LocationSettingsScreen}
                     options={{ title: 'Gestión de ubicación' }}
                   />
-                </Stack.Navigator>
-              </NavigationContainer>
-            </RecipeProvider>
-          </ShoppingProvider>
-        </InventoryProvider>
-      </LocationsProvider>
-    </UnitsProvider>
+                  </Stack.Navigator>
+                </NavigationContainer>
+              </RecipeProvider>
+            </ShoppingProvider>
+          </InventoryProvider>
+        </LocationsProvider>
+      </UnitsProvider>
+    </CustomFoodsProvider>
   );
 }

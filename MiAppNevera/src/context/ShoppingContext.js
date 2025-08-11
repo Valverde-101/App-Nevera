@@ -1,11 +1,13 @@
 import React, {createContext, useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getFoodIcon, getFoodCategory} from '../foodIcons';
+import { useCustomFoods } from './CustomFoodsContext';
 
 const ShoppingContext = createContext();
 
 export const ShoppingProvider = ({children}) => {
   const [list, setList] = useState([]);
+  const { customFoods } = useCustomFoods();
 
   useEffect(() => {
     (async () => {
@@ -23,7 +25,7 @@ export const ShoppingProvider = ({children}) => {
         console.error('Failed to load shopping list', e);
       }
     })();
-  }, []);
+  }, [customFoods]);
 
   const persist = async (data) => {
     setList(data);

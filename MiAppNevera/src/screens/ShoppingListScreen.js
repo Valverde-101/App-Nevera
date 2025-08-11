@@ -39,8 +39,8 @@ export default function ShoppingListScreen() {
   const [batchVisible, setBatchVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
-  const onSelectFood = name => {
-    setSelectedFood({name, icon: getFoodIcon(name)});
+  const onSelectFood = (name, icon) => {
+    setSelectedFood({name, icon});
     setPickerVisible(false);
     setAddVisible(true);
   };
