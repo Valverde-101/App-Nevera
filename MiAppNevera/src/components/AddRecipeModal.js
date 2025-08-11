@@ -10,6 +10,7 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
+import QuillEditor from 'react-native-quill-editor';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 
@@ -301,14 +302,16 @@ export default function AddRecipeModal({
           <TouchableOpacity onPress={() => setPickerVisible(true)} style={{marginBottom:10}}>
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
-          <Text>Pasos (admite Markdown)</Text>
-          <TextInput
-            multiline
-            placeholder="Usa **negrita**, - listas, 1. enumeraciones"
-            style={{borderWidth:1,marginBottom:10,padding:5,height:80}}
-            value={steps}
-            onChangeText={setSteps}
-          />
+          <Text>Pasos</Text>
+          <View style={{height:200,marginBottom:10}}>
+            <QuillEditor
+              key={visible ? 'visible' : 'hidden'}
+              defaultValue={steps}
+              onChange={setSteps}
+              style={{height:200}}
+              options={{placeholder:'Escribe los pasos...'}}
+            />
+          </View>
           <TouchableOpacity
             onPress={save}
             style={{backgroundColor:'#2196f3',padding:10,borderRadius:6,alignSelf:'center'}}
