@@ -9,7 +9,7 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
-import Markdown from 'react-native-markdown-display';
+import {WebView} from 'react-native-webview';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
@@ -115,7 +115,10 @@ export default function RecipeDetailScreen({route, navigation}) {
           </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
-        <Markdown>{recipe.steps}</Markdown>
+        <WebView
+          source={{html: recipe.steps}}
+          style={{height:200, marginTop:5}}
+        />
       </ScrollView>
       <AddRecipeModal
         visible={editVisible}
