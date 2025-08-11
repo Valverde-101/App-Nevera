@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, TouchableOpacity, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  FlatList,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { useLocations } from '../context/LocationsContext';
 import { useInventory } from '../context/InventoryContext';
 
@@ -11,6 +20,9 @@ export default function LocationSettingsScreen() {
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(icons[0]);
   const [editingKey, setEditingKey] = useState(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [pendingKey, setPendingKey] = useState(null);
+  const [warning, setWarning] = useState('');
 
   const startEdit = item => {
     setEditingKey(item.key);
@@ -26,16 +38,14 @@ export default function LocationSettingsScreen() {
 
   const handleRemove = key => {
     if (inventory[key] && inventory[key].length > 0) {
-      Alert.alert(
-        'No se puede eliminar',
-        'La ubicación contiene alimentos. Vacíe la ubicación antes de eliminarla.',
-      );
+      setWarning('La ubicación contiene alimentos. Vacíe la ubicación antes de eliminarla.');
+      setPendingKey(null);
+      setConfirmVisible(true);
       return;
     }
-    Alert.alert('Confirmar', '¿Seguro que deseas eliminar esta ubicación?', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: () => removeLocation(key) },
-    ]);
+    setWarning('');
+    setPendingKey(key);
+    setConfirmVisible(true);
   };
 
   return (
@@ -99,6 +109,60 @@ export default function LocationSettingsScreen() {
       {editingKey && (
         <Button title="Cancelar" onPress={cancelEdit} />
       )}
+      <Modal
+        visible={confirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setConfirmVisible(false)}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <TouchableWithoutFeedback>
+              <View
+                style={{
+                  backgroundColor: '#fff',
+                  padding: 20,
+                  borderRadius: 8,
+                  maxWidth: '80%',
+                }}
+              >
+                {warning ? (
+                  <Text style={{marginBottom: 10}}>{warning}</Text>
+                ) : (
+                  <Text style={{marginBottom: 10}}>
+                    ¿Seguro que deseas eliminar esta ubicación?
+                  </Text>
+                )}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                    marginTop: 20,
+                  }}
+                >
+                  <Button title="Cancelar" onPress={() => setConfirmVisible(false)} />
+                  {!warning && (
+                    <Button
+                      title="Eliminar"
+                      onPress={() => {
+                        removeLocation(pendingKey);
+                        setConfirmVisible(false);
+                      }}
+                    />
+                  )}
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </View>
   );
 }
