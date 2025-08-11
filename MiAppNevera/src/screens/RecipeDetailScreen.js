@@ -8,8 +8,8 @@ import {
   Modal,
   Button,
   TouchableWithoutFeedback,
+  Platform,
 } from 'react-native';
-import Markdown from 'react-native-markdown-display';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
@@ -17,6 +17,11 @@ import AddRecipeModal from '../components/AddRecipeModal';
 import {getFoodIcon, getFoodCategory, categories} from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+
+let QuillEditor = null;
+if (Platform.OS !== 'web') {
+  QuillEditor = require('react-native-cn-quill').default;
+}
 
 export default function RecipeDetailScreen({route, navigation}) {
   const {index} = route.params;
@@ -121,7 +126,15 @@ export default function RecipeDetailScreen({route, navigation}) {
           </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
-        <Markdown>{recipe.steps}</Markdown>
+        {Platform.OS === 'web' ? (
+          <Text style={{marginTop:5}}>
+            {recipe.steps.replace(/<[^>]+>/g, '')}
+          </Text>
+        ) : (
+          <View style={{minHeight:100,marginTop:5}}>
+            <QuillEditor initialHtml={recipe.steps} readonly style={{flex:1}} />
+          </View>
+        )}
       </ScrollView>
       <AddRecipeModal
         visible={editVisible}
