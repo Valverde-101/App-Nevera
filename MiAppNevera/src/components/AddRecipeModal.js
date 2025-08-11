@@ -30,6 +30,7 @@ export default function AddRecipeModal({
   const [selected, setSelected] = useState([]);
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
+  const UNIT_LABELS = { unidades: 'Unidades', kg: 'Kilos', l: 'Litros' };
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -228,7 +229,7 @@ export default function AddRecipeModal({
                   marginRight: 5,
                 }}
               >
-                <Text>{ing.unit}</Text>
+                <Text>{UNIT_LABELS[ing.unit] || ing.unit}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={selectMode}
@@ -333,13 +334,13 @@ export default function AddRecipeModal({
               }}
             >
               <View style={{backgroundColor:'#fff',padding:20,borderRadius:6}}>
-                {['unidades','kg','l'].map(u => (
+                {Object.entries(UNIT_LABELS).map(([key, label]) => (
                   <TouchableOpacity
-                    key={u}
-                    onPress={() => selectUnit(u)}
+                    key={key}
+                    onPress={() => selectUnit(key)}
                     style={{paddingVertical:5}}
                   >
-                    <Text>{u}</Text>
+                    <Text>{label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

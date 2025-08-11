@@ -34,6 +34,7 @@ export default function ShoppingListScreen() {
   const [selected, setSelected] = useState([]);
   const [batchVisible, setBatchVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const unitLabels = { units: 'Unidades', kg: 'Kilos', l: 'Litros', unidades: 'Unidades' };
 
   const onSelectFood = name => {
     setSelectedFood({name, icon: getFoodIcon(name)});
@@ -181,7 +182,7 @@ export default function ShoppingListScreen() {
                       color: item.purchased ? 'gray' : 'black',
                     }}
                   >
-                    {item.name} - {item.quantity} {item.unit}
+                    {item.name} - {item.quantity} {unitLabels[item.unit] || item.unit}
                   </Text>
                 </View>
               </TouchableOpacity>
