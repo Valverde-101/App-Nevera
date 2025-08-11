@@ -362,6 +362,7 @@ export default function InventoryScreen({ navigation }) {
                           alignItems: 'center',
                           paddingVertical: 5,
                           backgroundColor: selected ? '#d0ebff' : undefined,
+                          opacity: item.quantity === 0 ? 0.5 : 1,
                         }}
                         onLongPress={() => {
                           setMultiSelect(true);
@@ -404,7 +405,11 @@ export default function InventoryScreen({ navigation }) {
                       return (
                         <TouchableOpacity
                           key={key}
-                          style={{ width: '25%', padding: 5 }}
+                          style={{
+                            width: '25%',
+                            padding: 5,
+                            opacity: item.quantity === 0 ? 0.5 : 1,
+                          }}
                           onLongPress={() => {
                             setMultiSelect(true);
                             toggleSelection(item.location, item.index);
