@@ -11,7 +11,9 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import foodIcons, { categories } from '../foodIcons';
+import foodIcons, { categories, getFoodIcon } from '../foodIcons';
+import AddCustomFoodModal from './AddCustomFoodModal';
+import { useCustomFoods } from '../context/CustomFoodsContext';
 
 export default function FoodPickerModal({
   visible,
@@ -28,6 +30,8 @@ export default function FoodPickerModal({
   const [menuVisible, setMenuVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
   const [hiddenFoods, setHiddenFoods] = useState([]);
+  const { customFoods } = useCustomFoods();
+  const [addVisible, setAddVisible] = useState(false);
 
   useEffect(() => {
     if (!visible) {
@@ -48,23 +52,42 @@ export default function FoodPickerModal({
     AsyncStorage.setItem('hiddenFoods', JSON.stringify(hiddenFoods));
   }, [hiddenFoods]);
 
-  const toggleSelect = name => {
+  const toggleSelect = key => {
     setSelected(prev =>
-      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name],
+      prev.includes(key) ? prev.filter(n => n !== key) : [...prev, key],
     );
   };
 
   const handleSave = () => {
     if (onMultiSelect && selected.length) {
-      onMultiSelect(selected);
+      const names = selected.map(k => customFoodMap[k]?.name || k);
+      onMultiSelect(names);
     }
     setSelectMode(false);
     setSelected([]);
   };
 
-  const foods = categories[currentCategory].items
+  const customFoodMap = {};
+  customFoods.forEach(f => {
+    customFoodMap[f.key] = f;
+  });
+
+  const defaultFoods = categories[currentCategory].items
     .filter(name => !hiddenFoods.includes(name))
-    .filter(name => name.toLowerCase().includes(search.toLowerCase()));
+    .filter(name => name.toLowerCase().includes(search.toLowerCase()))
+    .map(name => ({ key: name, label: name, icon: foodIcons[name] }));
+
+  const customList = customFoods
+    .filter(f => f.category === currentCategory)
+    .filter(f => !hiddenFoods.includes(f.key))
+    .filter(f => f.name.toLowerCase().includes(search.toLowerCase()))
+    .map(f => ({
+      key: f.key,
+      label: f.name,
+      icon: f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name),
+    }));
+
+  const foods = [...defaultFoods, ...customList];
 
   return (
     <>
@@ -92,6 +115,9 @@ export default function FoodPickerModal({
               style={{ marginRight: 15 }}
             >
               <Text style={{ fontSize: 24 }}>🔍</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setAddVisible(true)} style={{ marginRight: 15 }}>
+              <Text style={{ fontSize: 24 }}>＋</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setMenuVisible(true)}>
               <Text style={{ fontSize: 24 }}>⋮</Text>
@@ -138,19 +164,21 @@ export default function FoodPickerModal({
           <ScrollView
             contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }}
           >
-            {foods.map(name => {
-              const isSelected = selected.includes(name);
+            {foods.map(food => {
+              const isSelected = selected.includes(food.key);
               return (
                 <TouchableOpacity
-                  key={name}
+                  key={food.key}
                   style={{ width: '25%', alignItems: 'center', marginBottom: 20 }}
                   onPress={() =>
-                    selectMode ? toggleSelect(name) : onSelect(name)
+                    selectMode
+                      ? toggleSelect(food.key)
+                      : onSelect(food.label, food.icon)
                   }
                   onLongPress={() => {
                     if (!selectMode) {
                       setSelectMode(true);
-                      toggleSelect(name);
+                      toggleSelect(food.key);
                     }
                   }}
                 >
@@ -162,12 +190,14 @@ export default function FoodPickerModal({
                       padding: 5,
                     }}
                   >
-                    <Image
-                      source={foodIcons[name]}
-                      style={{ width: 50, height: 50 }}
-                    />
+                    {food.icon && (
+                      <Image
+                        source={food.icon}
+                        style={{ width: 50, height: 50 }}
+                      />
+                    )}
                   </View>
-                  <Text style={{ textAlign: 'center', marginTop: 5 }}>{name}</Text>
+                  <Text style={{ textAlign: 'center', marginTop: 5 }}>{food.label}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -267,6 +297,7 @@ export default function FoodPickerModal({
         <Button title="Cerrar" onPress={() => setManageVisible(false)} />
       </View>
     </Modal>
+    <AddCustomFoodModal visible={addVisible} onClose={() => setAddVisible(false)} />
     </>
   );
 }

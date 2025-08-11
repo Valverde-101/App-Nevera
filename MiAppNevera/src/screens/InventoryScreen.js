@@ -171,8 +171,8 @@ export default function InventoryScreen({ navigation }) {
     groupOrder = ['all'];
   }
 
-  const onSelectFood = name => {
-    setSelectedFood({ name, icon: getFoodIcon(name) });
+  const onSelectFood = (name, icon) => {
+    setSelectedFood({ name, icon });
     setPickerVisible(false);
     setAddVisible(true);
   };

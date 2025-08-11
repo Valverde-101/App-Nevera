@@ -3,11 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
 import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useLocations } from './LocationsContext';
+import { useCustomFoods } from './CustomFoodsContext';
 
 const InventoryContext = createContext();
 
 export const InventoryProvider = ({children}) => {
   const { locations } = useLocations();
+  const { customFoods } = useCustomFoods();
 
   const buildEmpty = () => {
     const obj = {};
@@ -45,7 +47,7 @@ export const InventoryProvider = ({children}) => {
         console.error('Failed to load inventory', e);
       }
     })();
-  }, [locations]);
+  }, [locations, customFoods]);
 
   useEffect(() => {
     setInventory(prev => {

@@ -13,6 +13,7 @@ import {
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddRecipeModal({
   visible,
@@ -32,6 +33,16 @@ export default function AddRecipeModal({
   const [selected, setSelected] = useState([]);
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -62,10 +73,10 @@ export default function AddRecipeModal({
     }
   }, [visible, initialRecipe]);
 
-  const addIngredient = foodName => {
+  const addIngredient = (foodName, foodIcon) => {
     setIngredients([
       ...ingredients,
-      {name: foodName, quantity: '1', unit: units[0]?.key || 'units', icon: getFoodIcon(foodName)},
+      {name: foodName, quantity: '1', unit: units[0]?.key || 'units', icon: foodIcon || getFoodIcon(foodName)},
     ]);
     setPickerVisible(false);
   };
@@ -150,8 +161,17 @@ export default function AddRecipeModal({
         <ScrollView>
           <Text>Nombre</Text>
           <TextInput style={{borderWidth:1,marginBottom:10,padding:5}} value={name} onChangeText={setName} />
-          <Text>Foto (URL)</Text>
-          <TextInput style={{borderWidth:1,marginBottom:10,padding:5}} value={image} onChangeText={setImage} />
+          <Text>Foto</Text>
+          {image ? (
+            <Image source={{uri:image}} style={{width:'100%',height:200,marginBottom:10}} />
+          ) : null}
+          <Button title="Seleccionar imagen" onPress={pickImage} />
+          <TextInput
+            style={{borderWidth:1,marginVertical:10,padding:5}}
+            placeholder="o URL"
+            value={image}
+            onChangeText={setImage}
+          />
           <Text>Personas</Text>
           <View style={{flexDirection:'row',alignItems:'center',marginBottom:10}}>
             <TouchableOpacity
