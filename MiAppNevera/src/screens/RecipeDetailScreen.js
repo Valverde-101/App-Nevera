@@ -8,9 +8,8 @@ import {
   Modal,
   Button,
   TouchableWithoutFeedback,
-  Platform,
 } from 'react-native';
-import {RichEditor} from 'react-native-pell-rich-editor';
+import Markdown from 'react-native-markdown-display';
 import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
@@ -116,15 +115,7 @@ export default function RecipeDetailScreen({route, navigation}) {
           </View>
         ))}
         <Text style={{marginTop:10,fontWeight:'bold'}}>Pasos</Text>
-        {Platform.OS === 'web' ? (
-          <div dangerouslySetInnerHTML={{__html: recipe.steps}} />
-        ) : (
-          <RichEditor
-            initialContentHTML={recipe.steps}
-            disabled
-            editorStyle={{backgroundColor: 'transparent'}}
-          />
-        )}
+        <Markdown>{recipe.steps}</Markdown>
       </ScrollView>
       <AddRecipeModal
         visible={editVisible}

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Modal,
   View,
@@ -9,13 +9,7 @@ import {
   Image,
   Button,
   TouchableWithoutFeedback,
-  Platform,
 } from 'react-native';
-import {
-  RichEditor,
-  RichToolbar,
-  actions,
-} from 'react-native-pell-rich-editor';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 
@@ -36,7 +30,6 @@ export default function AddRecipeModal({
   const [selected, setSelected] = useState([]);
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
-  const richText = useRef(null);
 
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -308,35 +301,14 @@ export default function AddRecipeModal({
           <TouchableOpacity onPress={() => setPickerVisible(true)} style={{marginBottom:10}}>
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
-          <Text>Pasos</Text>
-          {Platform.OS === 'web' ? (
-            <TextInput
-              multiline
-              placeholder="Escribe los pasos"
-              style={{borderWidth:1,marginBottom:10,padding:5,height:150}}
-              value={steps}
-              onChangeText={setSteps}
-            />
-          ) : (
-            <>
-              <RichEditor
-                ref={richText}
-                style={{borderWidth:1,marginBottom:10,minHeight:150}}
-                placeholder="Escribe los pasos"
-                initialContentHTML={steps}
-                onChange={setSteps}
-              />
-              <RichToolbar
-                editor={richText}
-                actions={[
-                  actions.setBold,
-                  actions.setItalic,
-                  actions.insertBulletsList,
-                  actions.insertOrderedList,
-                ]}
-              />
-            </>
-          )}
+          <Text>Pasos (admite Markdown)</Text>
+          <TextInput
+            multiline
+            placeholder="Usa **negrita**, - listas, 1. enumeraciones"
+            style={{borderWidth:1,marginBottom:10,padding:5,height:80}}
+            value={steps}
+            onChangeText={setSteps}
+          />
           <TouchableOpacity
             onPress={save}
             style={{backgroundColor:'#2196f3',padding:10,borderRadius:6,alignSelf:'center'}}
