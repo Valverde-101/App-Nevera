@@ -34,29 +34,41 @@ export default function RecipeBookScreen({navigation}) {
 
   return (
     <View style={{flex:1,padding:10}}>
-      <ScrollView contentContainerStyle={{flexDirection:'row',flexWrap:'wrap'}}>
-        {recipes.map((rec, idx) => {
-          const enough = hasIngredients(rec);
-          return (
-            <TouchableOpacity
-              key={idx}
-              style={{width:'50%',padding:5,opacity:enough?1:0.5}}
-              onPress={() => navigation.navigate('RecipeDetail',{index: idx})}
-            >
-              {rec.image ? (
-                <Image source={{uri:rec.image}} style={{width:'100%',height:100}} />
-              ) : (
-                <View style={{width:'100%',height:100,backgroundColor:'#ccc',justifyContent:'center',alignItems:'center'}}>
-                  <Text>Sin imagen</Text>
-                </View>
-              )}
-              <Text style={{fontWeight:'bold'}}>{rec.name}</Text>
-              <Text>Para {rec.persons} personas</Text>
-              <Text>Dificultad: {rec.difficulty}</Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+        <ScrollView contentContainerStyle={{flexDirection:'row',flexWrap:'wrap'}}>
+          {recipes.map((rec, idx) => {
+            const enough = hasIngredients(rec);
+            return (
+              <TouchableOpacity
+                key={idx}
+                style={{width:'33.33%',padding:5,opacity:enough?1:0.5}}
+                onPress={() => navigation.navigate('RecipeDetail',{index: idx})}
+              >
+                {rec.image ? (
+                  <Image
+                    source={{uri:rec.image}}
+                    style={{width:'100%',aspectRatio:16/9}}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View
+                    style={{
+                      width:'100%',
+                      aspectRatio:16/9,
+                      backgroundColor:'#ccc',
+                      justifyContent:'center',
+                      alignItems:'center'
+                    }}
+                  >
+                    <Text>Sin imagen</Text>
+                  </View>
+                )}
+                <Text style={{fontWeight:'bold'}}>{rec.name}</Text>
+                <Text>Para {rec.persons} personas</Text>
+                <Text>Dificultad: {rec.difficulty}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       <AddRecipeModal
         visible={addVisible}
         onSave={recipe => {

@@ -90,7 +90,11 @@ export default function RecipeDetailScreen({route, navigation}) {
     <>
       <ScrollView style={{padding:20}}>
         {recipe.image ? (
-          <Image source={{uri:recipe.image}} style={{width:'100%',height:200,marginBottom:10}} />
+          <Image
+            source={{uri:recipe.image}}
+            style={{width:'100%',aspectRatio:16/9,marginBottom:10}}
+            resizeMode="cover"
+          />
         ) : null}
         <Text style={{fontSize:24,fontWeight:'bold'}}>{recipe.name}</Text>
         <Text>Para {recipe.persons} personas</Text>
