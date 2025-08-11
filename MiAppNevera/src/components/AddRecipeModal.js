@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Modal,
   View,
@@ -10,7 +10,6 @@ import {
   Button,
   TouchableWithoutFeedback,
 } from 'react-native';
-import {RichEditor, RichToolbar, actions} from 'react-native-pell-rich-editor';
 import FoodPickerModal from './FoodPickerModal';
 import {getFoodIcon} from '../foodIcons';
 
@@ -26,7 +25,6 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
-  const richText = useRef(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -39,9 +37,7 @@ export default function AddRecipeModal({
       setImage(initialRecipe.image || '');
       setPersons(String(initialRecipe.persons || 1));
       setDifficulty(initialRecipe.difficulty || '');
-      const html = initialRecipe.steps || '';
-      setSteps(html);
-      richText.current?.setContentHTML(html);
+      setSteps(initialRecipe.steps || '');
       setIngredients(
         initialRecipe.ingredients
           ? initialRecipe.ingredients.map(ing => ({
@@ -58,7 +54,6 @@ export default function AddRecipeModal({
       setPersons('1');
       setDifficulty('');
       setSteps('');
-      richText.current?.setContentHTML('');
       setIngredients([]);
       setSelectMode(false);
       setSelected([]);
@@ -306,24 +301,13 @@ export default function AddRecipeModal({
           <TouchableOpacity onPress={() => setPickerVisible(true)} style={{marginBottom:10}}>
             <Text style={{color:'blue'}}>Añadir ingrediente</Text>
           </TouchableOpacity>
-          <Text>Pasos</Text>
-          <RichToolbar
-            editor={richText}
-            actions={[
-              actions.setBold,
-              actions.setItalic,
-              actions.insertBulletsList,
-              actions.insertOrderedList,
-              actions.insertLink,
-            ]}
-            style={{borderWidth:1,borderColor:'#ccc',marginBottom:5}}
-          />
-          <RichEditor
-            ref={richText}
-            initialContentHTML={steps}
-            onChange={setSteps}
-            placeholder="Escribe los pasos aquí"
-            style={{borderWidth:1,marginBottom:10,minHeight:80}}
+          <Text>Pasos (admite Markdown)</Text>
+          <TextInput
+            multiline
+            placeholder="Usa **negrita**, - listas, 1. enumeraciones"
+            style={{borderWidth:1,marginBottom:10,padding:5,height:80}}
+            value={steps}
+            onChangeText={setSteps}
           />
           <TouchableOpacity
             onPress={save}
