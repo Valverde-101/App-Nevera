@@ -7,12 +7,19 @@ import {
   Button,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+
+const datePickerDisplay = Platform.select({
+  ios: 'inline',
+  android: 'calendar',
+  default: 'default',
+});
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
@@ -202,7 +209,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             <DateTimePicker
               value={regDate ? new Date(regDate) : new Date()}
               mode="date"
-              display="calendar"
+              display={datePickerDisplay}
               onChange={handleRegChange}
             />
           )}
@@ -210,7 +217,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             <DateTimePicker
               value={expDate ? new Date(expDate) : new Date()}
               mode="date"
-              display="calendar"
+              display={datePickerDisplay}
               onChange={handleExpChange}
             />
           )}

@@ -7,11 +7,18 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {useShopping} from '../context/ShoppingContext';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+
+const datePickerDisplay = Platform.select({
+  ios: 'inline',
+  android: 'calendar',
+  default: 'default',
+});
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -186,7 +193,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           <DateTimePicker
             value={regDate ? new Date(regDate) : new Date()}
             mode="date"
-            display="calendar"
+            display={datePickerDisplay}
             onChange={handleRegChange}
           />
         )}
@@ -194,7 +201,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           <DateTimePicker
             value={expDate ? new Date(expDate) : new Date()}
             mode="date"
-            display="calendar"
+            display={datePickerDisplay}
             onChange={handleExpChange}
           />
         )}

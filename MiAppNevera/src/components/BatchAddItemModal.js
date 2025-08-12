@@ -8,10 +8,17 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Platform,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+
+const datePickerDisplay = Platform.select({
+  ios: 'inline',
+  android: 'calendar',
+  default: 'default',
+});
 
 export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -184,7 +191,7 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
                 : new Date()
             }
             mode="date"
-            display="calendar"
+            display={datePickerDisplay}
             onChange={handlePickerChange}
           />
         )}
