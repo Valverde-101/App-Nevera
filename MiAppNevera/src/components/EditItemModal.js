@@ -3,7 +3,6 @@ import {
   Modal,
   View,
   Text,
-  TextInput,
   Button,
   TouchableOpacity,
   Image,
@@ -12,6 +11,7 @@ import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import DatePicker from './DatePicker';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
@@ -162,19 +162,9 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             ))}
           </View>
           <Text>Fecha de registro</Text>
-          <TextInput
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            placeholder="YYYY-MM-DD"
-            value={regDate}
-            onChangeText={setRegDate}
-          />
+          <DatePicker date={regDate} onChange={setRegDate} />
           <Text>Fecha de caducidad</Text>
-          <TextInput
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            placeholder="YYYY-MM-DD"
-            value={expDate}
-            onChangeText={setExpDate}
-          />
+          <DatePicker date={expDate} onChange={setExpDate} />
           <Text>Nota</Text>
           <TextInput
             style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
