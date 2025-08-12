@@ -40,17 +40,25 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   }, [visible, initialLocation, today, units, locations]);
 
   const handleRegChange = (event, selectedDate) => {
-    setShowRegPicker(false);
-    if (selectedDate) {
+    if (event.type === 'dismissed') {
+      setShowRegPicker(false);
+      return;
+    }
+    if (event.type === 'set' && selectedDate) {
       setRegDate(selectedDate.toISOString().split('T')[0]);
     }
+    setShowRegPicker(false);
   };
 
   const handleExpChange = (event, selectedDate) => {
-    setShowExpPicker(false);
-    if (selectedDate) {
+    if (event.type === 'dismissed') {
+      setShowExpPicker(false);
+      return;
+    }
+    if (event.type === 'set' && selectedDate) {
       setExpDate(selectedDate.toISOString().split('T')[0]);
     }
+    setShowExpPicker(false);
   };
 
   return (
