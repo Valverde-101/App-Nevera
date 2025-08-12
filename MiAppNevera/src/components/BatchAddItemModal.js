@@ -9,7 +9,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateInput from './DateInput';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 
@@ -18,7 +18,6 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const { units } = useUnits();
   const { locations } = useLocations();
   const [data, setData] = useState([]);
-  const [picker, setPicker] = useState({ show: false, index: null, field: null });
 
   useEffect(() => {
     if (visible) {
@@ -39,12 +38,6 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
     setData(prev => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
   };
 
-  const handlePickerChange = (event, selectedDate) => {
-    if (selectedDate && picker.index !== null && picker.field) {
-      updateField(picker.index, picker.field, selectedDate.toISOString().split('T')[0]);
-    }
-    setPicker({ show: false, index: null, field: null });
-  };
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -155,19 +148,15 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
               ))}
             </View>
             <Text>Fecha de registro</Text>
-            <TouchableOpacity
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              onPress={() => setPicker({ show: true, index: idx, field: 'regDate' })}
-            >
-              <Text>{data[idx]?.regDate || 'YYYY-MM-DD'}</Text>
-            </TouchableOpacity>
+            <DateInput
+              date={data[idx]?.regDate}
+              onChange={value => updateField(idx, 'regDate', value)}
+            />
             <Text>Fecha de caducidad</Text>
-            <TouchableOpacity
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              onPress={() => setPicker({ show: true, index: idx, field: 'expDate' })}
-            >
-              <Text>{data[idx]?.expDate || 'YYYY-MM-DD'}</Text>
-            </TouchableOpacity>
+            <DateInput
+              date={data[idx]?.expDate}
+              onChange={value => updateField(idx, 'expDate', value)}
+            />
             <Text>Nota</Text>
             <TextInput
               style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
@@ -176,18 +165,6 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
             />
           </View>
         ))}
-        {picker.show && (
-          <DateTimePicker
-            value={
-              picker.index !== null && data[picker.index]?.[picker.field]
-                ? new Date(data[picker.index][picker.field])
-                : new Date()
-            }
-            mode="date"
-            display="calendar"
-            onChange={handlePickerChange}
-          />
-        )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
           <Button title="Volver" onPress={onClose} />
           <Button title="Guardar" onPress={() => onSave(data)} />
