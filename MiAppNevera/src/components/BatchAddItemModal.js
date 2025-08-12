@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import DateInput from './DateInput';
 
 export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -146,18 +147,16 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
               ))}
             </View>
             <Text>Fecha de registro</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              placeholder="YYYY-MM-DD"
+            <DateInput
               value={data[idx]?.regDate}
-              onChangeText={t => updateField(idx, 'regDate', t)}
+              onChange={date => updateField(idx, 'regDate', date)}
+              style={{ marginBottom: 10 }}
             />
             <Text>Fecha de caducidad</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              placeholder="YYYY-MM-DD"
+            <DateInput
               value={data[idx]?.expDate}
-              onChangeText={t => updateField(idx, 'expDate', t)}
+              onChange={date => updateField(idx, 'expDate', date)}
+              style={{ marginBottom: 10 }}
             />
             <Text>Nota</Text>
             <TextInput

@@ -11,6 +11,7 @@ import {
 import {useShopping} from '../context/ShoppingContext';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import DateInput from './DateInput';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -146,18 +147,16 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           ))}
         </View>
         <Text>Fecha de registro</Text>
-        <TextInput
-          style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-          placeholder="YYYY-MM-DD"
+        <DateInput
           value={regDate}
-          onChangeText={setRegDate}
+          onChange={setRegDate}
+          style={{ marginBottom: 10 }}
         />
         <Text>Fecha de caducidad</Text>
-        <TextInput
-          style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-          placeholder="YYYY-MM-DD"
+        <DateInput
           value={expDate}
-          onChangeText={setExpDate}
+          onChange={setExpDate}
+          style={{ marginBottom: 10 }}
         />
         <Text>Nota</Text>
         <TextInput
