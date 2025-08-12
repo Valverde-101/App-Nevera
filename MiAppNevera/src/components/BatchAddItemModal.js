@@ -40,16 +40,8 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   };
 
   const handlePickerChange = (event, selectedDate) => {
-    if (event.type === 'dismissed') {
-      setPicker({ show: false, index: null, field: null });
-      return;
-    }
-    if (event.type === 'set' && selectedDate && picker.index !== null && picker.field) {
-      updateField(
-        picker.index,
-        picker.field,
-        selectedDate.toISOString().split('T')[0],
-      );
+    if (selectedDate && picker.index !== null && picker.field) {
+      updateField(picker.index, picker.field, selectedDate.toISOString().split('T')[0]);
     }
     setPicker({ show: false, index: null, field: null });
   };
