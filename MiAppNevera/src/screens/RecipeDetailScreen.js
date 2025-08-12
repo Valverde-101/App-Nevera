@@ -92,7 +92,7 @@ export default function RecipeDetailScreen({route, navigation}) {
         {recipe.image ? (
           <Image
             source={{uri:recipe.image}}
-            style={{width:'80%',aspectRatio:16/9,marginBottom:10,alignSelf:'center'}}
+            style={{width:'30%',aspectRatio:16/9,marginBottom:10,alignSelf:'center'}}
             resizeMode="cover"
           />
         ) : null}
