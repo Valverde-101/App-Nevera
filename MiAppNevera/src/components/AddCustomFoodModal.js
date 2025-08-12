@@ -1,18 +1,64 @@
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Image, ScrollView, Button } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Button,
+} from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import FoodPickerModal from './FoodPickerModal';
 import { categories, getFoodIcon } from '../foodIcons';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 
+function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
+  const { customFoods, removeCustomFood } = useCustomFoods();
+  return (
+    <Modal visible={visible} animationType="slide">
+      <View style={{ flex: 1, padding: 20 }}>
+        <TouchableOpacity onPress={onClose} style={{ marginBottom: 10 }}>
+          <Text style={{ fontSize: 24 }}>←</Text>
+        </TouchableOpacity>
+        <ScrollView>
+          {customFoods.map(f => (
+            <View
+              key={f.key}
+              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
+            >
+              {(f.icon || getFoodIcon(f.baseIcon || f.name)) && (
+                <Image
+                  source={f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name)}
+                  style={{ width: 40, height: 40, marginRight: 10 }}
+                />
+              )}
+              <Text style={{ flex: 1 }}>{f.name}</Text>
+              <TouchableOpacity onPress={() => onEdit(f)} style={{ marginRight: 10 }}>
+                <Text>Editar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => removeCustomFood(f.key)}>
+                <Text style={{ color: 'red' }}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+}
+
 export default function AddCustomFoodModal({ visible, onClose }) {
-  const { addCustomFood } = useCustomFoods();
+  const { addCustomFood, updateCustomFood } = useCustomFoods();
   const categoryNames = Object.keys(categories);
   const [name, setName] = useState('');
   const [category, setCategory] = useState(categoryNames[0]);
   const [iconUri, setIconUri] = useState(null);
   const [baseIcon, setBaseIcon] = useState(null);
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [manageVisible, setManageVisible] = useState(false);
+  const [editingKey, setEditingKey] = useState(null);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -31,23 +77,50 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     setPickerVisible(false);
   };
 
-  const save = () => {
-    if (!name) return;
-    addCustomFood({ name, category, icon: iconUri, baseIcon });
+  const startEdit = food => {
+    setName(food.name);
+    setCategory(food.category);
+    setIconUri(food.icon);
+    setBaseIcon(food.baseIcon);
+    setEditingKey(food.key);
+    setManageVisible(false);
+  };
+
+  const resetForm = () => {
     setName('');
     setCategory(categoryNames[0]);
     setIconUri(null);
     setBaseIcon(null);
+    setEditingKey(null);
+  };
+
+  const save = () => {
+    if (!name) return;
+    const data = { name, category, icon: iconUri, baseIcon };
+    if (editingKey) {
+      updateCustomFood(editingKey, data);
+    } else {
+      addCustomFood(data);
+    }
+    resetForm();
     onClose();
   };
 
   return (
     <Modal visible={visible} animationType="slide">
       <View style={{ flex:1, padding:20 }}>
-        <TouchableOpacity onPress={onClose} style={{ marginBottom:10 }}>
-          <Text style={{ fontSize:24 }}>←</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 }}>
+          <TouchableOpacity onPress={() => { resetForm(); onClose(); }}>
+            <Text style={{ fontSize:24 }}>←</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setManageVisible(true)}>
+            <Text style={{ color:'blue', marginTop:4 }}>Mis ingredientes</Text>
+          </TouchableOpacity>
+        </View>
         <ScrollView>
+          <Text style={{marginBottom:10, textAlign:'center'}}>
+            Aca podras crear tus propios ingredientes de acuerdo a tus necesidades, puedes usar iconos predefinidos o cargar nuevos iconos a tu eleccion
+          </Text>
           <Text>Nombre</Text>
           <TextInput
             style={{ borderWidth:1, marginBottom:10, padding:5 }}
@@ -104,6 +177,11 @@ export default function AddCustomFoodModal({ visible, onClose }) {
           visible={pickerVisible}
           onSelect={selectDefault}
           onClose={() => setPickerVisible(false)}
+        />
+        <ManageCustomFoodsModal
+          visible={manageVisible}
+          onClose={() => setManageVisible(false)}
+          onEdit={startEdit}
         />
       </View>
     </Modal>

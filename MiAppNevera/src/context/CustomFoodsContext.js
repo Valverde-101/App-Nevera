@@ -34,8 +34,20 @@ export const CustomFoodsProvider = ({ children }) => {
     persist([...customFoods, newFood]);
   };
 
+  const updateCustomFood = (key, { name, category, icon, baseIcon }) => {
+    const newKey = normalizeFoodName(name);
+    const updated = customFoods.map(f =>
+      f.key === key ? { name, category, icon: icon || null, baseIcon: baseIcon || null, key: newKey } : f,
+    );
+    persist(updated);
+  };
+
+  const removeCustomFood = key => {
+    persist(customFoods.filter(f => f.key !== key));
+  };
+
   return (
-    <CustomFoodsContext.Provider value={{ customFoods, addCustomFood }}>
+    <CustomFoodsContext.Provider value={{ customFoods, addCustomFood, updateCustomFood, removeCustomFood }}>
       {children}
     </CustomFoodsContext.Provider>
   );
