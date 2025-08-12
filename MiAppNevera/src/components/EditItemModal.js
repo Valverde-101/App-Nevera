@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import { useUnits } from '../context/UnitsContext';
@@ -25,6 +26,8 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const [note, setNote] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [shoppingVisible, setShoppingVisible] = useState(false);
+  const [showRegPicker, setShowRegPicker] = useState(false);
+  const [showExpPicker, setShowExpPicker] = useState(false);
 
   useEffect(() => {
     if (visible && item) {
@@ -46,6 +49,20 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
       expiration: expDate,
       note,
     });
+  };
+
+  const handleRegChange = (event, selectedDate) => {
+    setShowRegPicker(false);
+    if (selectedDate) {
+      setRegDate(selectedDate.toISOString().split('T')[0]);
+    }
+  };
+
+  const handleExpChange = (event, selectedDate) => {
+    setShowExpPicker(false);
+    if (selectedDate) {
+      setExpDate(selectedDate.toISOString().split('T')[0]);
+    }
   };
 
   return (
@@ -162,25 +179,41 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             ))}
           </View>
           <Text>Fecha de registro</Text>
-          <TextInput
+          <TouchableOpacity
             style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            placeholder="YYYY-MM-DD"
-            value={regDate}
-            onChangeText={setRegDate}
-          />
+            onPress={() => setShowRegPicker(true)}
+          >
+            <Text>{regDate || 'YYYY-MM-DD'}</Text>
+          </TouchableOpacity>
           <Text>Fecha de caducidad</Text>
-          <TextInput
+          <TouchableOpacity
             style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            placeholder="YYYY-MM-DD"
-            value={expDate}
-            onChangeText={setExpDate}
-          />
+            onPress={() => setShowExpPicker(true)}
+          >
+            <Text>{expDate || 'YYYY-MM-DD'}</Text>
+          </TouchableOpacity>
           <Text>Nota</Text>
           <TextInput
             style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
             value={note}
             onChangeText={setNote}
           />
+          {showRegPicker && (
+            <DateTimePicker
+              value={regDate ? new Date(regDate) : new Date()}
+              mode="date"
+              display="calendar"
+              onChange={handleRegChange}
+            />
+          )}
+          {showExpPicker && (
+            <DateTimePicker
+              value={expDate ? new Date(expDate) : new Date()}
+              mode="date"
+              display="calendar"
+              onChange={handleExpChange}
+            />
+          )}
           <TouchableOpacity
             onPress={handleSave}
             style={{
