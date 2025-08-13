@@ -3,7 +3,6 @@
     "name": "MiAppNevera",
     "slug": "miappnevera",
     "version": "0.0.1",
-    "sdkVersion": "51.0.0",
     "platforms": [
       "ios",
       "android",

@@ -1,17 +1,15 @@
-const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
-
+const { getDefaultConfig } = require('@expo/metro-config');
 const config = getDefaultConfig(__dirname);
 
-// Include the icons folder located outside of the project root
+// si usas ../icons:
 const iconsPath = path.resolve(__dirname, '..', 'icons');
 config.watchFolders = [iconsPath];
 
-// Ensure modules are resolved from this project's node_modules even when
-// bundling files from outside of the project root (such as the icons folder).
 config.resolver = {
   ...config.resolver,
   nodeModulesPaths: [path.resolve(__dirname, 'node_modules')],
+  unstable_enablePackageExports: true   // deja TRUE; solo ponlo en false si vuelve un “deep import”
 };
 
 module.exports = config;
