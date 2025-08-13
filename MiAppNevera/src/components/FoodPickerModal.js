@@ -11,7 +11,7 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import foodIcons, { categories, getFoodIcon } from '../foodIcons';
+import foodIcons, { categories, getFoodIcon, foodLabels } from '../foodIcons';
 import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 
@@ -60,7 +60,9 @@ export default function FoodPickerModal({
 
   const handleSave = () => {
     if (onMultiSelect && selected.length) {
-      const names = selected.map(k => customFoodMap[k]?.name || k);
+      const names = selected.map(
+        k => customFoodMap[k]?.name || foodLabels[k] || k,
+      );
       onMultiSelect(names);
     }
     setSelectMode(false);
@@ -75,7 +77,11 @@ export default function FoodPickerModal({
   const defaultFoods = categories[currentCategory].items
     .filter(name => !hiddenFoods.includes(name))
     .filter(name => name.toLowerCase().includes(search.toLowerCase()))
-    .map(name => ({ key: name, label: name, icon: foodIcons[name] }));
+    .map(name => ({
+      key: name,
+      label: foodLabels[name] || name,
+      icon: foodIcons[name],
+    }));
 
   const customList = customFoods
     .filter(f => f.category === currentCategory)
