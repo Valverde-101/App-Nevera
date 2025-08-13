@@ -52,7 +52,7 @@ export const foodData = {
   },
   'algodon': {
     icon: require('./../../icons/Vegetales/algodón_icon.png'),
-    name: 'AlgodóN',
+    name: 'Algodón',
     expirationDays: null,
   },
   'almendra': {
@@ -72,7 +72,7 @@ export const foodData = {
   },
   'anemonademar': {
     icon: require('./../../icons/Peces/anémona_de_mar_icon.png'),
-    name: 'AnéMona De Mar',
+    name: 'Anémona De Mar',
     expirationDays: null,
   },
   'angelote': {
@@ -97,7 +97,7 @@ export const foodData = {
   },
   'atun': {
     icon: require('./../../icons/Peces/atún_icon.png'),
-    name: 'AtúN',
+    name: 'Atún',
     expirationDays: null,
   },
   'avellana': {
@@ -132,7 +132,7 @@ export const foodData = {
   },
   'batidordecocteles': {
     icon: require('./../../icons/Bebidas/batidor_de_coctéles_icon.png'),
-    name: 'Batidor De CoctéLes',
+    name: 'Batidor De Cócteles',
     expirationDays: null,
   },
   'bayas': {
@@ -142,7 +142,7 @@ export const foodData = {
   },
   'bebidaenergetica': {
     icon: require('./../../icons/Bebidas/bebida_energética_icon.png'),
-    name: 'Bebida EnergéTica',
+    name: 'Bebida Energética',
     expirationDays: null,
   },
   'bellota': {
@@ -162,7 +162,7 @@ export const foodData = {
   },
   'brocoli': {
     icon: require('./../../icons/Vegetales/brócoli_icon.png'),
-    name: 'BróColi',
+    name: 'Brócoli',
     expirationDays: null,
   },
   'caballodemar': {
@@ -202,7 +202,7 @@ export const foodData = {
   },
   'calabacin': {
     icon: require('./../../icons/Vegetales/calabacín_icon.png'),
-    name: 'CalabacíN',
+    name: 'Calabacín',
     expirationDays: null,
   },
   'calabaza': {
@@ -217,12 +217,12 @@ export const foodData = {
   },
   'camaron': {
     icon: require('./../../icons/Peces/camarón_icon.png'),
-    name: 'CamaróN',
+    name: 'Camarón',
     expirationDays: null,
   },
   'canadeazucar': {
     icon: require('./../../icons/Vegetales/caña_de_azúcar_icon.png'),
-    name: 'CañA De AzúCar',
+    name: 'Caña De Azúcar',
     expirationDays: null,
   },
   'canela': {
@@ -237,7 +237,7 @@ export const foodData = {
   },
   'cangrejoermitano': {
     icon: require('./../../icons/Peces/cangrejo_ermitaño_icon.png'),
-    name: 'Cangrejo ErmitañO',
+    name: 'Cangrejo Ermitaño',
     expirationDays: null,
   },
   'capuchino': {
@@ -257,12 +257,12 @@ export const foodData = {
   },
   'cascara': {
     icon: require('./../../icons/Peces/cáscara_icon.png'),
-    name: 'CáScara',
+    name: 'Cáscara',
     expirationDays: null,
   },
   'castana': {
     icon: require('./../../icons/Frutas Secas/castaña_icon.png'),
-    name: 'CastañA',
+    name: 'Castaña',
     expirationDays: null,
   },
   'caucho': {
@@ -277,7 +277,7 @@ export const foodData = {
   },
   'cebollin': {
     icon: require('./../../icons/Vegetales/cebollín_icon.png'),
-    name: 'CebollíN',
+    name: 'Cebollín',
     expirationDays: null,
   },
   'cerdo': {
@@ -302,12 +302,12 @@ export const foodData = {
   },
   'champan': {
     icon: require('./../../icons/Bebidas/champán_icon.png'),
-    name: 'ChampáN',
+    name: 'Champán',
     expirationDays: null,
   },
   'chia': {
     icon: require('./../../icons/Legumbres/chía_icon.png'),
-    name: 'ChíA',
+    name: 'Chía',
     expirationDays: null,
   },
   'chocolatecaliente': {
@@ -327,7 +327,7 @@ export const foodData = {
   },
   'coctel': {
     icon: require('./../../icons/Bebidas/cóctel_icon.png'),
-    name: 'CóCtel',
+    name: 'Cóctel',
     expirationDays: null,
   },
   'coliflor': {
@@ -377,12 +377,12 @@ export const foodData = {
   },
   'delfin': {
     icon: require('./../../icons/Peces/delfín_icon.png'),
-    name: 'DelfíN',
+    name: 'Delfín',
     expirationDays: null,
   },
   'dragondefruta': {
     icon: require('./../../icons/Frutas/dragon_de_fruta_icon.png'),
-    name: 'Dragon De Fruta',
+    name: 'Dragón De Fruta',
     expirationDays: null,
   },
   'durian': {
@@ -402,7 +402,7 @@ export const foodData = {
   },
   'esparragos': {
     icon: require('./../../icons/Vegetales/espárragos_icon.png'),
-    name: 'EspáRragos',
+    name: 'Espárragos',
     expirationDays: null,
   },
   'espina': {
@@ -512,7 +512,7 @@ export const foodData = {
   },
   'higado': {
     icon: require('./../../icons/Carnes/hígado_icon.png'),
-    name: 'HíGado',
+    name: 'Hígado',
     expirationDays: null,
   },
   'hinojo': {
@@ -527,12 +527,12 @@ export const foodData = {
   },
   'idolomoro': {
     icon: require('./../../icons/Peces/Ídolo_moro_icon.png'),
-    name: 'ÍDolo Moro',
+    name: 'Ídolo Moro',
     expirationDays: null,
   },
   'infusion': {
     icon: require('./../../icons/Bebidas/infusión_icon.png'),
-    name: 'InfusióN',
+    name: 'Infusión',
     expirationDays: null,
   },
   'jengibre': {
@@ -542,7 +542,7 @@ export const foodData = {
   },
   'judiasverdes': {
     icon: require('./../../icons/Legumbres/judías_verdes_icon.png'),
-    name: 'JudíAs Verdes',
+    name: 'Judías Verdes',
     expirationDays: null,
   },
   'kiwi': {
@@ -602,7 +602,7 @@ export const foodData = {
   },
   'limon': {
     icon: require('./../../icons/Vegetales/limón_icon.png'),
-    name: 'LimóN',
+    name: 'Limón',
     expirationDays: null,
   },
   'limonada': {
@@ -622,7 +622,7 @@ export const foodData = {
   },
   'maiz': {
     icon: require('./../../icons/Legumbres/maíz_icon.png'),
-    name: 'MaíZ',
+    name: 'Maíz',
     expirationDays: null,
   },
   'malteada': {
@@ -637,7 +637,7 @@ export const foodData = {
   },
   'mangostan': {
     icon: require('./../../icons/Vegetales/mangostán_icon.png'),
-    name: 'MangostáN',
+    name: 'Mangostán',
     expirationDays: null,
   },
   'mani': {
@@ -682,17 +682,17 @@ export const foodData = {
   },
   'mejillon': {
     icon: require('./../../icons/Peces/mejillón_icon.png'),
-    name: 'MejillóN',
+    name: 'Mejillón',
     expirationDays: null,
   },
   'melocoton': {
     icon: require('./../../icons/Frutas/melocotón_icon.png'),
-    name: 'MelocotóN',
+    name: 'Melocotón',
     expirationDays: null,
   },
   'melon': {
     icon: require('./../../icons/Frutas/melón_icon.png'),
-    name: 'MelóN',
+    name: 'Melón',
     expirationDays: null,
   },
   'membrillo': {
@@ -832,7 +832,7 @@ export const foodData = {
   },
   'pina': {
     icon: require('./../../icons/Frutas/piña_icon.png'),
-    name: 'PiñA',
+    name: 'Piña',
     expirationDays: null,
   },
   'pistacho': {
@@ -842,7 +842,7 @@ export const foodData = {
   },
   'platano': {
     icon: require('./../../icons/Frutas/plátano_icon.png'),
-    name: 'PláTano',
+    name: 'Plátano',
     expirationDays: null,
   },
   'pollo': {
@@ -862,12 +862,12 @@ export const foodData = {
   },
   'punetazo': {
     icon: require('./../../icons/Bebidas/puñetazo_icon.png'),
-    name: 'PuñEtazo',
+    name: 'Puñetazo',
     expirationDays: null,
   },
   'rabano': {
     icon: require('./../../icons/Vegetales/rábano_icon.png'),
-    name: 'RáBano',
+    name: 'Rábano',
     expirationDays: null,
   },
   'ramune': {
@@ -907,7 +907,7 @@ export const foodData = {
   },
   'rinon': {
     icon: require('./../../icons/Carnes/riñón_icon.png'),
-    name: 'RiñóN',
+    name: 'Riñón',
     expirationDays: null,
   },
   'salami': {
@@ -922,17 +922,17 @@ export const foodData = {
   },
   'salmon': {
     icon: require('./../../icons/Carnes/salmón_icon.png'),
-    name: 'SalmóN',
+    name: 'Salmón',
     expirationDays: null,
   },
   'sandia': {
     icon: require('./../../icons/Frutas/sandía_icon.png'),
-    name: 'SandíA',
+    name: 'Sandía',
     expirationDays: null,
   },
   'sangria': {
     icon: require('./../../icons/Bebidas/sangría_icon.png'),
-    name: 'SangríA',
+    name: 'Sangría',
     expirationDays: null,
   },
   'sardina': {
@@ -962,7 +962,7 @@ export const foodData = {
   },
   'sesamo': {
     icon: require('./../../icons/Frutas Secas/sésamo_icon.png'),
-    name: 'SéSamo',
+    name: 'Sésamo',
     expirationDays: null,
   },
   'seta': {
@@ -1007,7 +1007,7 @@ export const foodData = {
   },
   'tiburon': {
     icon: require('./../../icons/Peces/tiburón_icon.png'),
-    name: 'TiburóN',
+    name: 'Tiburón',
     expirationDays: null,
   },
   'tomate': {
