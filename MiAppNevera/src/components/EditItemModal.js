@@ -13,7 +13,6 @@ import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
-import { getDefaultExpiration } from '../foodIcons';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
@@ -33,9 +32,8 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
       setLocation(item.location || locations[0]?.key || 'fridge');
       setQuantity(String(item.quantity));
       setUnit(item.unit);
-      const reg = item.registered || '';
-      setRegDate(reg);
-      setExpDate(item.expiration || getDefaultExpiration(item.name, reg || new Date().toISOString().split('T')[0]));
+      setRegDate(item.registered || '');
+      setExpDate(item.expiration || '');
       setNote(item.note || '');
     }
   }, [visible, item]);

@@ -35,15 +35,9 @@ function walk(dir) {
         .relative(path.join(root, 'MiAppNevera', 'src'), full)
         .replace(/\\/g, '/');
 
-      // Base name without the `_icon` suffix. Keep a human-friendly label
-      // alongside the normalised key so the UI can display the original
-      // wording with spaces and accents.
+      // Normalised base name without the `_icon` suffix.
       let base = path.basename(entry, path.extname(entry));
-      base = base.replace(/_icon.*$/, '').replace(/[-_]/g, ' ').normalize('NFC');
-      const label = base
-        .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' ');
+      base = base.replace(/_icon.*$/, '').replace(/[-_]/g, ' ');
       const key = normalize(base);
 
       // Determine the top-level directory inside icons/ to infer the category.
@@ -55,7 +49,7 @@ function walk(dir) {
         categoryIcons[key] = rel;
       } else {
         // Regular food icon. Track it and associate it with its category.
-        entries.push({ key, rel, label });
+        entries.push({ key, rel });
         categoryItems[category] = categoryItems[category] || [];
         categoryItems[category].push(key);
       }
@@ -87,19 +81,6 @@ for (const { key, rel } of entries) {
 lines.push('};');
 lines.push('');
 
-lines.push('export const foodLabels = {');
-seen.clear();
-for (const { key, label } of entries) {
-  if (!seen.has(key)) {
-    const escaped = label.replace(/'/g, "\\'");
-    lines.push(`  '${key}': '${escaped}',`);
-    seen.add(key);
-  }
-}
-lines.push('};');
-lines.push('');
-
-// Generate category information with icon and list of food names.
 // Generate category information with icon and list of food names.
 lines.push('export const categories = {');
 const allCategories = new Set([
