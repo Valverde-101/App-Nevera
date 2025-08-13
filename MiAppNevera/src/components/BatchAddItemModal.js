@@ -12,6 +12,7 @@ import {
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
+import { getFoodInfo } from '../foodIcons';
 
 export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -22,14 +23,23 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   useEffect(() => {
     if (visible) {
       setData(
-        items.map(() => ({
-          location: locations[0]?.key || 'fridge',
-          quantity: '1',
-          unit: units[0]?.key || 'units',
-          regDate: today,
-          expDate: '',
-          note: '',
-        })),
+        items.map(item => {
+          const info = getFoodInfo(item.name);
+          let exp = '';
+          if (info?.expirationDays != null) {
+            const d = new Date();
+            d.setDate(d.getDate() + info.expirationDays);
+            exp = d.toISOString().split('T')[0];
+          }
+          return {
+            location: locations[0]?.key || 'fridge',
+            quantity: '1',
+            unit: units[0]?.key || 'units',
+            regDate: today,
+            expDate: exp,
+            note: '',
+          };
+        }),
       );
     }
   }, [visible, items, today, units, locations]);
