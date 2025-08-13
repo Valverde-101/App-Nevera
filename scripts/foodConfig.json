@@ -1,0 +1,5 @@
+{
+  "tomate": { "name": "Tomate", "expirationDays": 7 },
+  "manzana": { "name": "Manzana", "expirationDays": 30 },
+  "zanahoria": { "name": "Zanahoria", "expirationDays": 20 }
+}
