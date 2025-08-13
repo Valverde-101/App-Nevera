@@ -52,9 +52,16 @@ export const UnitsProvider = ({ children }) => {
     return Number(quantity) === 1 ? unit.singular : unit.plural;
   }, [units]);
 
+  const resetUnits = useCallback(() => {
+    setUnits(defaultUnits);
+    AsyncStorage.removeItem('units').catch(e => {
+      console.error('Failed to clear units', e);
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ units, addUnit, updateUnit, removeUnit, getLabel }),
-    [units, addUnit, updateUnit, removeUnit, getLabel],
+    () => ({ units, addUnit, updateUnit, removeUnit, getLabel, resetUnits }),
+    [units, addUnit, updateUnit, removeUnit, getLabel, resetUnits],
   );
 
   return (

@@ -83,9 +83,16 @@ export const ShoppingProvider = ({children}) => {
     ));
   }, [persist]);
 
+  const resetShopping = useCallback(() => {
+    setList([]);
+    AsyncStorage.removeItem('shopping').catch(e => {
+      console.error('Failed to clear shopping list', e);
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased}),
-    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased],
+    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping}),
+    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping],
   );
 
   return (

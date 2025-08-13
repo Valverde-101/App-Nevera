@@ -67,9 +67,16 @@ export const RecipeProvider = ({children}) => {
     persist(prev => prev.filter((_, idx) => idx !== index));
   }, [persist]);
 
+  const resetRecipes = useCallback(() => {
+    setRecipes([]);
+    AsyncStorage.removeItem('recipes').catch(e => {
+      console.error('Failed to clear recipes', e);
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({recipes, addRecipe, updateRecipe, removeRecipe}),
-    [recipes, addRecipe, updateRecipe, removeRecipe],
+    () => ({recipes, addRecipe, updateRecipe, removeRecipe, resetRecipes}),
+    [recipes, addRecipe, updateRecipe, removeRecipe, resetRecipes],
   );
 
   return (
