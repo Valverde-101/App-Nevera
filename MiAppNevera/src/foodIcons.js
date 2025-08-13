@@ -250,12 +250,24 @@ export const categories = {
   },
 };
 
+export const expirationDays = {
+  'frijoles': 365,
+  'guisantes': 180,
+  'lentejas': 365,
+  'maiz': 365,
+  'manzana': 30,
+  'tomate': 7,
+  'zanahoria': 14,
+};
+
 let customIconMap = {};
 let customCategoryMap = {};
+let customExpirationMap = {};
 
 export function setCustomFoodsMap(foods) {
   customIconMap = {};
   customCategoryMap = {};
+  customExpirationMap = {};
   foods.forEach(f => {
     customCategoryMap[f.key] = f.category;
     if (f.icon) {
@@ -263,6 +275,9 @@ export function setCustomFoodsMap(foods) {
     } else if (f.baseIcon) {
       const baseKey = normalizeFoodName(f.baseIcon);
       customIconMap[f.key] = foodIcons[baseKey];
+    }
+    if (f.expiresIn) {
+      customExpirationMap[f.key] = f.expiresIn;
     }
   });
 }
@@ -285,6 +300,15 @@ export function getFoodCategory(name) {
     }
   }
   return null;
+}
+
+export function getDefaultExpiration(name, fromDate = new Date()) {
+  const key = normalizeFoodName(name);
+  const days = customExpirationMap[key] ?? expirationDays[key];
+  if (!days) return '';
+  const base = new Date(fromDate);
+  base.setDate(base.getDate() + days);
+  return base.toISOString().split('T')[0];
 }
 
 export default foodIcons;

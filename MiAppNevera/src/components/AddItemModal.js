@@ -12,6 +12,7 @@ import {useShopping} from '../context/ShoppingContext';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
+import { getDefaultExpiration } from '../foodIcons';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -32,10 +33,10 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
       setQuantity(1);
       setUnit(units[0]?.key || 'units');
       setRegDate(today);
-      setExpDate('');
+      setExpDate(getDefaultExpiration(foodName, today));
       setNote('');
     }
-  }, [visible, initialLocation, today, units, locations]);
+  }, [visible, initialLocation, today, units, locations, foodName]);
 
   return (
     <Modal visible={visible} animationType="slide">
