@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import DatePicker from './DatePicker';
 
 export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
   const today = new Date().toISOString().split('T')[0];
@@ -145,19 +146,15 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
                 </TouchableOpacity>
               ))}
             </View>
-            <Text>Fecha de registro</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              placeholder="YYYY-MM-DD"
+            <DatePicker
+              label="Fecha de registro"
               value={data[idx]?.regDate}
-              onChangeText={t => updateField(idx, 'regDate', t)}
+              onChange={t => updateField(idx, 'regDate', t)}
             />
-            <Text>Fecha de caducidad</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              placeholder="YYYY-MM-DD"
+            <DatePicker
+              label="Fecha de caducidad"
               value={data[idx]?.expDate}
-              onChangeText={t => updateField(idx, 'expDate', t)}
+              onChange={t => updateField(idx, 'expDate', t)}
             />
             <Text>Nota</Text>
             <TextInput

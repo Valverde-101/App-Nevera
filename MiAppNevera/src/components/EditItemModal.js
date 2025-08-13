@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
+import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 
@@ -161,20 +162,8 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               </TouchableOpacity>
             ))}
           </View>
-          <Text>Fecha de registro</Text>
-          <TextInput
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            placeholder="YYYY-MM-DD"
-            value={regDate}
-            onChangeText={setRegDate}
-          />
-          <Text>Fecha de caducidad</Text>
-          <TextInput
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            placeholder="YYYY-MM-DD"
-            value={expDate}
-            onChangeText={setExpDate}
-          />
+          <DatePicker label="Fecha de registro" value={regDate} onChange={setRegDate} />
+          <DatePicker label="Fecha de caducidad" value={expDate} onChange={setExpDate} />
           <Text>Nota</Text>
           <TextInput
             style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
