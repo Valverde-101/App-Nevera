@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, View, Text, TextInput, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import {
+  Platform,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Animated,
+} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function DatePicker({ label, value, onChange }) {
@@ -28,21 +36,24 @@ export default function DatePicker({ label, value, onChange }) {
     <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       {label && <Text style={styles.label}>{label}</Text>}
       {Platform.OS === 'web' ? (
-        <TextInput
+        // Use a native HTML input for web to get the browser date picker UI
+        <input
           type="date"
           value={displayValue}
-          onChangeText={onChange}
-          style={styles.input}
+          onChange={e => onChange(e.target.value)}
+          style={webInputStyle}
         />
       ) : (
         <>
           <TouchableOpacity onPress={() => setShow(true)}>
-            <TextInput
-              style={styles.input}
-              value={displayValue}
-              placeholder="YYYY-MM-DD"
-              editable={false}
-            />
+            <View pointerEvents="none">
+              <TextInput
+                style={styles.input}
+                value={displayValue}
+                placeholder="YYYY-MM-DD"
+                editable={false}
+              />
+            </View>
           </TouchableOpacity>
           {show && (
             <DateTimePicker
@@ -75,3 +86,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
+
+// Plain object styles for the web <input/> element
+const webInputStyle = {
+  borderWidth: 1,
+  borderColor: '#ccc',
+  padding: 8,
+  borderRadius: 4,
+  backgroundColor: '#fff',
+  width: '100%',
+  boxSizing: 'border-box',
+};
