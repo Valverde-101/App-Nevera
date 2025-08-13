@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
 import {getFoodIcon, getFoodCategory} from '../foodIcons';
@@ -11,15 +11,15 @@ export const InventoryProvider = ({children}) => {
   const { locations } = useLocations();
   const { customFoods } = useCustomFoods();
 
-  const buildEmpty = () => {
+  const buildEmpty = useCallback(() => {
     const obj = {};
     locations.forEach(loc => {
       obj[loc.key] = [];
     });
     return obj;
-  };
+  }, [locations]);
 
-  const [inventory, setInventory] = useState(buildEmpty());
+  const [inventory, setInventory] = useState(buildEmpty);
 
   function attachIcons(data) {
     const withIcons = {};
@@ -59,7 +59,7 @@ export const InventoryProvider = ({children}) => {
     });
   }, [locations]);
 
-  const persist = updater => {
+  const persist = useCallback(updater => {
     setInventory(prev => {
       const data = typeof updater === 'function' ? updater(prev) : updater;
       AsyncStorage.setItem('inventory', JSON.stringify(data)).catch(e => {
@@ -67,9 +67,9 @@ export const InventoryProvider = ({children}) => {
       });
       return data;
     });
-  };
+  }, []);
 
-  const addItem = (
+  const addItem = useCallback((
     category,
     name,
     quantity = 1,
@@ -94,9 +94,9 @@ export const InventoryProvider = ({children}) => {
       ...prev,
       [category]: [...prev[category], newItem],
     }));
-  };
+  }, [persist]);
 
-  const updateItem = (
+  const updateItem = useCallback((
     oldCategory,
     index,
     {location, quantity, unit, registered, expiration, note},
@@ -127,9 +127,9 @@ export const InventoryProvider = ({children}) => {
         };
       }
     });
-  };
+  }, [persist]);
 
-  const updateQuantity = (category, index, delta) => {
+  const updateQuantity = useCallback((category, index, delta) => {
     persist(prev => {
       const updatedCategory = prev[category].map((item, idx) =>
         idx === index
@@ -138,17 +138,22 @@ export const InventoryProvider = ({children}) => {
       );
       return { ...prev, [category]: updatedCategory };
     });
-  };
+  }, [persist]);
 
-  const removeItem = (category, index) => {
+  const removeItem = useCallback((category, index) => {
     persist(prev => {
       const updatedCategory = prev[category].filter((_, idx) => idx !== index);
       return { ...prev, [category]: updatedCategory };
     });
-  };
+  }, [persist]);
+
+  const value = useMemo(
+    () => ({inventory, addItem, updateItem, updateQuantity, removeItem}),
+    [inventory, addItem, updateItem, updateQuantity, removeItem],
+  );
 
   return (
-    <InventoryContext.Provider value={{inventory, addItem, updateItem, updateQuantity, removeItem}}>
+    <InventoryContext.Provider value={value}>
       {children}
     </InventoryContext.Provider>
   );

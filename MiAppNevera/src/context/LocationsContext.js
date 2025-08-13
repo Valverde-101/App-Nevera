@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const defaultLocations = [
@@ -33,27 +33,30 @@ export const LocationsProvider = ({ children }) => {
     });
   }, [locations]);
 
-  const addLocation = (name, icon) => {
+  const addLocation = useCallback((name, icon) => {
     const key = name.toLowerCase();
     setLocations(prev => [...prev, { key, name, icon, active: true }]);
-  };
+  }, []);
 
-  const updateLocation = (key, name, icon) => {
+  const updateLocation = useCallback((key, name, icon) => {
     setLocations(prev => prev.map(l => (l.key === key ? { ...l, name, icon } : l)));
-  };
+  }, []);
 
-  const removeLocation = key => {
+  const removeLocation = useCallback(key => {
     setLocations(prev => prev.filter(l => l.key !== key));
-  };
+  }, []);
 
-  const toggleActive = key => {
+  const toggleActive = useCallback(key => {
     setLocations(prev => prev.map(l => (l.key === key ? { ...l, active: !l.active } : l)));
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ locations, addLocation, updateLocation, removeLocation, toggleActive }),
+    [locations, addLocation, updateLocation, removeLocation, toggleActive],
+  );
 
   return (
-    <LocationsContext.Provider
-      value={{ locations, addLocation, updateLocation, removeLocation, toggleActive }}
-    >
+    <LocationsContext.Provider value={value}>
       {children}
     </LocationsContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getFoodIcon} from '../foodIcons';
 
@@ -31,14 +31,17 @@ export const RecipeProvider = ({children}) => {
     })();
   }, []);
 
-  const persist = data => {
-    setRecipes(data);
-    AsyncStorage.setItem('recipes', JSON.stringify(data)).catch(e => {
-      console.error('Failed to save recipes', e);
+  const persist = useCallback(updater => {
+    setRecipes(prev => {
+      const data = typeof updater === 'function' ? updater(prev) : updater;
+      AsyncStorage.setItem('recipes', JSON.stringify(data)).catch(e => {
+        console.error('Failed to save recipes', e);
+      });
+      return data;
     });
-  };
+  }, []);
 
-  const addRecipe = recipe => {
+  const addRecipe = useCallback(recipe => {
     const withIcons = {
       ...recipe,
       ingredients: recipe.ingredients.map(ing => ({
@@ -46,10 +49,10 @@ export const RecipeProvider = ({children}) => {
         icon: ing.icon || getFoodIcon(ing.name),
       })),
     };
-    persist([...recipes, withIcons]);
-  };
+    persist(prev => [...prev, withIcons]);
+  }, [persist]);
 
-  const updateRecipe = (index, recipe) => {
+  const updateRecipe = useCallback((index, recipe) => {
     const withIcons = {
       ...recipe,
       ingredients: recipe.ingredients.map(ing => ({
@@ -57,16 +60,20 @@ export const RecipeProvider = ({children}) => {
         icon: ing.icon || getFoodIcon(ing.name),
       })),
     };
-    const updated = recipes.map((r, idx) => (idx === index ? withIcons : r));
-    persist(updated);
-  };
+    persist(prev => prev.map((r, idx) => (idx === index ? withIcons : r)));
+  }, [persist]);
 
-  const removeRecipe = index => {
-    persist(recipes.filter((_, idx) => idx !== index));
-  };
+  const removeRecipe = useCallback(index => {
+    persist(prev => prev.filter((_, idx) => idx !== index));
+  }, [persist]);
+
+  const value = useMemo(
+    () => ({recipes, addRecipe, updateRecipe, removeRecipe}),
+    [recipes, addRecipe, updateRecipe, removeRecipe],
+  );
 
   return (
-    <RecipeContext.Provider value={{recipes, addRecipe, updateRecipe, removeRecipe}}>
+    <RecipeContext.Provider value={value}>
       {children}
     </RecipeContext.Provider>
   );

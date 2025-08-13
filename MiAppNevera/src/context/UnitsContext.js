@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const defaultUnits = [
@@ -33,27 +33,32 @@ export const UnitsProvider = ({ children }) => {
     });
   }, [units]);
 
-  const addUnit = (singular, plural) => {
+  const addUnit = useCallback((singular, plural) => {
     const key = plural.toLowerCase();
     setUnits(prev => [...prev, { key, singular, plural }]);
-  };
+  }, []);
 
-  const updateUnit = (key, singular, plural) => {
+  const updateUnit = useCallback((key, singular, plural) => {
     setUnits(prev => prev.map(u => (u.key === key ? { ...u, singular, plural } : u)));
-  };
+  }, []);
 
-  const removeUnit = key => {
+  const removeUnit = useCallback(key => {
     setUnits(prev => prev.filter(u => u.key !== key));
-  };
+  }, []);
 
-  const getLabel = (quantity, key) => {
+  const getLabel = useCallback((quantity, key) => {
     const unit = units.find(u => u.key === key);
     if (!unit) return key;
     return Number(quantity) === 1 ? unit.singular : unit.plural;
-  };
+  }, [units]);
+
+  const value = useMemo(
+    () => ({ units, addUnit, updateUnit, removeUnit, getLabel }),
+    [units, addUnit, updateUnit, removeUnit, getLabel],
+  );
 
   return (
-    <UnitsContext.Provider value={{ units, addUnit, updateUnit, removeUnit, getLabel }}>
+    <UnitsContext.Provider value={value}>
       {children}
     </UnitsContext.Provider>
   );

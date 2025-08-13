@@ -1,4 +1,4 @@
-import React, {createContext, useContext, useEffect, useState} from 'react';
+import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useCustomFoods } from './CustomFoodsContext';
@@ -27,16 +27,17 @@ export const ShoppingProvider = ({children}) => {
     })();
   }, [customFoods]);
 
-  const persist = async (data) => {
-    setList(data);
-    try {
-      await AsyncStorage.setItem('shopping', JSON.stringify(data));
-    } catch (e) {
-      console.error('Failed to save shopping list', e);
-    }
-  };
+  const persist = useCallback(updater => {
+    setList(prev => {
+      const data = typeof updater === 'function' ? updater(prev) : updater;
+      AsyncStorage.setItem('shopping', JSON.stringify(data)).catch(e => {
+        console.error('Failed to save shopping list', e);
+      });
+      return data;
+    });
+  }, []);
 
-  const addItem = (name, quantity = 1, unit = 'units') => {
+  const addItem = useCallback((name, quantity = 1, unit = 'units') => {
     const newItem = {
       name,
       quantity,
@@ -45,10 +46,10 @@ export const ShoppingProvider = ({children}) => {
       foodCategory: getFoodCategory(name),
       purchased: false,
     };
-    persist([...list, newItem]);
-  };
+    persist(prev => [...prev, newItem]);
+  }, [persist]);
 
-  const addItems = items => {
+  const addItems = useCallback(items => {
     const newItems = items.map(({name, quantity = 1, unit = 'units'}) => ({
       name,
       quantity,
@@ -57,39 +58,38 @@ export const ShoppingProvider = ({children}) => {
       foodCategory: getFoodCategory(name),
       purchased: false,
     }));
-    persist([...list, ...newItems]);
-  };
+    persist(prev => [...prev, ...newItems]);
+  }, [persist]);
 
-  const togglePurchased = (index) => {
-    const updated = list.map((item, idx) =>
+  const togglePurchased = useCallback(index => {
+    persist(prev => prev.map((item, idx) =>
       idx === index ? {...item, purchased: !item.purchased} : item,
-    );
-    persist(updated);
-  };
+    ));
+  }, [persist]);
 
-  const removeItem = (index) => {
-    const updated = list.filter((_, idx) => idx !== index);
-    persist(updated);
-  };
+  const removeItem = useCallback(index => {
+    persist(prev => prev.filter((_, idx) => idx !== index));
+  }, [persist]);
 
-  const removeItems = (indices) => {
+  const removeItems = useCallback(indices => {
     const set = new Set(indices);
-    const updated = list.filter((_, idx) => !set.has(idx));
-    persist(updated);
-  };
+    persist(prev => prev.filter((_, idx) => !set.has(idx)));
+  }, [persist]);
 
-  const markPurchased = (indices) => {
+  const markPurchased = useCallback(indices => {
     const set = new Set(indices);
-    const updated = list.map((item, idx) =>
+    persist(prev => prev.map((item, idx) =>
       set.has(idx) ? {...item, purchased: true} : item,
-    );
-    persist(updated);
-  };
+    ));
+  }, [persist]);
+
+  const value = useMemo(
+    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased}),
+    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased],
+  );
 
   return (
-    <ShoppingContext.Provider
-      value={{list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased}}
-    >
+    <ShoppingContext.Provider value={value}>
       {children}
     </ShoppingContext.Provider>
   );
