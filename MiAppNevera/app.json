@@ -10,6 +10,11 @@
     ],
     "android": {
       "package": "com.anonymous.miappnevera"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "29bdbb1e-a7ff-4f47-a1c8-178ab45939ff"
+      }
     }
   }
 }
