@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { normalizeFoodName, setCustomFoodsMap } from '../foodIcons';
 
@@ -20,34 +20,40 @@ export const CustomFoodsProvider = ({ children }) => {
     })();
   }, []);
 
-  const persist = data => {
-    setCustomFoods(data);
-    AsyncStorage.setItem('customFoods', JSON.stringify(data)).catch(e => {
-      console.error('Failed to save custom foods', e);
+  const persist = useCallback(updater => {
+    setCustomFoods(prev => {
+      const data = typeof updater === 'function' ? updater(prev) : updater;
+      AsyncStorage.setItem('customFoods', JSON.stringify(data)).catch(e => {
+        console.error('Failed to save custom foods', e);
+      });
+      setCustomFoodsMap(data);
+      return data;
     });
-    setCustomFoodsMap(data);
-  };
+  }, []);
 
-  const addCustomFood = ({ name, category, icon, baseIcon }) => {
+  const addCustomFood = useCallback(({ name, category, icon, baseIcon }) => {
     const key = normalizeFoodName(name);
     const newFood = { name, category, icon: icon || null, baseIcon: baseIcon || null, key };
-    persist([...customFoods, newFood]);
-  };
+    persist(prev => [...prev, newFood]);
+  }, [persist]);
 
-  const updateCustomFood = (key, { name, category, icon, baseIcon }) => {
+  const updateCustomFood = useCallback((key, { name, category, icon, baseIcon }) => {
     const newKey = normalizeFoodName(name);
-    const updated = customFoods.map(f =>
+    persist(prev => prev.map(f =>
       f.key === key ? { name, category, icon: icon || null, baseIcon: baseIcon || null, key: newKey } : f,
-    );
-    persist(updated);
-  };
+    ));
+  }, [persist]);
 
-  const removeCustomFood = key => {
-    persist(customFoods.filter(f => f.key !== key));
-  };
+  const removeCustomFood = useCallback(key => {
+    persist(prev => prev.filter(f => f.key !== key));
+  }, [persist]);
+  const value = useMemo(
+    () => ({ customFoods, addCustomFood, updateCustomFood, removeCustomFood }),
+    [customFoods, addCustomFood, updateCustomFood, removeCustomFood],
+  );
 
   return (
-    <CustomFoodsContext.Provider value={{ customFoods, addCustomFood, updateCustomFood, removeCustomFood }}>
+    <CustomFoodsContext.Provider value={value}>
       {children}
     </CustomFoodsContext.Provider>
   );
