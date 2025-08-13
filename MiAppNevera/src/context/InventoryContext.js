@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
-import {getFoodIcon, getFoodCategory, getDefaultExpiration} from '../foodIcons';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useLocations } from './LocationsContext';
 import { useCustomFoods } from './CustomFoodsContext';
 
@@ -22,21 +22,13 @@ export const InventoryProvider = ({children}) => {
   const [inventory, setInventory] = useState(buildEmpty);
 
   function attachIcons(data) {
-    const today = new Date().toISOString().split('T')[0];
     const withIcons = {};
     Object.keys(data).forEach(cat => {
-      withIcons[cat] = data[cat].map(item => {
-        const registered = item.registered || today;
-        const expiration =
-          item.expiration || getDefaultExpiration(item.name, registered);
-        return {
-          ...item,
-          icon: getFoodIcon(item.name),
-          foodCategory: getFoodCategory(item.name),
-          registered,
-          expiration,
-        };
-      });
+      withIcons[cat] = data[cat].map(item => ({
+        ...item,
+        icon: getFoodIcon(item.name),
+        foodCategory: getFoodCategory(item.name),
+      }));
     });
     return withIcons;
   }
@@ -86,8 +78,6 @@ export const InventoryProvider = ({children}) => {
     expiration = '',
     note = '',
   ) => {
-    const reg = registered || new Date().toISOString().split('T')[0];
-    const exp = expiration || getDefaultExpiration(name, reg);
     const icon = getFoodIcon(name);
     const foodCategory = getFoodCategory(name);
     const newItem = {
@@ -95,8 +85,8 @@ export const InventoryProvider = ({children}) => {
       quantity,
       unit,
       icon,
-      registered: reg,
-      expiration: exp,
+      registered,
+      expiration,
       note,
       foodCategory,
     };
