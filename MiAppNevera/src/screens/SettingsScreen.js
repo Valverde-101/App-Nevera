@@ -6,6 +6,7 @@ export default function SettingsScreen({ navigation }) {
     <View style={{ flex: 1, justifyContent: 'center', padding: 20, gap: 10 }}>
       <Button title="Tipos de unidad" onPress={() => navigation.navigate('UnitSettings')} />
       <Button title="Gestión de ubicación" onPress={() => navigation.navigate('LocationSettings')} />
+      <Button title="Datos de usuario" onPress={() => navigation.navigate('UserData')} />
     </View>
   );
 }

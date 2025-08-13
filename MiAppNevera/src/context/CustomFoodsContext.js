@@ -47,9 +47,18 @@ export const CustomFoodsProvider = ({ children }) => {
   const removeCustomFood = useCallback(key => {
     persist(prev => prev.filter(f => f.key !== key));
   }, [persist]);
+
+  const resetCustomFoods = useCallback(() => {
+    setCustomFoods([]);
+    setCustomFoodsMap([]);
+    AsyncStorage.removeItem('customFoods').catch(e => {
+      console.error('Failed to clear custom foods', e);
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ customFoods, addCustomFood, updateCustomFood, removeCustomFood }),
-    [customFoods, addCustomFood, updateCustomFood, removeCustomFood],
+    () => ({ customFoods, addCustomFood, updateCustomFood, removeCustomFood, resetCustomFoods }),
+    [customFoods, addCustomFood, updateCustomFood, removeCustomFood, resetCustomFoods],
   );
 
   return (

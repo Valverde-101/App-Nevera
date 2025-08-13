@@ -147,9 +147,17 @@ export const InventoryProvider = ({children}) => {
     });
   }, [persist]);
 
+  const resetInventory = useCallback(() => {
+    const initial = { ...buildEmpty(), ...attachIcons(foods) };
+    AsyncStorage.removeItem('inventory').catch(e => {
+      console.error('Failed to clear inventory', e);
+    });
+    setInventory(initial);
+  }, [buildEmpty]);
+
   const value = useMemo(
-    () => ({inventory, addItem, updateItem, updateQuantity, removeItem}),
-    [inventory, addItem, updateItem, updateQuantity, removeItem],
+    () => ({inventory, addItem, updateItem, updateQuantity, removeItem, resetInventory}),
+    [inventory, addItem, updateItem, updateQuantity, removeItem, resetInventory],
   );
 
   return (

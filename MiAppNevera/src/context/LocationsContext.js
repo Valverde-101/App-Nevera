@@ -50,9 +50,16 @@ export const LocationsProvider = ({ children }) => {
     setLocations(prev => prev.map(l => (l.key === key ? { ...l, active: !l.active } : l)));
   }, []);
 
+  const resetLocations = useCallback(() => {
+    setLocations(defaultLocations);
+    AsyncStorage.removeItem('locations').catch(e => {
+      console.error('Failed to clear locations', e);
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ locations, addLocation, updateLocation, removeLocation, toggleActive }),
-    [locations, addLocation, updateLocation, removeLocation, toggleActive],
+    () => ({ locations, addLocation, updateLocation, removeLocation, toggleActive, resetLocations }),
+    [locations, addLocation, updateLocation, removeLocation, toggleActive, resetLocations],
   );
 
   return (

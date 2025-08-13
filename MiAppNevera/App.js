@@ -11,6 +11,7 @@ import { RecipeProvider } from './src/context/RecipeContext';
 import SettingsScreen from './src/screens/SettingsScreen';
 import UnitSettingsScreen from './src/screens/UnitSettingsScreen';
 import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
+import UserDataScreen from './src/screens/UserDataScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
@@ -63,6 +64,11 @@ export default function App() {
                     name="LocationSettings"
                     component={LocationSettingsScreen}
                     options={{ title: 'Gestión de ubicación' }}
+                  />
+                  <Stack.Screen
+                    name="UserData"
+                    component={UserDataScreen}
+                    options={{ title: 'Datos de usuario' }}
                   />
                   </Stack.Navigator>
                 </NavigationContainer>
