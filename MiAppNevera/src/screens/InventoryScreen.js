@@ -364,86 +364,82 @@ export default function InventoryScreen({ navigation }) {
                             (1000 * 60 * 60 * 24),
                         )
                       : null;
-
-                      return (
-                        <TouchableOpacity
-                          key={key}
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            paddingVertical: 5,
-                            backgroundColor: selected ? '#d0ebff' : undefined,
-                            opacity: item.quantity === 0 ? 0.5 : 1,
-                          }}
-                          onLongPress={() => {
-                            setMultiSelect(true);
+                    return (
+                      <TouchableOpacity
+                        key={key}
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          paddingVertical: 5,
+                          backgroundColor: selected ? '#d0ebff' : undefined,
+                          opacity: item.quantity === 0 ? 0.5 : 1,
+                        }}
+                        onLongPress={() => {
+                          setMultiSelect(true);
+                          toggleSelection(item.location, item.index);
+                        }}
+                        onPress={() => {
+                          if (multiSelect) {
                             toggleSelection(item.location, item.index);
-                          }}
-                          onPress={() => {
-                            if (multiSelect) {
-                              toggleSelection(item.location, item.index);
-                            } else {
-                              setEditingItem({
-                                ...item,
-                                index: item.index,
-                                category: item.location,
-                                location: item.location,
-                              });
-                            }
-                          }}
-                        >
-                          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                            {item.icon && (
-                              <View style={{ position: 'relative', marginRight: 10 }}>
-                                <Image
-                                  source={item.icon}
-                                  style={{ width: 32, height: 32 }}
-                                />
-                                {daysLeft !== null && (
-                                  <View
-                                    style={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                      backgroundColor: '#fff',
-                                      paddingHorizontal: 2,
-                                      borderRadius: 3,
-                                      minWidth: 12,
-                                      alignItems: 'center',
-                                    }}
-                                  >
-                                    <Text style={{ fontSize: 8 }}>D-{daysLeft}</Text>
-                                  </View>
-                                )}
+                          } else {
+                            setEditingItem({
+                              ...item,
+                              index: item.index,
+                              category: item.location,
+                              location: item.location,
+                            });
+                          }
+                        }}
+                      >
+                        {item.icon && (
+                          <View style={{ position: 'relative', marginRight: 10 }}>
+                            <Image
+                              source={item.icon}
+                              style={{ width: 32, height: 32 }}
+                            />
+                            {daysLeft !== null && (
+                              <View
+                                style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  backgroundColor: '#fff',
+                                  paddingHorizontal: 2,
+                                  borderRadius: 3,
+                                  minWidth: 12,
+                                  alignItems: 'center',
+                                }}
+                              >
+                                <Text style={{ fontSize: 8 }}>D-{daysLeft}</Text>
                               </View>
                             )}
-                            <Text>{item.name}</Text>
-                            {daysLeft !== null && (
-                              <Text style={{ marginLeft: 10 }}>D-{daysLeft}</Text>
-                            )}
-                            {search && (
-                              <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
-                            )}
                           </View>
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <TouchableOpacity
-                              onPress={() => updateQuantity(item.location, item.index, -1)}
-                              style={{ borderWidth: 1, padding: 3, marginRight: 5 }}
-                            >
-                              <Text>◀</Text>
-                            </TouchableOpacity>
-                            <Text>
-                              {item.quantity} {getLabel(item.quantity, item.unit)}
-                            </Text>
-                            <TouchableOpacity
-                              onPress={() => updateQuantity(item.location, item.index, 1)}
-                              style={{ borderWidth: 1, padding: 3, marginLeft: 5 }}
-                            >
-                              <Text>▶</Text>
-                            </TouchableOpacity>
-                          </View>
-                        </TouchableOpacity>
+                        )}
+                        <Text>{item.name}</Text>
+                        {item.expiration ? (
+                          <Text style={{ marginLeft: 10 }}>{item.expiration}</Text>
+                        ) : null}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10 }}>
+                          <TouchableOpacity
+                            onPress={() => updateQuantity(item.location, item.index, -1)}
+                            style={{ borderWidth: 1, padding: 3, marginRight: 5 }}
+                          >
+                            <Text>◀</Text>
+                          </TouchableOpacity>
+                          <Text>
+                            {item.quantity} {getLabel(item.quantity, item.unit)}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => updateQuantity(item.location, item.index, 1)}
+                            style={{ borderWidth: 1, padding: 3, marginLeft: 5 }}
+                          >
+                            <Text>▶</Text>
+                          </TouchableOpacity>
+                        </View>
+                        {search && (
+                          <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
+                        )}
+                      </TouchableOpacity>
                     );
                   })
                 ) : (
@@ -495,8 +491,8 @@ export default function InventoryScreen({ navigation }) {
                               <View
                                 style={{
                                   position: 'absolute',
-                                  top: 0,
-                                  left: 0,
+                                  top: 2,
+                                  left: 2,
                                   backgroundColor: '#fff',
                                   borderRadius: 3,
                                   width: overlaySize,
