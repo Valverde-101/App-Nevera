@@ -16,67 +16,70 @@ import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
+import { CategoriesProvider } from './src/context/CategoriesContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <CustomFoodsProvider>
-      <UnitsProvider>
-        <LocationsProvider>
-          <InventoryProvider>
-            <ShoppingProvider>
-              <RecipeProvider>
-                <NavigationContainer>
-                  <StatusBar style="auto" />
-                  <Stack.Navigator>
-                  <Stack.Screen
-                    name="Inventory"
-                    component={InventoryScreen}
-                    options={{ title: 'Nevera' }}
-                  />
-                  <Stack.Screen
-                    name="Shopping"
-                    component={ShoppingListScreen}
-                    options={{ title: 'Compras' }}
-                  />
-                  <Stack.Screen
-                    name="Recipes"
-                    component={RecipeBookScreen}
-                    options={{ title: 'Recetario' }}
-                  />
-                  <Stack.Screen
-                    name="RecipeDetail"
-                    component={RecipeDetailScreen}
-                    options={{ title: 'Receta' }}
-                  />
-                  <Stack.Screen
-                    name="Settings"
-                    component={SettingsScreen}
-                    options={{ title: 'Ajustes' }}
-                  />
-                  <Stack.Screen
-                    name="UnitSettings"
-                    component={UnitSettingsScreen}
-                    options={{ title: 'Tipos de unidad' }}
-                  />
-                  <Stack.Screen
-                    name="LocationSettings"
-                    component={LocationSettingsScreen}
-                    options={{ title: 'Gestión de ubicación' }}
-                  />
-                  <Stack.Screen
-                    name="UserData"
-                    component={UserDataScreen}
-                    options={{ title: 'Datos de usuario' }}
-                  />
-                  </Stack.Navigator>
-                </NavigationContainer>
-              </RecipeProvider>
-            </ShoppingProvider>
-          </InventoryProvider>
-        </LocationsProvider>
-      </UnitsProvider>
-    </CustomFoodsProvider>
+    <CategoriesProvider>
+      <CustomFoodsProvider>
+        <UnitsProvider>
+          <LocationsProvider>
+            <InventoryProvider>
+              <ShoppingProvider>
+                <RecipeProvider>
+                  <NavigationContainer>
+                    <StatusBar style="auto" />
+                    <Stack.Navigator>
+                    <Stack.Screen
+                      name="Inventory"
+                      component={InventoryScreen}
+                      options={{ title: 'Nevera' }}
+                    />
+                    <Stack.Screen
+                      name="Shopping"
+                      component={ShoppingListScreen}
+                      options={{ title: 'Compras' }}
+                    />
+                    <Stack.Screen
+                      name="Recipes"
+                      component={RecipeBookScreen}
+                      options={{ title: 'Recetario' }}
+                    />
+                    <Stack.Screen
+                      name="RecipeDetail"
+                      component={RecipeDetailScreen}
+                      options={{ title: 'Receta' }}
+                    />
+                    <Stack.Screen
+                      name="Settings"
+                      component={SettingsScreen}
+                      options={{ title: 'Ajustes' }}
+                    />
+                    <Stack.Screen
+                      name="UnitSettings"
+                      component={UnitSettingsScreen}
+                      options={{ title: 'Tipos de unidad' }}
+                    />
+                    <Stack.Screen
+                      name="LocationSettings"
+                      component={LocationSettingsScreen}
+                      options={{ title: 'Gestión de ubicación' }}
+                    />
+                    <Stack.Screen
+                      name="UserData"
+                      component={UserDataScreen}
+                      options={{ title: 'Datos de usuario' }}
+                    />
+                    </Stack.Navigator>
+                  </NavigationContainer>
+                </RecipeProvider>
+              </ShoppingProvider>
+            </InventoryProvider>
+          </LocationsProvider>
+        </UnitsProvider>
+      </CustomFoodsProvider>
+    </CategoriesProvider>
   );
 }

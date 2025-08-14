@@ -27,7 +27,7 @@ export default function ShoppingListScreen() {
     removeItems,
     markPurchased,
   } = useShopping();
-  const {inventory, addItem: addInventoryItem} = useInventory();
+  const {inventory, addItem: addInventoryItem, removeItem: removeInventoryItem} = useInventory();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -96,6 +96,14 @@ export default function ShoppingListScreen() {
     entries.forEach((entry, idx) => {
       const {location, quantity, unit, regDate, expDate, note} = entry;
       const item = list[selected[idx]];
+      locations.forEach(loc => {
+        for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
+          const invItem = inventory[loc.key][i];
+          if (invItem.name === item.name && invItem.quantity === 0) {
+            removeInventoryItem(loc.key, i);
+          }
+        }
+      });
       addInventoryItem(
         location,
         item.name,

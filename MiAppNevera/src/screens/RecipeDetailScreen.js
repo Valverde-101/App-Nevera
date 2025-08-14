@@ -14,9 +14,10 @@ import {useRecipes} from '../context/RecipeContext';
 import {useInventory} from '../context/InventoryContext';
 import {useShopping} from '../context/ShoppingContext';
 import AddRecipeModal from '../components/AddRecipeModal';
-import {getFoodIcon, getFoodCategory, categories} from '../foodIcons';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import { useCategories } from '../context/CategoriesContext';
 
 export default function RecipeDetailScreen({route, navigation}) {
   const {index} = route.params;
@@ -26,6 +27,7 @@ export default function RecipeDetailScreen({route, navigation}) {
   const recipe = recipes[index];
   const { getLabel } = useUnits();
   const { locations } = useLocations();
+  const { categories } = useCategories();
   const [editVisible, setEditVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const groupedIngredients = recipe
@@ -109,7 +111,7 @@ export default function RecipeDetailScreen({route, navigation}) {
                   style={{width:20,height:20,marginRight:5}}
                 />
               )}
-              <Text style={{fontWeight:'bold',textTransform:'capitalize'}}>{cat}</Text>
+              <Text style={{fontWeight:'bold',textTransform:'capitalize'}}>{categories[cat]?.name || cat}</Text>
             </View>
             {groupedIngredients[cat].map((ing, idx) => (
               <View key={idx} style={{flexDirection:'row',alignItems:'center',marginLeft:10}}>

@@ -10,8 +10,10 @@ import {
   Button,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { categories, getFoodIcon } from '../foodIcons';
+import { getFoodIcon } from '../foodIcons';
 import { useCustomFoods } from '../context/CustomFoodsContext';
+import { useCategories } from '../context/CategoriesContext';
+import AddCategoryModal from './AddCategoryModal';
 
 function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   const { customFoods, removeCustomFood } = useCustomFoods();
@@ -50,6 +52,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 
 export default function AddCustomFoodModal({ visible, onClose }) {
   const { addCustomFood, updateCustomFood } = useCustomFoods();
+  const { categories, addCategory } = useCategories();
   const categoryNames = Object.keys(categories);
   const [name, setName] = useState('');
   const [category, setCategory] = useState(categoryNames[0]);
@@ -58,6 +61,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
+  const [catModalVisible, setCatModalVisible] = useState(false);
   // Lazy-load to prevent a require cycle with FoodPickerModal
   const FoodPickerModal = React.useMemo(
     () => require('./FoodPickerModal').default,
@@ -92,7 +96,8 @@ export default function AddCustomFoodModal({ visible, onClose }) {
 
   const resetForm = () => {
     setName('');
-    setCategory(categoryNames[0]);
+    const first = Object.keys(categories)[0];
+    setCategory(first);
     setIconUri(null);
     setBaseIcon(null);
     setEditingKey(null);
@@ -146,9 +151,21 @@ export default function AddCustomFoodModal({ visible, onClose }) {
                   backgroundColor: category === cat ? '#ddd' : '#fff',
                 }}
               >
-                <Text>{cat}</Text>
+                <Text>{categories[cat]?.name || cat}</Text>
               </TouchableOpacity>
             ))}
+            <TouchableOpacity
+              onPress={() => setCatModalVisible(true)}
+              style={{
+                padding:5,
+                borderWidth:1,
+                borderColor:'#ccc',
+                marginRight:5,
+                marginBottom:5,
+              }}
+            >
+              <Text>+</Text>
+            </TouchableOpacity>
           </View>
           <Text>Icono</Text>
           {(iconUri || baseIcon) && (
@@ -186,6 +203,14 @@ export default function AddCustomFoodModal({ visible, onClose }) {
           visible={manageVisible}
           onClose={() => setManageVisible(false)}
           onEdit={startEdit}
+        />
+        <AddCategoryModal
+          visible={catModalVisible}
+          onClose={() => setCatModalVisible(false)}
+          onSave={data => {
+            const key = addCategory(data);
+            setCategory(key);
+          }}
         />
       </View>
     </Modal>
