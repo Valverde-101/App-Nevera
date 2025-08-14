@@ -30,7 +30,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   useEffect(() => {
     if (visible) {
       setLocation(initialLocation);
-      setQuantity('1');
+      setQuantity(1);
       setUnit(units[0]?.key || 'units');
       setRegDate(today);
       const info = getFoodInfo(foodName);
