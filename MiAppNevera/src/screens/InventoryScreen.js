@@ -9,6 +9,7 @@ import {
   TextInput,
   Modal,
   TouchableWithoutFeedback,
+  Dimensions,
 } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
@@ -16,9 +17,10 @@ import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
-import { categories, getFoodIcon } from '../foodIcons';
+import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import { useCategories } from '../context/CategoriesContext';
 
 function StorageSelector({ current, onChange }) {
   const { locations } = useLocations();
@@ -36,10 +38,11 @@ function StorageSelector({ current, onChange }) {
 }
 
 export default function InventoryScreen({ navigation }) {
-  const { inventory, addItem, updateItem, removeItem } = useInventory();
+  const { inventory, addItem, updateItem, removeItem, updateQuantity } = useInventory();
   const { addItems: addShoppingItems } = useShopping();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
+  const { categories } = useCategories();
   const [storage, setStorage] = useState(locations[0]?.key || 'fridge');
 
   useEffect(() => {
@@ -54,6 +57,7 @@ export default function InventoryScreen({ navigation }) {
   const [editingItem, setEditingItem] = useState(null);
   const [multiAddVisible, setMultiAddVisible] = useState(false);
   const [multiItems, setMultiItems] = useState([]);
+  const overlaySize = Dimensions.get('window').width * 0.06;
 
   const [search, setSearch] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
@@ -345,7 +349,7 @@ export default function InventoryScreen({ navigation }) {
                     )}
                     <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
                       {groupBy === 'category'
-                        ? cat.charAt(0).toUpperCase() + cat.slice(1)
+                        ? (categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1))
                         : cat}
                     </Text>
                   </View>
@@ -412,9 +416,26 @@ export default function InventoryScreen({ navigation }) {
                           </View>
                         )}
                         <Text>{item.name}</Text>
-                        <Text style={{ marginLeft: 10 }}>
-                          {item.quantity} {getLabel(item.quantity, item.unit)}
-                        </Text>
+                        {item.expiration ? (
+                          <Text style={{ marginLeft: 10 }}>{item.expiration}</Text>
+                        ) : null}
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 10 }}>
+                          <TouchableOpacity
+                            onPress={() => updateQuantity(item.location, item.index, -1)}
+                            style={{ borderWidth: 1, padding: 3, marginRight: 5 }}
+                          >
+                            <Text>◀</Text>
+                          </TouchableOpacity>
+                          <Text>
+                            {item.quantity} {getLabel(item.quantity, item.unit)}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => updateQuantity(item.location, item.index, 1)}
+                            style={{ borderWidth: 1, padding: 3, marginLeft: 5 }}
+                          >
+                            <Text>▶</Text>
+                          </TouchableOpacity>
+                        </View>
                         {search && (
                           <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
                         )}
@@ -463,31 +484,31 @@ export default function InventoryScreen({ navigation }) {
                               borderRadius: 8,
                               alignItems: 'center',
                               padding: 8,
+                              position: 'relative',
                             }}
                           >
-                            {item.icon && (
-                              <View style={{ position: 'relative' }}>
-                                <Image
-                                  source={item.icon}
-                                  style={{ width: 40, height: 40, marginBottom: 4 }}
-                                />
-                                {daysLeft !== null && (
-                                  <View
-                                    style={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                      backgroundColor: '#fff',
-                                      paddingHorizontal: 2,
-                                      borderRadius: 3,
-                                      minWidth: 14,
-                                      alignItems: 'center',
-                                    }}
-                                  >
-                                    <Text style={{ fontSize: 8 }}>D-{daysLeft}</Text>
-                                  </View>
-                                )}
+                            {daysLeft !== null && (
+                              <View
+                                style={{
+                                  position: 'absolute',
+                                  top: 2,
+                                  left: 2,
+                                  backgroundColor: '#fff',
+                                  borderRadius: 3,
+                                  width: overlaySize,
+                                  height: overlaySize,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                              >
+                                <Text style={{ fontSize: overlaySize * 0.4 }}>D-{daysLeft}</Text>
                               </View>
+                            )}
+                            {item.icon && (
+                              <Image
+                                source={item.icon}
+                                style={{ width: 40, height: 40, marginBottom: 4 }}
+                              />
                             )}
                             <Text style={{ textAlign: 'center', fontSize: 12 }}>
                               {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
