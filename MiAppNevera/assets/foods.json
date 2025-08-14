@@ -1,15 +1,5 @@
 {
-  "fridge": [
-    {"name": "Tomate", "quantity": 2, "unit": "units"},
-    {"name": "Manzana", "quantity": 3, "unit": "units"},
-    {"name": "Zanahoria", "quantity": 5, "unit": "units"}
-  ],
-  "freezer": [
-    {"name": "Guisantes", "quantity": 1, "unit": "units"},
-    {"name": "Maíz", "quantity": 1, "unit": "units"}
-  ],
-  "pantry": [
-    {"name": "Frijoles", "quantity": 1, "unit": "units"},
-    {"name": "Lentejas", "quantity": 1, "unit": "units"}
-  ]
+  "fridge": [],
+  "freezer": [],
+  "pantry": []
 }

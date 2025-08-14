@@ -6,7 +6,7 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
 - `MiAppNevera/App.js`: punto de entrada que configura la navegación entre las pantallas.
 - `MiAppNevera/src/screens`: implementa las pantallas de inicio, categorías (nevera, congelador, despensa) y lista de compras.
 - `MiAppNevera/src/context`: hooks de estado con persistencia en `AsyncStorage`.
-- `MiAppNevera/assets/foods.json`: datos iniciales con ejemplos de alimentos.
+- `MiAppNevera/assets/foods.json`: estructura de inventario inicial (vacía por defecto).
 
 ## Desarrollo
 1. Instalar dependencias
