@@ -354,15 +354,6 @@ export default function InventoryScreen({ navigation }) {
                   items.map(item => {
                     const key = `${item.location}-${item.index}`;
                     const selected = selectedItems.some(it => it.key === key);
-                    const daysLeft = item.expiration
-                      ? Math.max(
-                          0,
-                          Math.ceil(
-                            (new Date(item.expiration) - new Date()) /
-                              (1000 * 60 * 60 * 24),
-                          ),
-                        )
-                      : null;
                     return (
                       <TouchableOpacity
                         key={key}
@@ -391,26 +382,10 @@ export default function InventoryScreen({ navigation }) {
                         }}
                       >
                         {item.icon && (
-                          <View style={{ position: 'relative', marginRight: 10 }}>
-                            <Image source={item.icon} style={{ width: 32, height: 32 }} />
-                            {daysLeft !== null && (
-                              <View
-                                style={{
-                                  position: 'absolute',
-                                  top: -4,
-                                  left: -4,
-                                  backgroundColor: '#333',
-                                  width: 14,
-                                  height: 14,
-                                  borderRadius: 2,
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
-                                }}
-                              >
-                                <Text style={{ color: '#fff', fontSize: 8 }}>D-{daysLeft}</Text>
-                              </View>
-                            )}
-                          </View>
+                          <Image
+                            source={item.icon}
+                            style={{ width: 32, height: 32, marginRight: 10 }}
+                          />
                         )}
                         <Text>{item.name}</Text>
                         <Text style={{ marginLeft: 10 }}>
@@ -427,15 +402,6 @@ export default function InventoryScreen({ navigation }) {
                     {items.map(item => {
                       const key = `${item.location}-${item.index}`;
                       const selected = selectedItems.some(it => it.key === key);
-                      const daysLeft = item.expiration
-                        ? Math.max(
-                            0,
-                            Math.ceil(
-                              (new Date(item.expiration) - new Date()) /
-                                (1000 * 60 * 60 * 24),
-                            ),
-                          )
-                        : null;
                       return (
                         <TouchableOpacity
                           key={key}
@@ -470,26 +436,10 @@ export default function InventoryScreen({ navigation }) {
                             }}
                           >
                             {item.icon && (
-                              <View style={{ position: 'relative', marginBottom: 4 }}>
-                                <Image source={item.icon} style={{ width: 40, height: 40 }} />
-                                {daysLeft !== null && (
-                                  <View
-                                    style={{
-                                      position: 'absolute',
-                                      top: -4,
-                                      left: -4,
-                                      backgroundColor: '#333',
-                                      width: 14,
-                                      height: 14,
-                                      borderRadius: 2,
-                                      justifyContent: 'center',
-                                      alignItems: 'center',
-                                    }}
-                                  >
-                                    <Text style={{ color: '#fff', fontSize: 8 }}>D-{daysLeft}</Text>
-                                  </View>
-                                )}
-                              </View>
+                              <Image
+                                source={item.icon}
+                                style={{ width: 40, height: 40, marginBottom: 4 }}
+                              />
                             )}
                             <Text style={{ textAlign: 'center', fontSize: 12 }}>
                               {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
