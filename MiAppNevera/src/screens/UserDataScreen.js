@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Button, Alert } from 'react-native';
+import { View, Button, Alert, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useInventory } from '../context/InventoryContext';
 import { useUnits } from '../context/UnitsContext';
@@ -31,14 +31,20 @@ export default function UserDataScreen() {
   };
 
   const confirmReset = () => {
-    Alert.alert(
-      'Confirmar',
-      'Esto eliminará todos los datos de usuario. ¿Deseas continuar?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: resetAll },
-      ],
-    );
+    if (Platform.OS === 'web') {
+      if (window.confirm('Esto eliminará todos los datos de usuario. ¿Deseas continuar?')) {
+        resetAll();
+      }
+    } else {
+      Alert.alert(
+        'Confirmar',
+        'Esto eliminará todos los datos de usuario. ¿Deseas continuar?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Eliminar', style: 'destructive', onPress: resetAll },
+        ],
+      );
+    }
   };
 
   return (
