@@ -10,7 +10,6 @@ import {
   Button,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import FoodPickerModal from './FoodPickerModal';
 import { categories, getFoodIcon } from '../foodIcons';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 
@@ -59,6 +58,11 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
+  // Lazy-load to prevent a require cycle with FoodPickerModal
+  const FoodPickerModal = React.useMemo(
+    () => require('./FoodPickerModal').default,
+    []
+  );
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
