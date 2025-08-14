@@ -1106,12 +1106,38 @@ export const categories = {
   },
 };
 
+let customFoodsMap = {};
+
+export function setCustomFoodsMap(list) {
+  customFoodsMap = {};
+  if (Array.isArray(list)) {
+    list.forEach(item => {
+      const key = item.key || normalizeFoodName(item.name);
+      customFoodsMap[key] = {
+        ...item,
+        key,
+        baseIcon: item.baseIcon ? normalizeFoodName(item.baseIcon) : null,
+      };
+    });
+  }
+}
+
 export function normalizeFoodName(name) {
   return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 }
 
 export function getFoodInfo(name) {
-  return foodData[normalizeFoodName(name)];
+  const key = normalizeFoodName(name);
+  if (customFoodsMap[key]) {
+    const info = customFoodsMap[key];
+    const icon = info.icon
+      ? { uri: info.icon }
+      : info.baseIcon && info.baseIcon !== key
+        ? getFoodIcon(info.baseIcon)
+        : undefined;
+    return { ...info, icon };
+  }
+  return foodData[key];
 }
 
 export function getFoodIcon(name) {
@@ -1121,6 +1147,9 @@ export function getFoodIcon(name) {
 
 export function getFoodCategory(name) {
   const normalized = normalizeFoodName(name);
+  if (customFoodsMap[normalized]) {
+    return customFoodsMap[normalized].category || null;
+  }
   for (const [cat, data] of Object.entries(categories)) {
     if (data.items.includes(normalized)) {
       return cat;
