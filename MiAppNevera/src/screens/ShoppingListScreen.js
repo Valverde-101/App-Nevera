@@ -99,11 +99,7 @@ export default function ShoppingListScreen() {
       locations.forEach(loc => {
         for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
           const invItem = inventory[loc.key][i];
-          if (
-            invItem.name === item.name &&
-            invItem.quantity === 0 &&
-            (!invItem.note || invItem.note.trim() === '')
-          ) {
+          if (invItem.name === item.name && invItem.quantity === 0) {
             removeInventoryItem(loc.key, i);
           }
         }
