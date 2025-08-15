@@ -39,7 +39,7 @@ function StorageSelector({ current, onChange }) {
 
 export default function InventoryScreen({ navigation }) {
   const { inventory, addItem, updateItem, removeItem, updateQuantity } = useInventory();
-  const { addItems: addShoppingItems } = useShopping();
+  const { list: shoppingList, addItems: addShoppingItems } = useShopping();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
@@ -303,12 +303,14 @@ export default function InventoryScreen({ navigation }) {
   };
 
   const handleAddToShopping = () => {
-    const items = getSelectedFullItems().map(it => ({
-      name: it.name,
-      quantity: it.quantity,
-      unit: it.unit,
-    }));
-    addShoppingItems(items);
+    const items = getSelectedFullItems()
+      .filter(
+        it => !(it.quantity === 0 && shoppingList.some(l => l.name === it.name)),
+      )
+      .map(it => ({ name: it.name, quantity: it.quantity, unit: it.unit }));
+    if (items.length) {
+      addShoppingItems(items);
+    }
     clearSelection();
     setShoppingVisible(false);
   };

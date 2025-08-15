@@ -96,25 +96,38 @@ export default function ShoppingListScreen() {
     entries.forEach((entry, idx) => {
       const {location, quantity, unit, regDate, expDate, note} = entry;
       const item = list[selected[idx]];
+      // Remove zero quantity items without notes across all locations
       locations.forEach(loc => {
         for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
           const invItem = inventory[loc.key][i];
-          if (invItem.name === item.name && invItem.quantity === 0) {
+          if (
+            invItem.name === item.name &&
+            invItem.quantity === 0 &&
+            !invItem.note
+          ) {
             removeInventoryItem(loc.key, i);
           }
         }
       });
-      addInventoryItem(
-        location,
-        item.name,
-        parseFloat(quantity) || 0,
-        unit,
-        regDate,
-        expDate,
-        note,
-      );
+      const qty = parseFloat(quantity) || 0;
+      // Only store items that have quantity or notes
+      if (qty !== 0 || note) {
+        addInventoryItem(
+          location,
+          item.name,
+          qty,
+          unit,
+          regDate,
+          expDate,
+          note,
+        );
+      }
     });
-    markPurchased(selected);
+    // Mark purchased items selected plus zero-quantity items not selected
+    const zeroNotSelected = list
+      .map((it, idx) => (it.quantity === 0 && !selected.includes(idx) ? idx : null))
+      .filter(idx => idx !== null);
+    markPurchased([...selected, ...zeroNotSelected]);
     setBatchVisible(false);
     setSelected([]);
     setSelectMode(false);
