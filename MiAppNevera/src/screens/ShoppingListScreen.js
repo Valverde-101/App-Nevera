@@ -26,6 +26,7 @@ export default function ShoppingListScreen() {
     togglePurchased,
     removeItems,
     markPurchased,
+    cleanupZeroItems,
   } = useShopping();
   const {inventory, addItem: addInventoryItem, removeItem: removeInventoryItem} = useInventory();
   const { getLabel } = useUnits();
@@ -57,9 +58,12 @@ export default function ShoppingListScreen() {
     const zeroItems = locations.flatMap(loc =>
       inventory[loc.key].filter(item => item.quantity === 0),
     );
-    const newItems = zeroItems
-      .filter(it => !list.some(l => l.name === it.name))
-      .map(it => ({name: it.name, quantity: 1, unit: it.unit}));
+    const newItems = zeroItems.map(it => ({
+      name: it.name,
+      quantity: 0,
+      unit: it.unit,
+      note: it.note,
+    }));
     if (newItems.length) {
       addItems(newItems);
     }
@@ -115,6 +119,7 @@ export default function ShoppingListScreen() {
       );
     });
     markPurchased(selected);
+    cleanupZeroItems();
     setBatchVisible(false);
     setSelected([]);
     setSelectMode(false);

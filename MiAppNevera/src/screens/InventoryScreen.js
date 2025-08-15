@@ -307,6 +307,7 @@ export default function InventoryScreen({ navigation }) {
       name: it.name,
       quantity: it.quantity,
       unit: it.unit,
+      note: it.note,
     }));
     addShoppingItems(items);
     clearSelection();
