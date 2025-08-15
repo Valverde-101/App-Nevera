@@ -281,7 +281,7 @@ export default function FoodPickerModal({
           {baseCategoryNames.map(cat => (
             <View key={cat} style={{ marginBottom: 15 }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {baseCategories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {baseCategories[cat].items.map(name => {
