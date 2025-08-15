@@ -3,6 +3,7 @@ import { Button, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import { useCategories } from '../context/CategoriesContext';
+import { capitalizeWords } from '../utils/capitalize';
 
 export default function CategoryScreen({ route }) {
   const { category } = route.params;
@@ -21,7 +22,7 @@ export default function CategoryScreen({ route }) {
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
-        {categories[category]?.name || category.charAt(0).toUpperCase() + category.slice(1)}
+        {capitalizeWords(categories[category]?.name || category)}
       </Text>
       <TextInput
         style={{ borderWidth: 1, padding: 5, marginBottom: 10 }}
