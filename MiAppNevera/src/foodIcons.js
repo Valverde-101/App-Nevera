@@ -1074,42 +1074,34 @@ export const foodIcons = Object.fromEntries(
 export const categories = {
   'bebidas': {
     icon: require('./../../icons/Categorias/Bebidas.png'),
-    name: 'Bebidas',
     items: ['agua', 'batidordecocteles', 'bebidaenergetica', 'cafe', 'cafehelado', 'cajadejugo', 'cajadeleche', 'capuchino', 'cerveza', 'champan', 'chocolatecaliente', 'coco', 'coctel', 'cosmopolita', 'dalgona', 'horchata', 'infusion', 'kombucha', 'lattemacchiato', 'leche', 'lecheconchocolate', 'lechedefresa', 'limonada', 'malteada', 'margarita', 'martini', 'matcha', 'mimosa', 'mojito', 'punetazo', 'ramune', 'reajustesalarial', 'sangria', 'soda', 'sodaconhelado', 'te', 'tedeburbujas', 'tehelado', 'tetera', 'vino', 'whisky', 'zalamero', 'zumodenaranja'],
   },
   'carnes': {
     icon: require('./../../icons/Categorias/Carnes.png'),
-    name: 'Carnes',
     items: ['asado', 'carne', 'cerdo', 'cordero', 'costillas', 'filete', 'hamburguesa', 'higado', 'lata', 'palillodetambor', 'pez', 'pollo', 'rinon', 'salami', 'salchicha', 'salmon'],
   },
   'cereales': {
     icon: require('./../../icons/Categorias/Cereales.png'),
-    name: 'Cereales',
     items: [],
   },
   'frutas': {
     icon: require('./../../icons/Categorias/Frutas.png'),
-    name: 'Frutas',
     items: ['cereza', 'coco', 'dragondefruta', 'durian', 'ficus', 'frambuesa', 'fresa', 'mango', 'manzana', 'melocoton', 'melon', 'naranja', 'papaya', 'pera', 'pina', 'platano', 'sandia', 'uva'],
   },
   'frutassecas': {
     icon: require('./../../icons/Categorias/Frutas Secas.png'),
-    name: 'Frutas Secas',
     items: ['almendra', 'avellana', 'bellota', 'cacao', 'cardamomo', 'castana', 'coco', 'conodepino', 'granosdecafe', 'macadamia', 'mani', 'nuecesdebrasil', 'nuez', 'nuezmoscada', 'pacana', 'pistacho', 'semilladecalabaza', 'semilladegirasol', 'semilladelino', 'sesamo'],
   },
   'legumbres': {
     icon: require('./../../icons/Categorias/Legumbres.png'),
-    name: 'Legumbres',
     items: ['anacardo', 'chia', 'edamame', 'frijoles', 'frijolesrojos', 'garbanzos', 'guisantes', 'habadesoja', 'judiasverdes', 'lentejas', 'maiz'],
   },
   'peces': {
     icon: require('./../../icons/Categorias/Peces.png'),
-    name: 'Peces',
     items: ['algasmarinas', 'anemonademar', 'angelote', 'anguila', 'atun', 'bacalao', 'ballena', 'banco', 'caballodemar', 'calamar', 'camaron', 'cangrejo', 'cangrejoermitano', 'cascara', 'concha', 'coral', 'delfin', 'erizodemar', 'espina', 'estrellademar', 'gaviota', 'idolomoro', 'langosta', 'medusa', 'mejillon', 'orca', 'pez', 'pezcirujano', 'pezespada', 'pezglobo', 'pezluna', 'pezmartillo', 'pezpayaso', 'pezvolador', 'pulpo', 'rape', 'rayo', 'sardina', 'serpientedemar', 'tiburon', 'tortuga'],
   },
   'vegetales': {
     icon: require('./../../icons/Categorias/Vegetales.png'),
-    name: 'Vegetales',
     items: ['aceituna', 'acelga', 'agave', 'aguacate', 'ajipicante', 'ajo', 'albahaca', 'alcachofa', 'algodon', 'almendra', 'aloevera', 'apio', 'bambu', 'batata', 'bayas', 'berenjenas', 'blanco', 'brocoli', 'cacao', 'cactus', 'cafe', 'calabacin', 'calabaza', 'canadeazucar', 'canela', 'caucho', 'cebolla', 'cebollin', 'chalote', 'clavo', 'coliflor', 'colrizada', 'esparragos', 'espinacas', 'frijoles', 'fruta', 'frutaestrella', 'girasol', 'goji', 'granada', 'habadesoja', 'hierba', 'hinojo', 'jengibre', 'kiwi', 'lechuga', 'lima', 'limon', 'lychee', 'maiz', 'mangostan', 'mani', 'manzanarosa', 'maracuya', 'membrillo', 'nabo', 'natillasappel', 'nuez', 'pacana', 'palmeradatilera', 'patatas', 'pepino', 'physalis', 'pimienta', 'puerro', 'rabano', 'remolacha', 'repollo', 'repollorojo', 'seta', 'tamarindo', 'tomate', 'trigo', 'vegetal', 'wasabi', 'zanahoria'],
   },
 };
