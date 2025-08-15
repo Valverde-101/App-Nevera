@@ -6,14 +6,13 @@ import FoodPickerModal from '../components/FoodPickerModal';
 export default function CategoryScreen({ route }) {
   const { category } = route.params;
   const { inventory, addItem, updateQuantity, removeItem } = useInventory();
-  const [quantity, setQuantity] = useState('1');
+  const [quantity, setQuantity] = useState(1);
   const [search, setSearch] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
 
   const onSelectFood = name => {
-    const qty = parseInt(quantity, 10);
-    addItem(category, name, isNaN(qty) ? 0 : qty);
-    setQuantity('1');
+    addItem(category, name, quantity || 0);
+    setQuantity(1);
     setPickerVisible(false);
   };
 
@@ -31,8 +30,8 @@ export default function CategoryScreen({ route }) {
       <View style={{ flexDirection: 'row', marginBottom: 10 }}>
         <TextInput
           style={{ width: 60, borderWidth: 1, marginRight: 10, padding: 5 }}
-          value={quantity}
-          onChangeText={setQuantity}
+          value={String(quantity)}
+          onChangeText={t => setQuantity(parseInt(t, 10) || 0)}
           keyboardType="numeric"
         />
         <Button title="Añadir" onPress={() => setPickerVisible(true)} />

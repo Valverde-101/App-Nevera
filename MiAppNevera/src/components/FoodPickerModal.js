@@ -11,9 +11,15 @@ import {
   TouchableWithoutFeedback,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import foodIcons, { categories, getFoodIcon, getFoodInfo, normalizeFoodName } from '../foodIcons';
+import foodIcons, {
+  categories as baseCategories,
+  getFoodIcon,
+  getFoodInfo,
+  normalizeFoodName,
+} from '../foodIcons';
 import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
+import { useCategories } from '../context/CategoriesContext';
 
 export default function FoodPickerModal({
   visible,
@@ -21,8 +27,10 @@ export default function FoodPickerModal({
   onClose,
   onMultiSelect,
 }) {
+  const { categories } = useCategories();
   const categoryNames = Object.keys(categories);
-  const [currentCategory, setCurrentCategory] = useState(categoryNames[0]);
+  const baseCategoryNames = Object.keys(baseCategories);
+  const [currentCategory, setCurrentCategory] = useState(categoryNames[0] || '');
   const [search, setSearch] = useState('');
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -32,6 +40,13 @@ export default function FoodPickerModal({
   const [hiddenFoods, setHiddenFoods] = useState([]);
   const { customFoods } = useCustomFoods();
   const [addVisible, setAddVisible] = useState(false);
+
+  useEffect(() => {
+    const names = Object.keys(categories);
+    if (names.length && !names.includes(currentCategory)) {
+      setCurrentCategory(names[0]);
+    }
+  }, [categories, currentCategory]);
 
   useEffect(() => {
     if (!visible) {
@@ -72,11 +87,13 @@ export default function FoodPickerModal({
     customFoodMap[f.key] = f;
   });
 
-  const defaultFoods = categories[currentCategory].items
+  const defaultFoods = (categories[currentCategory]?.items || [])
     .filter(name => !hiddenFoods.includes(name))
     .filter(name => {
       const info = getFoodInfo(name);
-      return normalizeFoodName(info?.name || '').includes(normalizeFoodName(search));
+      return normalizeFoodName(info?.name || '').includes(
+        normalizeFoodName(search),
+      );
     })
     .map(name => {
       const info = getFoodInfo(name);
@@ -135,25 +152,26 @@ export default function FoodPickerModal({
             <ScrollView horizontal contentContainerStyle={{ alignItems: 'center' }}>
               {categoryNames.map(cat => (
                 <TouchableOpacity
-                key={cat}
-                style={{ alignItems: 'center', marginRight: 20 }}
-                onPress={() => setCurrentCategory(cat)}
-              >
-                {categories[cat].icon && (
-                  <Image
-                    source={categories[cat].icon}
-                    style={{
-                      width: 50,
-                      height: 50,
-                      opacity: currentCategory === cat ? 1 : 0.5,
-                    }}
-                  />
-                )}
-                <Text style={{ textAlign: 'center', marginTop: 5 }}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  key={cat}
+                  style={{ alignItems: 'center', marginRight: 20 }}
+                  onPress={() => setCurrentCategory(cat)}
+                >
+                  {categories[cat]?.icon && (
+                    <Image
+                      source={categories[cat].icon}
+                      style={{
+                        width: 50,
+                        height: 50,
+                        opacity: currentCategory === cat ? 1 : 0.5,
+                      }}
+                    />
+                  )}
+                  <Text style={{ textAlign: 'center', marginTop: 5 }}>
+                    {categories[cat]?.name ||
+                      cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
           </ScrollView>
         </View>
 
@@ -260,13 +278,13 @@ export default function FoodPickerModal({
           </Text>
         </View>
         <ScrollView>
-          {categoryNames.map(cat => (
+          {baseCategoryNames.map(cat => (
             <View key={cat} style={{ marginBottom: 15 }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {categories[cat].items.map(name => {
+                {baseCategories[cat].items.map(name => {
                   const hidden = hiddenFoods.includes(name);
                   return (
                     <TouchableOpacity
