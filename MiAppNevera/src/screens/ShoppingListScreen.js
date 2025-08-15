@@ -92,29 +92,40 @@ export default function ShoppingListScreen() {
     setConfirmVisible(false);
   };
 
-  const handleBatchSave = entries => {
-    entries.forEach((entry, idx) => {
-      const {location, quantity, unit, regDate, expDate, note} = entry;
-      const item = list[selected[idx]];
-      locations.forEach(loc => {
-        for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
-          const invItem = inventory[loc.key][i];
-          if (invItem.name === item.name && invItem.quantity === 0) {
-            removeInventoryItem(loc.key, i);
-          }
+  const purgeZeroNoNote = name => {
+    locations.forEach(loc => {
+      for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
+        const invItem = inventory[loc.key][i];
+        if (
+          invItem.name === name &&
+          invItem.quantity === 0 &&
+          (!invItem.note || invItem.note.trim() === '')
+        ) {
+          removeInventoryItem(loc.key, i);
         }
-      });
-      addInventoryItem(
-        location,
-        item.name,
-        parseFloat(quantity) || 0,
-        unit,
-        regDate,
-        expDate,
-        note,
-      );
+      }
     });
-    markPurchased(selected);
+  };
+
+  const handleBatchSave = entries => {
+    for (const entry of entries) {
+      const {name, location, quantity, unit, regDate, expDate, note} = entry;
+      purgeZeroNoNote(name);
+      const qty = parseFloat(quantity) || 0;
+      const hasNote = note && note.trim() !== '';
+      if (qty !== 0 || hasNote) {
+        addInventoryItem(location, name, qty, unit, regDate, expDate, note);
+      }
+    }
+
+    const zeroUnselected = list
+      .map((it, idx) => ({it, idx}))
+      .filter(({it, idx}) => it.quantity === 0 && !entries.some(e => e.index === idx))
+      .map(({idx}) => idx);
+    const toMark = [...new Set([...zeroUnselected, ...entries.map(e => e.index)])];
+    if (toMark.length) {
+      markPurchased(toMark);
+    }
     setBatchVisible(false);
     setSelected([]);
     setSelectMode(false);
@@ -217,7 +228,7 @@ export default function ShoppingListScreen() {
 
       <BatchAddItemModal
         visible={batchVisible}
-        items={selected.map(idx => list[idx])}
+        items={selected.map(idx => ({...list[idx], index: idx}))}
         onSave={handleBatchSave}
         onClose={() => setBatchVisible(false)}
       />
