@@ -59,7 +59,7 @@ export default function ShoppingListScreen() {
     );
     const newItems = zeroItems
       .filter(it => !list.some(l => l.name === it.name))
-      .map(it => ({name: it.name, quantity: 0, unit: it.unit}));
+      .map(it => ({name: it.name, quantity: 1, unit: it.unit}));
     if (newItems.length) {
       addItems(newItems);
     }
@@ -99,11 +99,7 @@ export default function ShoppingListScreen() {
       locations.forEach(loc => {
         for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
           const invItem = inventory[loc.key][i];
-          if (
-            invItem.name === item.name &&
-            invItem.quantity === 0 &&
-            !invItem.note
-          ) {
+          if (invItem.name === item.name && invItem.quantity === 0) {
             removeInventoryItem(loc.key, i);
           }
         }
