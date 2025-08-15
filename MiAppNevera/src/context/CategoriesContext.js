@@ -48,7 +48,7 @@ export const CategoriesProvider = ({ children }) => {
 
   const categories = useMemo(() => {
     const base = Object.fromEntries(
-      Object.entries(defaultCategories).map(([k, v]) => [k, { ...v, name: v.name || k }]),
+      Object.entries(defaultCategories).map(([k, v]) => [k, { ...v, name: k }]),
     );
     customCategories.forEach(cat => {
       base[cat.key] = {
