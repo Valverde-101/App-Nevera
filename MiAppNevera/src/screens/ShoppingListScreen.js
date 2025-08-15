@@ -9,6 +9,7 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import {useShopping} from '../context/ShoppingContext';
 import {useInventory} from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
@@ -137,13 +138,13 @@ export default function ShoppingListScreen() {
   });
 
   return (
-    <View style={{flex:1, padding:20}}>
+    <View style={{flex:1, padding:20, backgroundColor:'#121212'}}>
       <View style={{flexDirection:'row', justifyContent:'space-between', marginBottom:10}}>
         {!selectMode ? (
           <>
             <Button title="Añadir" onPress={() => setPickerVisible(true)} />
             <TouchableOpacity onPress={() => setAutoVisible(true)}>
-              <Text style={{fontSize:24}}>⚡</Text>
+              <Ionicons name="flash-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </>
         ) : (
@@ -179,16 +180,19 @@ export default function ShoppingListScreen() {
                     alignItems:'center',
                     padding:5,
                     backgroundColor: selectMode && selected.includes(index)
-                      ? '#e0f7fa'
+                      ? '#33395d'
                       : item.purchased
-                      ? '#ddd'
+                      ? '#444'
                       : 'transparent',
                   }}
                 >
                   {selectMode && (
-                    <Text style={{marginRight:10}}>
-                      {selected.includes(index) ? '☑️' : '⬜'}
-                    </Text>
+                    <Ionicons
+                      style={{marginRight:10}}
+                      name={selected.includes(index) ? 'checkbox' : 'square-outline'}
+                      size={24}
+                      color="#fff"
+                    />
                   )}
                   {item.icon && (
                     <Image
@@ -199,7 +203,7 @@ export default function ShoppingListScreen() {
                   <Text
                     style={{
                       textDecorationLine: item.purchased ? 'line-through' : 'none',
-                      color: item.purchased ? 'gray' : 'black',
+                      color: item.purchased ? '#777' : '#fff',
                     }}
                   >
                     {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
@@ -247,7 +251,7 @@ export default function ShoppingListScreen() {
             }}
           >
             <TouchableWithoutFeedback>
-              <View style={{backgroundColor:'#fff', padding:20, borderRadius:8}}>
+              <View style={{backgroundColor:'#1f1f1f', padding:20, borderRadius:8}}>
                 <Text style={{marginBottom:10}}>
                   ¿Está seguro de eliminar {selected.length} alimentos de la lista de compras?
                 </Text>
@@ -277,7 +281,7 @@ export default function ShoppingListScreen() {
             }}
           >
             <TouchableWithoutFeedback>
-              <View style={{backgroundColor:'#fff', padding:20, borderRadius:8}}>
+              <View style={{backgroundColor:'#1f1f1f', padding:20, borderRadius:8}}>
                 <Text style={{marginBottom:10}}>
                   ¿Desea añadir todos los elementos que presenten una cantidad de 0 a la lista de compras? Todos los alimentos que ya se encuentren en la lista no se agregarán.
                 </Text>

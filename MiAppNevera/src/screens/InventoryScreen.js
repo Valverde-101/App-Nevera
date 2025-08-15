@@ -21,6 +21,7 @@ import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { Ionicons } from '@expo/vector-icons';
 
 function StorageSelector({ current, onChange }) {
   const { locations } = useLocations();
@@ -117,22 +118,22 @@ export default function InventoryScreen({ navigation }) {
             }
             style={{ marginRight: 15 }}
           >
-            <Text style={{ fontSize: 18 }}>🔍</Text>
+            <Ionicons name="search" size={22} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('Recipes')}
             style={{ marginRight: 15 }}
           >
-            <Text style={{ fontSize: 18 }}>📖</Text>
+            <Ionicons name="book-outline" size={22} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate('Shopping')}
             style={{ marginRight: 15 }}
           >
-            <Text style={{ fontSize: 18 }}>🛒</Text>
+            <Ionicons name="cart-outline" size={22} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Text style={{ fontSize: 24, paddingHorizontal: 6, backgroundColor: '#eee', borderRadius: 4 }}>⋮</Text>
+            <Ionicons name="ellipsis-vertical" size={22} color="#fff" />
           </TouchableOpacity>
         </View>
       ),
@@ -355,7 +356,7 @@ export default function InventoryScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#121212' }}>
       <StorageSelector current={storage} onChange={setStorage} />
       <View style={{ padding: 20, flex: 1 }}>
         {searchVisible && (
@@ -401,7 +402,7 @@ export default function InventoryScreen({ navigation }) {
                           flexDirection: 'row',
                           alignItems: 'center',
                           paddingVertical: 5,
-                          backgroundColor: selected ? '#d0ebff' : undefined,
+                          backgroundColor: selected ? '#33395d' : undefined,
                           opacity: item.quantity === 0 ? 0.5 : 1,
                         }}
                         onLongPress={() => {
@@ -504,7 +505,7 @@ export default function InventoryScreen({ navigation }) {
                         >
                           <View
                             style={{
-                              backgroundColor: selected ? '#d0ebff' : '#eee',
+                              backgroundColor: selected ? '#33395d' : '#1f1f1f',
                               borderRadius: 8,
                               position: 'relative',
                               overflow: 'hidden',
@@ -516,7 +517,7 @@ export default function InventoryScreen({ navigation }) {
                                   position: 'absolute',
                                   top: 0,
                                   left: 0,
-                                  backgroundColor: '#fff',
+                                  backgroundColor: '#2e2e2e',
                                   borderRadius: 3,
                                   width: overlaySize,
                                   height: overlaySize,
@@ -567,24 +568,24 @@ export default function InventoryScreen({ navigation }) {
       </TouchableOpacity>
 
       {multiSelect && selectedItems.length > 0 && (
-        <View
-          style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
-            backgroundColor: '#fff',
-            padding: 10,
-            borderTopWidth: 1,
-            borderColor: '#ccc',
-          }}
-        >
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
+              backgroundColor: '#1f1f1f',
+              padding: 10,
+              borderTopWidth: 1,
+              borderColor: '#333',
+            }}
+          >
           <TouchableOpacity
             style={{
-              backgroundColor: '#e0e0e0',
+              backgroundColor: '#33395d',
               paddingVertical: 8,
               paddingHorizontal: 12,
               borderRadius: 6,
@@ -599,7 +600,7 @@ export default function InventoryScreen({ navigation }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={{
-              backgroundColor: '#e0e0e0',
+              backgroundColor: '#33395d',
               paddingVertical: 8,
               paddingHorizontal: 12,
               borderRadius: 6,
@@ -611,7 +612,7 @@ export default function InventoryScreen({ navigation }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={{
-              backgroundColor: '#e0e0e0',
+              backgroundColor: '#33395d',
               paddingVertical: 8,
               paddingHorizontal: 12,
               borderRadius: 6,
@@ -681,7 +682,7 @@ export default function InventoryScreen({ navigation }) {
                   position: 'absolute',
                   top: 40,
                   right: 10,
-                  backgroundColor: '#fff',
+                  backgroundColor: '#1f1f1f',
                   padding: 10,
                   borderRadius: 8,
                 }}
@@ -731,7 +732,7 @@ export default function InventoryScreen({ navigation }) {
             <TouchableWithoutFeedback>
               <View
                 style={{
-                  backgroundColor: '#fff',
+                  backgroundColor: '#1f1f1f',
                   padding: 20,
                   borderRadius: 8,
                   width: '80%',
@@ -814,7 +815,7 @@ export default function InventoryScreen({ navigation }) {
             <TouchableWithoutFeedback>
               <View
                 style={{
-                  backgroundColor: '#fff',
+                  backgroundColor: '#1f1f1f',
                   padding: 20,
                   borderRadius: 8,
                   width: '80%',
@@ -910,7 +911,7 @@ export default function InventoryScreen({ navigation }) {
             }}
           >
             <TouchableWithoutFeedback>
-              <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8, maxHeight: '80%', width: '80%' }}>
+              <View style={{ backgroundColor: '#1f1f1f', padding: 20, borderRadius: 8, maxHeight: '80%', width: '80%' }}>
                 <Text style={{ marginBottom: 10 }}>
                   Añadir los siguientes {selectedItems.length} elementos a la lista de compras?
                 </Text>
@@ -961,7 +962,7 @@ export default function InventoryScreen({ navigation }) {
             }}
           >
             <TouchableWithoutFeedback>
-              <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8 }}>
+              <View style={{ backgroundColor: '#1f1f1f', padding: 20, borderRadius: 8 }}>
                 <Text style={{ marginBottom: 10 }}>
                   {transferType === 'move' ? 'Mover a:' : 'Copiar a:'}
                 </Text>
@@ -986,7 +987,7 @@ export default function InventoryScreen({ navigation }) {
             }}
           >
             <TouchableWithoutFeedback>
-              <View style={{ backgroundColor: '#fff', padding: 20, borderRadius: 8 }}>
+              <View style={{ backgroundColor: '#1f1f1f', padding: 20, borderRadius: 8 }}>
                 <Text style={{ marginBottom: 10 }}>
                   ¿Eliminar {selectedItems.length} items?
                 </Text>
