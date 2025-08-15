@@ -393,32 +393,24 @@ export default function InventoryScreen({ navigation }) {
                       >
                         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                           {item.icon && (
-                            <View style={{ position: 'relative', marginRight: 10 }}>
-                              <Image
-                                source={item.icon}
-                                style={{ width: 32, height: 32 }}
-                              />
-                              {daysLeft !== null && (
-                                <View
-                                  style={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    backgroundColor: '#fff',
-                                    paddingHorizontal: 2,
-                                    borderRadius: 3,
-                                    minWidth: 12,
-                                    alignItems: 'center',
-                                  }}
-                                >
-                                  <Text style={{ fontSize: 8 }}>D-{daysLeft}</Text>
-                                </View>
-                              )}
-                            </View>
+                            <Image
+                              source={item.icon}
+                              style={{ width: 32, height: 32, marginRight: 10 }}
+                            />
                           )}
                           <Text>{item.name}</Text>
                           {daysLeft !== null && (
-                            <Text style={{ marginLeft: 10 }}>D-{daysLeft}</Text>
+                            <View
+                              style={{
+                                marginLeft: 10,
+                                backgroundColor: '#ffebee',
+                                paddingHorizontal: 6,
+                                paddingVertical: 2,
+                                borderRadius: 8,
+                              }}
+                            >
+                              <Text style={{ color: '#c62828', fontSize: 12 }}>D-{daysLeft}</Text>
+                            </View>
                           )}
                           {search && (
                             <Text style={{ marginLeft: 10, opacity: 0.6 }}>{item.location}</Text>
