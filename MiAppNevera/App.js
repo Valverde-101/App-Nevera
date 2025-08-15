@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
@@ -15,27 +15,10 @@ import UserDataScreen from './src/screens/UserDataScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Text } from 'react-native';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 
 const Stack = createNativeStackNavigator();
-
-Text.defaultProps = Text.defaultProps || {};
-Text.defaultProps.style = [Text.defaultProps.style, { color: '#fff' }];
-
-const AppTheme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    primary: '#bb86fc',
-    background: '#121212',
-    card: '#1f1f1f',
-    text: '#ffffff',
-    border: '#272727',
-  },
-};
 
 export default function App() {
   return (
@@ -46,22 +29,9 @@ export default function App() {
             <InventoryProvider>
               <ShoppingProvider>
                 <RecipeProvider>
-                  <NavigationContainer theme={AppTheme}>
-                    <StatusBar style="light" />
-                    <Stack.Navigator
-                      screenOptions={{
-                        headerTintColor: '#fff',
-                        headerTitleStyle: { color: '#fff' },
-                        headerBackground: () => (
-                          <LinearGradient
-                            colors={['#6a00ff', '#2196f3']}
-                            style={{ flex: 1 }}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 0 }}
-                          />
-                        ),
-                      }}
-                    >
+                  <NavigationContainer>
+                    <StatusBar style="auto" />
+                    <Stack.Navigator>
                     <Stack.Screen
                       name="Inventory"
                       component={InventoryScreen}
