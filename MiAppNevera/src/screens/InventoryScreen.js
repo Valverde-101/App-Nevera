@@ -59,17 +59,6 @@ export default function InventoryScreen({ navigation }) {
   const [multiItems, setMultiItems] = useState([]);
   const overlaySize = Dimensions.get('window').width * 0.06;
 
-  const cleanZeroItems = name => {
-    locations.forEach(loc => {
-      for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
-        const invItem = inventory[loc.key][i];
-        if (invItem.name === name && invItem.quantity === 0 && !invItem.note) {
-          removeItem(loc.key, i);
-        }
-      }
-    });
-  };
-
   const [search, setSearch] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
   const [sortVisible, setSortVisible] = useState(false);
@@ -200,7 +189,6 @@ export default function InventoryScreen({ navigation }) {
   };
 
   const onSave = data => {
-    cleanZeroItems(selectedFood.name);
     addItem(
       data.location,
       selectedFood.name,
@@ -217,7 +205,6 @@ export default function InventoryScreen({ navigation }) {
     entries.forEach((entry, idx) => {
       const { location, quantity, unit, regDate, expDate, note } = entry;
       const item = multiItems[idx];
-      cleanZeroItems(item.name);
       addItem(
         location,
         item.name,
