@@ -176,7 +176,18 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
         ))}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
           <Button title="Volver" onPress={onClose} />
-          <Button title="Guardar" onPress={() => onSave(data)} />
+          <Button
+            title="Guardar"
+            onPress={() =>
+              onSave(
+                data.map((d, idx) => ({
+                  ...d,
+                  index: items[idx].index,
+                  name: items[idx].name,
+                })),
+              )
+            }
+          />
         </View>
       </ScrollView>
     </Modal>
