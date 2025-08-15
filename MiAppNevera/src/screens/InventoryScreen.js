@@ -57,7 +57,10 @@ export default function InventoryScreen({ navigation }) {
   const [editingItem, setEditingItem] = useState(null);
   const [multiAddVisible, setMultiAddVisible] = useState(false);
   const [multiItems, setMultiItems] = useState([]);
-  const overlaySize = Dimensions.get('window').width * 0.06;
+  const overlaySize = Math.min(24, Dimensions.get('window').width * 0.06);
+  const screenWidth = Dimensions.get('window').width;
+  const numColumns = Math.max(1, Math.floor(screenWidth / 120));
+  const itemWidth = `${100 / numColumns}%`;
 
   const cleanZeroItems = name => {
     locations.forEach(loc => {
@@ -481,7 +484,7 @@ export default function InventoryScreen({ navigation }) {
                         <TouchableOpacity
                           key={key}
                           style={{
-                            width: '25%',
+                            width: itemWidth,
                             padding: 5,
                             opacity: item.quantity === 0 ? 0.5 : 1,
                           }}
@@ -504,40 +507,58 @@ export default function InventoryScreen({ navigation }) {
                         >
                           <View
                             style={{
-                              backgroundColor: selected ? '#d0ebff' : '#eee',
-                              borderRadius: 8,
+                              backgroundColor: selected ? '#6ab7ff' : '#4a4a4a',
+                              borderRadius: 10,
+                              padding: 8,
                               position: 'relative',
-                              overflow: 'hidden',
                             }}
                           >
                             {daysLeft !== null && (
                               <View
                                 style={{
                                   position: 'absolute',
-                                  top: 0,
-                                  left: 0,
-                                  backgroundColor: '#fff',
-                                  borderRadius: 3,
+                                  top: 4,
+                                  left: 4,
                                   width: overlaySize,
                                   height: overlaySize,
+                                  backgroundColor: '#fff',
+                                  borderRadius: overlaySize * 0.3,
                                   alignItems: 'center',
                                   justifyContent: 'center',
+                                  zIndex: 1,
                                 }}
                               >
-                                <Text style={{ fontSize: overlaySize * 0.4 }}>D-{daysLeft}</Text>
+                                <Text style={{ fontSize: overlaySize * 0.4 }}>
+                                  {`D-${daysLeft}`}
+                                </Text>
                               </View>
                             )}
-                            <View style={{ alignItems: 'center', padding: 8 }}>
+                            <View
+                              style={{
+                                backgroundColor: '#6d6d6d',
+                                borderRadius: 8,
+                                padding: 6,
+                                alignItems: 'center',
+                                marginBottom: 8,
+                              }}
+                            >
                               {item.icon && (
                                 <Image
                                   source={item.icon}
-                                  style={{ width: 40, height: 40, marginBottom: 4 }}
+                                  style={{ width: 40, height: 40 }}
+                                  resizeMode="contain"
                                 />
                               )}
-                              <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                                {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
-                              </Text>
                             </View>
+                            <Text
+                              style={{ textAlign: 'center', color: '#fff', fontSize: 12 }}
+                              numberOfLines={1}
+                            >
+                              {item.name}
+                            </Text>
+                            <Text style={{ textAlign: 'center', color: '#fff', fontSize: 12 }}>
+                              {item.quantity} {getLabel(item.quantity, item.unit)}
+                            </Text>
                           </View>
                         </TouchableOpacity>
                       );
