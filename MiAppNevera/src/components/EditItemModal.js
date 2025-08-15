@@ -184,7 +184,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
         foodIcon={item?.icon}
         initialUnit={item?.unit}
         onSave={({ quantity, unit }) => {
-          addShoppingItem(item.name, quantity || 0, unit, note);
+          addShoppingItem(item.name, quantity || 0, unit);
           setShoppingVisible(false);
         }}
         onClose={() => setShoppingVisible(false)}
