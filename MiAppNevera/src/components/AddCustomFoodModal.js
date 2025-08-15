@@ -8,43 +8,326 @@ import {
   Image,
   ScrollView,
   Button,
+  StyleSheet,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { getFoodIcon } from '../foodIcons';
+import { getFoodIcon, getFoodCategory } from '../foodIcons';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { useInventory } from '../context/InventoryContext';
+import { useShopping } from '../context/ShoppingContext';
+import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  dialog: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 8,
+    width: '100%',
+    maxWidth: 300,
+    alignItems: 'center',
+  },
+});
 
 function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   const { customFoods, removeCustomFood } = useCustomFoods();
+  const { customCategories, categories, removeCategory } = useCategories();
+  const { inventory } = useInventory();
+  const { list: shoppingList } = useShopping();
+  const { recipes } = useRecipes();
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState([]);
+  const [foodToDelete, setFoodToDelete] = useState(null);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [warning, setWarning] = useState(null);
+
+  const foodsByCategory = customFoods.reduce((acc, food) => {
+    const cat = food.category || 'otros';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(food);
+    return acc;
+  }, {});
+  const categoryOrder = Object.keys(categories);
+
+  const toggleSelect = key => {
+    setSelected(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
+    );
+  };
+
+  const selectAll = () => setSelected(customFoods.map(f => f.key));
+
+  const isFoodInUse = name => {
+    const inInventory = Object.values(inventory).some(items =>
+      items.some(it => it.name === name),
+    );
+    const inShopping = shoppingList.some(it => it.name === name);
+    const inRecipes = recipes.some(rec =>
+      rec.ingredients.some(ing => ing.name === name),
+    );
+    return inInventory || inShopping || inRecipes;
+  };
+
+  const isCategoryInUse = key => {
+    const inInventory = Object.values(inventory).some(items =>
+      items.some(it => it.foodCategory === key),
+    );
+    const inShopping = shoppingList.some(it => it.foodCategory === key);
+    const inRecipes = recipes.some(rec =>
+      rec.ingredients.some(ing => getFoodCategory(ing.name) === key),
+    );
+    return inInventory || inShopping || inRecipes;
+  };
+
+  const deleteSelected = () => {
+    const foods = customFoods.filter(f => selected.includes(f.key));
+    const inUse = foods.filter(f => isFoodInUse(f.name));
+    if (inUse.length) {
+      setWarning('Algunos ingredientes seleccionados están en uso y no se pueden eliminar.');
+      return;
+    }
+    setFoodToDelete({ multiple: true, items: foods });
+  };
+
+  const handleDeleteFood = food => {
+    if (isFoodInUse(food.name)) {
+      setWarning(`No se puede eliminar, ${food.name} está en uso.`);
+    } else {
+      setFoodToDelete(food);
+    }
+  };
+
+  const handleDeleteCategory = cat => {
+    if (customFoods.some(f => f.category === cat.key)) {
+      setWarning('La categoría contiene ingredientes.');
+      return;
+    }
+    if (isCategoryInUse(cat.key)) {
+      setWarning(`La categoría ${cat.name} está en uso.`);
+      return;
+    }
+    setCategoryToDelete(cat);
+  };
+
+  const confirmDeleteFood = () => {
+    if (foodToDelete) {
+      if (foodToDelete.multiple) {
+        foodToDelete.items.forEach(f => removeCustomFood(f.key));
+        setSelected([]);
+        setSelectMode(false);
+      } else {
+        removeCustomFood(foodToDelete.key);
+      }
+    }
+    setFoodToDelete(null);
+  };
+
+  const confirmDeleteCategory = () => {
+    if (categoryToDelete) {
+      removeCategory(categoryToDelete.key);
+    }
+    setCategoryToDelete(null);
+  };
+
   return (
     <Modal visible={visible} animationType="slide">
       <View style={{ flex: 1, padding: 20 }}>
-        <TouchableOpacity onPress={onClose} style={{ marginBottom: 10 }}>
-          <Text style={{ fontSize: 24 }}>←</Text>
-        </TouchableOpacity>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+          }}
+        >
+          <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); onClose(); }}>
+            <Text style={{ fontSize: 24 }}>←</Text>
+          </TouchableOpacity>
+          {selectMode ? (
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity onPress={() => selectAll()} style={{ marginRight: 10 }}>
+                <Text style={{ color: 'blue' }}>Seleccionar todo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={deleteSelected} style={{ marginRight: 10 }}>
+                <Text style={{ color: 'red' }}>Eliminar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); }}>
+                <Text>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={() => setSelectMode(true)}>
+              <Text style={{ color: 'blue' }}>Seleccionar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <ScrollView>
-          {customFoods.map(f => (
+          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Categorías personalizadas</Text>
+          {customCategories.map(cat => (
             <View
-              key={f.key}
+              key={cat.key}
               style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
             >
-              {(f.icon || getFoodIcon(f.baseIcon || f.name)) && (
+              {cat.icon && (
                 <Image
-                  source={f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name)}
+                  source={{ uri: cat.icon }}
                   style={{ width: 40, height: 40, marginRight: 10 }}
                 />
               )}
-              <Text style={{ flex: 1 }}>{f.name}</Text>
-              <TouchableOpacity onPress={() => onEdit(f)} style={{ marginRight: 10 }}>
-                <Text>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => removeCustomFood(f.key)}>
+              <Text style={{ flex: 1 }}>{cat.name}</Text>
+              <TouchableOpacity onPress={() => handleDeleteCategory(cat)}>
                 <Text style={{ color: 'red' }}>Eliminar</Text>
               </TouchableOpacity>
             </View>
           ))}
+          <Text style={{ fontWeight: 'bold', marginVertical: 5 }}>Ingredientes personalizados</Text>
+          {categoryOrder.map(catKey => {
+            const list = foodsByCategory[catKey];
+            if (!list || list.length === 0) return null;
+            return (
+              <View key={catKey} style={{ marginBottom: 10 }}>
+                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>
+                  {categories[catKey]?.name || catKey}
+                </Text>
+                {list.map(f => {
+                  const isSelected = selected.includes(f.key);
+                  return (
+                    <View
+                      key={f.key}
+                      style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                    >
+                      {(f.icon || getFoodIcon(f.baseIcon || f.name)) && (
+                        <Image
+                          source={f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name)}
+                          style={{ width: 40, height: 40, marginRight: 10 }}
+                        />
+                      )}
+                      <Text style={{ flex: 1 }}>{f.name}</Text>
+                      {selectMode ? (
+                        <TouchableOpacity onPress={() => toggleSelect(f.key)}>
+                          <Text>{isSelected ? '☑' : '☐'}</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <>
+                          <TouchableOpacity onPress={() => onEdit(f)} style={{ marginRight: 10 }}>
+                            <Text>Editar</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => handleDeleteFood(f)}>
+                            <Text style={{ color: 'red' }}>Eliminar</Text>
+                          </TouchableOpacity>
+                        </>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            );
+          })}
         </ScrollView>
+
+        {foodToDelete && (
+          <Modal visible animationType="fade" transparent>
+            <View style={styles.overlay}>
+              <View style={styles.dialog}>
+                {foodToDelete.multiple ? (
+                  <>
+                    <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>
+                      ¿Eliminar ingredientes seleccionados?
+                    </Text>
+                    <ScrollView style={{ maxHeight: 200, width: '100%' }}>
+                      {foodToDelete.items.map(item => (
+                        <View
+                          key={item.key}
+                          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
+                        >
+                          {(item.icon || getFoodIcon(item.baseIcon || item.name)) && (
+                            <Image
+                              source={
+                                item.icon
+                                  ? { uri: item.icon }
+                                  : getFoodIcon(item.baseIcon || item.name)
+                              }
+                              style={{ width: 30, height: 30, marginRight: 10 }}
+                            />
+                          )}
+                          <Text>{item.name}</Text>
+                        </View>
+                      ))}
+                    </ScrollView>
+                  </>
+                ) : (
+                  <>
+                    {(foodToDelete.icon || getFoodIcon(foodToDelete.baseIcon || foodToDelete.name)) && (
+                      <Image
+                        source={
+                          foodToDelete.icon
+                            ? { uri: foodToDelete.icon }
+                            : getFoodIcon(foodToDelete.baseIcon || foodToDelete.name)
+                        }
+                        style={{ width: 40, height: 40, marginBottom: 10 }}
+                      />
+                    )}
+                    <Text style={{ marginBottom: 10 }}>
+                      ¿Eliminar {foodToDelete.name}?
+                    </Text>
+                  </>
+                )}
+                <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                  <TouchableOpacity onPress={() => setFoodToDelete(null)} style={{ marginRight: 20 }}>
+                    <Text>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={confirmDeleteFood}>
+                    <Text style={{ color: 'red' }}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
+        {categoryToDelete && (
+          <Modal visible animationType="fade" transparent>
+            <View style={styles.overlay}>
+              <View style={styles.dialog}>
+                {categoryToDelete.icon && (
+                  <Image
+                    source={{ uri: categoryToDelete.icon }}
+                    style={{ width: 40, height: 40, marginBottom: 10 }}
+                  />
+                )}
+                <Text style={{ marginBottom: 10 }}>
+                  ¿Eliminar {categoryToDelete.name}?
+                </Text>
+                <View style={{ flexDirection: 'row', marginTop: 10 }}>
+                  <TouchableOpacity onPress={() => setCategoryToDelete(null)} style={{ marginRight: 20 }}>
+                    <Text>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={confirmDeleteCategory}>
+                    <Text style={{ color: 'red' }}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
+        {warning && (
+          <Modal visible animationType="fade" transparent>
+            <View style={styles.overlay}>
+              <View style={styles.dialog}>
+                <Text style={{ marginBottom: 10 }}>{warning}</Text>
+                <TouchableOpacity onPress={() => setWarning(null)}>
+                  <Text>Aceptar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
       </View>
     </Modal>
   );
