@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Button, Image, ScrollView, Text, TextInput, View } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
+import { useCategories } from '../context/CategoriesContext';
 
 export default function CategoryScreen({ route }) {
   const { category } = route.params;
   const { inventory, addItem, updateQuantity, removeItem } = useInventory();
+  const { categories } = useCategories();
   const [quantity, setQuantity] = useState(1);
   const [search, setSearch] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -19,7 +21,7 @@ export default function CategoryScreen({ route }) {
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10 }}>
-        {category.charAt(0).toUpperCase() + category.slice(1)}
+        {categories[category]?.name || category.charAt(0).toUpperCase() + category.slice(1)}
       </Text>
       <TextInput
         style={{ borderWidth: 1, padding: 5, marginBottom: 10 }}
