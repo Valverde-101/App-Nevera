@@ -18,6 +18,7 @@ export const ShoppingProvider = ({children}) => {
             ...item,
             icon: item.icon || getFoodIcon(item.name),
             foodCategory: item.foodCategory || getFoodCategory(item.name),
+            note: item.note || '',
           }));
           setList(parsed);
         }
@@ -37,28 +38,51 @@ export const ShoppingProvider = ({children}) => {
     });
   }, []);
 
-  const addItem = useCallback((name, quantity = 1, unit = 'units') => {
+  const addItem = useCallback((name, quantity = 1, unit = 'units', note = '') => {
     const newItem = {
       name,
       quantity,
       unit,
+      note,
       icon: getFoodIcon(name),
       foodCategory: getFoodCategory(name),
       purchased: false,
     };
-    persist(prev => [...prev, newItem]);
+    persist(prev => {
+      if (quantity === 0) {
+        const exists = prev.some(
+          it => it.name === name && !(it.quantity === 0 && it.note),
+        );
+        return exists ? prev : [...prev, newItem];
+      }
+      return [...prev, newItem];
+    });
   }, [persist]);
 
   const addItems = useCallback(items => {
-    const newItems = items.map(({name, quantity = 1, unit = 'units'}) => ({
-      name,
-      quantity,
-      unit,
-      icon: getFoodIcon(name),
-      foodCategory: getFoodCategory(name),
-      purchased: false,
-    }));
-    persist(prev => [...prev, ...newItems]);
+    persist(prev => {
+      const result = [...prev];
+      items.forEach(({name, quantity = 1, unit = 'units', note = ''}) => {
+        const newItem = {
+          name,
+          quantity,
+          unit,
+          note,
+          icon: getFoodIcon(name),
+          foodCategory: getFoodCategory(name),
+          purchased: false,
+        };
+        if (quantity === 0) {
+          const exists = result.some(
+            it => it.name === name && !(it.quantity === 0 && it.note),
+          );
+          if (!exists) result.push(newItem);
+        } else {
+          result.push(newItem);
+        }
+      });
+      return result;
+    });
   }, [persist]);
 
   const togglePurchased = useCallback(index => {
@@ -83,6 +107,10 @@ export const ShoppingProvider = ({children}) => {
     ));
   }, [persist]);
 
+  const cleanupZeroItems = useCallback(() => {
+    persist(prev => prev.filter(item => !(item.quantity === 0 && !item.note)));
+  }, [persist]);
+
   const resetShopping = useCallback(() => {
     setList([]);
     AsyncStorage.removeItem('shopping').catch(e => {
@@ -91,8 +119,8 @@ export const ShoppingProvider = ({children}) => {
   }, []);
 
   const value = useMemo(
-    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping}),
-    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping],
+    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, cleanupZeroItems}),
+    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, cleanupZeroItems],
   );
 
   return (

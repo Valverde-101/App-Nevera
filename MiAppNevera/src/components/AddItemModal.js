@@ -61,7 +61,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              addShoppingItem(foodName, quantity || 0, unit);
+              addShoppingItem(foodName, quantity || 0, unit, note);
               Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
             }}
           >
