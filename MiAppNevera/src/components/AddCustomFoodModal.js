@@ -18,6 +18,7 @@ import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
+import { capitalizeWords } from '../utils/capitalize';
 
 const styles = StyleSheet.create({
   overlay: {
@@ -111,7 +112,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
       return;
     }
     if (isCategoryInUse(cat.key)) {
-      setWarning(`La categoría ${cat.name} está en uso.`);
+      setWarning(`La categoría ${capitalizeWords(cat.name)} está en uso.`);
       return;
     }
     setCategoryToDelete(cat);
@@ -181,7 +182,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                   style={{ width: 40, height: 40, marginRight: 10 }}
                 />
               )}
-              <Text style={{ flex: 1 }}>{cat.name}</Text>
+              <Text style={{ flex: 1 }}>{capitalizeWords(cat.name)}</Text>
               <TouchableOpacity onPress={() => handleDeleteCategory(cat)}>
                 <Text style={{ color: 'red' }}>Eliminar</Text>
               </TouchableOpacity>
@@ -194,7 +195,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
             return (
               <View key={catKey} style={{ marginBottom: 10 }}>
                 <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>
-                  {categories[catKey]?.name || catKey}
+                  {capitalizeWords(categories[catKey]?.name || catKey)}
                 </Text>
                 {list.map(f => {
                   const isSelected = selected.includes(f.key);
@@ -434,7 +435,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
                   backgroundColor: category === cat ? '#ddd' : '#fff',
                 }}
               >
-                <Text>{categories[cat]?.name || cat}</Text>
+                <Text>{capitalizeWords(categories[cat]?.name || cat)}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity

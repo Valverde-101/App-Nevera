@@ -17,6 +17,8 @@ import BatchAddItemModal from '../components/BatchAddItemModal';
 import {getFoodIcon} from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
+import { useCategories } from '../context/CategoriesContext';
+import { capitalizeWords } from '../utils/capitalize';
 
 export default function ShoppingListScreen() {
   const {
@@ -30,6 +32,7 @@ export default function ShoppingListScreen() {
   const {inventory, addItem: addInventoryItem, removeItem: removeInventoryItem} = useInventory();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
+  const { categories } = useCategories();
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
@@ -157,7 +160,9 @@ export default function ShoppingListScreen() {
       <ScrollView>
         {Object.entries(grouped).map(([cat, items]) => (
           <View key={cat} style={{marginBottom:10}}>
-            <Text style={{fontSize:18, fontWeight:'bold', marginBottom:5}}>{cat}</Text>
+            <Text style={{fontSize:18, fontWeight:'bold', marginBottom:5}}>
+              {capitalizeWords(categories[cat]?.name || cat)}
+            </Text>
             {items.map(({item, index}) => (
               <TouchableOpacity
                 key={index}

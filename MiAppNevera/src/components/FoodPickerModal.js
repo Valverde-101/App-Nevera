@@ -20,6 +20,7 @@ import foodIcons, {
 import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { capitalizeWords } from '../utils/capitalize';
 
 export default function FoodPickerModal({
   visible,
@@ -167,8 +168,7 @@ export default function FoodPickerModal({
                     />
                   )}
                   <Text style={{ textAlign: 'center', marginTop: 5 }}>
-                    {categories[cat]?.name ||
-                      cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    {capitalizeWords(categories[cat]?.name || cat)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -281,7 +281,7 @@ export default function FoodPickerModal({
           {baseCategoryNames.map(cat => (
             <View key={cat} style={{ marginBottom: 15 }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {capitalizeWords(baseCategories[cat]?.name || cat)}
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {baseCategories[cat].items.map(name => {

@@ -21,6 +21,7 @@ import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { capitalizeWords } from '../utils/capitalize';
 
 function StorageSelector({ current, onChange }) {
   const { locations } = useLocations();
@@ -379,7 +380,7 @@ export default function InventoryScreen({ navigation }) {
                     )}
                     <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
                       {groupBy === 'category'
-                        ? (categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1))
+                        ? capitalizeWords(categories[cat]?.name || cat)
                         : cat}
                     </Text>
                   </View>
