@@ -504,64 +504,40 @@ export default function InventoryScreen({ navigation }) {
                         >
                           <View
                             style={{
-                              backgroundColor: selected ? '#5d9eff' : '#4d4d4d',
-                              borderRadius: 12,
-                              padding: 6,
+                              backgroundColor: selected ? '#d0ebff' : '#eee',
+                              borderRadius: 8,
                               position: 'relative',
                               overflow: 'hidden',
-                              alignItems: 'center',
                             }}
                           >
                             {daysLeft !== null && (
                               <View
                                 style={{
                                   position: 'absolute',
-                                  top: 4,
-                                  left: 4,
+                                  top: 0,
+                                  left: 0,
                                   backgroundColor: '#fff',
-                                  borderRadius: 8,
-                                  paddingHorizontal: 6,
-                                  paddingVertical: 2,
+                                  borderRadius: 3,
+                                  width: overlaySize,
+                                  height: overlaySize,
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
                                 }}
                               >
                                 <Text style={{ fontSize: overlaySize * 0.4 }}>D-{daysLeft}</Text>
                               </View>
                             )}
-                            <View
-                              style={{
-                                backgroundColor: '#6b6b6b',
-                                borderRadius: 8,
-                                padding: 6,
-                                marginBottom: 4,
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                              }}
-                            >
+                            <View style={{ alignItems: 'center', padding: 8 }}>
                               {item.icon && (
                                 <Image
                                   source={item.icon}
-                                  style={{ width: 40, height: 40 }}
+                                  style={{ width: 40, height: 40, marginBottom: 4 }}
                                 />
                               )}
+                              <Text style={{ textAlign: 'center', fontSize: 12 }}>
+                                {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                              </Text>
                             </View>
-                            <Text
-                              style={{
-                                textAlign: 'center',
-                                fontSize: 12,
-                                color: '#fff',
-                              }}
-                            >
-                              {item.name}
-                            </Text>
-                            <Text
-                              style={{
-                                textAlign: 'center',
-                                fontSize: 10,
-                                color: '#ccc',
-                              }}
-                            >
-                              {item.quantity} {getLabel(item.quantity, item.unit)}
-                            </Text>
                           </View>
                         </TouchableOpacity>
                       );
