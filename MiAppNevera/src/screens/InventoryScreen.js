@@ -59,21 +59,6 @@ export default function InventoryScreen({ navigation }) {
   const [multiItems, setMultiItems] = useState([]);
   const overlaySize = Dimensions.get('window').width * 0.06;
 
-  const cleanZeroItems = name => {
-    locations.forEach(loc => {
-      for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
-        const invItem = inventory[loc.key][i];
-        if (
-          invItem.name === name &&
-          invItem.quantity === 0 &&
-          (!invItem.note || invItem.note.trim() === '')
-        ) {
-          removeItem(loc.key, i);
-        }
-      }
-    });
-  };
-
   const [search, setSearch] = useState('');
   const [menuVisible, setMenuVisible] = useState(false);
   const [sortVisible, setSortVisible] = useState(false);
@@ -204,34 +189,32 @@ export default function InventoryScreen({ navigation }) {
   };
 
   const onSave = data => {
-    cleanZeroItems(selectedFood.name);
-    const qty = parseFloat(data.quantity) || 0;
-    const hasNote = data.note && data.note.trim() !== '';
-    if (qty !== 0 || hasNote) {
-      addItem(
-        data.location,
-        selectedFood.name,
-        qty,
-        data.unit,
-        data.registered,
-        data.expiration,
-        data.note,
-      );
-    }
+    addItem(
+      data.location,
+      selectedFood.name,
+      data.quantity,
+      data.unit,
+      data.registered,
+      data.expiration,
+      data.note,
+    );
     setAddVisible(false);
   };
 
   const handleBatchAddSave = entries => {
-    for (let i = 0; i < entries.length; i++) {
-      const { location, quantity, unit, regDate, expDate, note } = entries[i];
-      const item = multiItems[i];
-      cleanZeroItems(item.name);
-      const qty = parseFloat(quantity) || 0;
-      const hasNote = note && note.trim() !== '';
-      if (qty !== 0 || hasNote) {
-        addItem(location, item.name, qty, unit, regDate, expDate, note);
-      }
-    }
+    entries.forEach((entry, idx) => {
+      const { location, quantity, unit, regDate, expDate, note } = entry;
+      const item = multiItems[idx];
+      addItem(
+        location,
+        item.name,
+        parseFloat(quantity) || 0,
+        unit,
+        regDate,
+        expDate,
+        note,
+      );
+    });
     setMultiAddVisible(false);
     setMultiItems([]);
   };
