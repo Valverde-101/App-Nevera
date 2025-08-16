@@ -10,6 +10,8 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Dimensions,
+  Pressable,
+  StyleSheet,
 } from 'react-native';
 import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
@@ -25,17 +27,61 @@ import { useCategories } from '../context/CategoriesContext';
 function StorageSelector({ current, onChange }) {
   const { locations } = useLocations();
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-around', padding: 10 }}>
+    <View style={selectorStyles.container}>
       {locations.filter(l => l.active).map(opt => (
-        <TouchableOpacity key={opt.key} onPress={() => onChange(opt.key)}>
-          <Text style={{ fontSize: 24, opacity: current === opt.key ? 1 : 0.4 }}>
+        <Pressable
+          key={opt.key}
+          onPress={() => onChange(opt.key)}
+          style={({ pressed }) => [
+            selectorStyles.button,
+            current === opt.key
+              ? selectorStyles.selected
+              : selectorStyles.unselected,
+            pressed && selectorStyles.pressed,
+          ]}>
+          <Text
+            style={[
+              selectorStyles.text,
+              current === opt.key && selectorStyles.selectedText,
+            ]}>
             {current === opt.key ? opt.name : opt.icon}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
     </View>
   );
 }
+
+const selectorStyles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: 10,
+  },
+  button: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginHorizontal: 4,
+  },
+  selected: {
+    backgroundColor: '#4caf50',
+  },
+  unselected: {
+    backgroundColor: '#eee',
+  },
+  pressed: {
+    opacity: 0.75,
+  },
+  text: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  selectedText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+});
 
 export default function InventoryScreen({ navigation }) {
   const { inventory, addItem, updateItem, removeItem, updateQuantity } = useInventory();
