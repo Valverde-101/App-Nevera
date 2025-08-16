@@ -139,7 +139,7 @@ export default function ShoppingListScreen() {
   });
 
   return (
-    <View style={{flex:1, padding:20, backgroundColor:'#f0f0f0'}}>
+    <View style={{flex:1, padding:20, backgroundColor:'#e6e2e4'}}>
       <View style={{flexDirection:'row', justifyContent:'space-between', marginBottom:10}}>
         {!selectMode ? (
           <>
