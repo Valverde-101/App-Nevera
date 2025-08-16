@@ -382,7 +382,17 @@ export default function InventoryScreen({ navigation }) {
                             </View>
                             <View style={{ flex: 1, paddingRight: 6 }}>
                               <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400' }} numberOfLines={2}>{item.name}</Text>
-                              <Text style={{ color: palette.textDim, fontSize: 12 }}>{item.quantity} {getLabel(item.quantity, item.unit)}</Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, -1)} style={{ paddingHorizontal: 4, paddingVertical: 2 }}>
+                                  <Text style={{ color: palette.accent, fontSize: 16 }}>←</Text>
+                                </TouchableOpacity>
+                                <Text style={{ color: palette.textDim, fontSize: 12, marginHorizontal: 4 }}>
+                                  {item.quantity} {getLabel(item.quantity, item.unit)}
+                                </Text>
+                                <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ paddingHorizontal: 4, paddingVertical: 2 }}>
+                                  <Text style={{ color: palette.accent, fontSize: 16 }}>→</Text>
+                                </TouchableOpacity>
+                              </View>
                             </View>
                           </LinearGradient>
                         </View>
