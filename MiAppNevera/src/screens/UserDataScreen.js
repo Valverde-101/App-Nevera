@@ -229,7 +229,16 @@ export default function UserDataScreen() {
           const input = document.createElement('input');
           input.type = 'file';
           input.accept = '.zip';
-          input.onchange = () => resolve(input.files?.[0] || null);
+          input.style.display = 'none';
+          input.onchange = () => {
+            const selected = input.files?.[0] || null;
+            if (selected) {
+              alert('Archivo seleccionado. Importando...');
+            }
+            document.body.removeChild(input);
+            resolve(selected);
+          };
+          document.body.appendChild(input);
           input.click();
         });
         if (!file) return;
