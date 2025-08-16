@@ -371,26 +371,28 @@ export default function InventoryScreen({ navigation }) {
                         onPress={() => { if (multiSelect) toggleSelection(item.location, item.index); else setEditingItem({ ...item, index: item.index, category: item.location, location: item.location }); }}
                       >
                         <View style={{ borderRadius: 14, borderWidth: 1, borderColor: selected ? palette.accent : palette.frame, overflow: 'hidden', position: 'relative' }}>
-                          
+                          {meta && (
+                            <View style={{ position: 'absolute', top: 6, left: 6, paddingHorizontal: 7, paddingVertical: 3, backgroundColor: meta.bg, borderRadius: 6, zIndex: 20 }}>
+                              <Text style={{ fontSize: 11, color: meta.text, fontWeight: '700' }}>{meta.label}</Text>
+                            </View>
+                          )}
+
                           <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={{ padding: 10, flexDirection: 'row', alignItems: 'center' }}>
                             <View style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: palette.surface2, alignItems: 'center', justifyContent: 'center', marginRight: 10, borderWidth: 1, borderColor: palette.frame }}>
                               {item.icon && (<Image source={item.icon} style={{ width: 40, height: 40 }} resizeMode="contain" />)}
                             </View>
                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
                               <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400', flex: 1 }} numberOfLines={2}>{item.name}</Text>
-                              {daysLeft !== null && (
-                                <View style={{ marginLeft: 10, backgroundColor: palette.danger, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
-                                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>{`D-${daysLeft}`}</Text>
-                                </View>
-                              )}
 
                               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, -1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>←</Text>
                                 </TouchableOpacity>
-                                <Text style={{ color: palette.textDim, fontSize: 12, marginHorizontal: 4 }}>
-                                  {item.quantity} {getLabel(item.quantity, item.unit)}
-                                </Text>
+                                <View style={{ width: 60, alignItems: 'center', marginHorizontal: 4 }}>
+                                  <Text style={{ color: palette.textDim, fontSize: 12 }}>
+                                    {item.quantity} {getLabel(item.quantity, item.unit)}
+                                  </Text>
+                                </View>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>→</Text>
                                 </TouchableOpacity>
