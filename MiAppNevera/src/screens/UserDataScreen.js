@@ -7,6 +7,7 @@ import { useLocations } from '../context/LocationsContext';
 import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
+import { exportBackup, importBackup } from '../utils/backup';
 
 export default function UserDataScreen() {
   const { resetInventory } = useInventory();
@@ -15,6 +16,23 @@ export default function UserDataScreen() {
   const { resetShopping } = useShopping();
   const { resetRecipes } = useRecipes();
   const { resetCustomFoods } = useCustomFoods();
+
+  const confirmExport = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('¿Deseas exportar todos los datos de usuario?')) {
+        exportBackup();
+      }
+    } else {
+      Alert.alert(
+        'Confirmar',
+        '¿Deseas exportar todos los datos de usuario?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Exportar', onPress: exportBackup },
+        ],
+      );
+    }
+  };
 
   const resetAll = async () => {
     try {
@@ -49,6 +67,10 @@ export default function UserDataScreen() {
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
+      <Button title="Exportar datos" onPress={confirmExport} />
+      <View style={{ height: 10 }} />
+      <Button title="Importar datos" onPress={importBackup} />
+      <View style={{ height: 10 }} />
       <Button title="Eliminar todos los datos de usuario" onPress={confirmReset} />
     </View>
   );
