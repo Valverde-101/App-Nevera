@@ -380,9 +380,19 @@ export default function InventoryScreen({ navigation }) {
                             <View style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: palette.surface2, alignItems: 'center', justifyContent: 'center', marginRight: 10, borderWidth: 1, borderColor: palette.frame }}>
                               {item.icon && (<Image source={item.icon} style={{ width: 40, height: 40 }} resizeMode="contain" />)}
                             </View>
-                            <View style={{ flex: 1, paddingRight: 6 }}>
-                              <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400' }} numberOfLines={2}>{item.name}</Text>
-                              <Text style={{ color: palette.textDim, fontSize: 12 }}>{item.quantity} {getLabel(item.quantity, item.unit)}</Text>
+                            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
+                              <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400', flex: 1 }} numberOfLines={2}>{item.name}</Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, -1)} style={{ paddingHorizontal: 4, paddingVertical: 2 }}>
+                                  <Text style={{ color: palette.accent, fontSize: 16 }}>←</Text>
+                                </TouchableOpacity>
+                                <Text style={{ color: palette.textDim, fontSize: 12, marginHorizontal: 4 }}>
+                                  {item.quantity} {getLabel(item.quantity, item.unit)}
+                                </Text>
+                                <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ paddingHorizontal: 4, paddingVertical: 2 }}>
+                                  <Text style={{ color: palette.accent, fontSize: 16 }}>→</Text>
+                                </TouchableOpacity>
+                              </View>
                             </View>
                           </LinearGradient>
                         </View>
