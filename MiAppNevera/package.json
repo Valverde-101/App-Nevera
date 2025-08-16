@@ -30,7 +30,8 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-web": "^0.20.0",
     "react-native-screens": "~4.11.1",
-    "expo-updates": "~0.28.17"
+    "expo-updates": "~0.28.17",
+    "expo-linear-gradient": "~14.1.5"
   },
   "devDependencies": {
     "metro": "^0.82.5",
