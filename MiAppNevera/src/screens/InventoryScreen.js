@@ -404,7 +404,7 @@ export default function InventoryScreen({ navigation }) {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#f0f0f0' }}>
       <StorageSelector current={storage} onChange={setStorage} />
       <View style={{ padding: 20, flex: 1 }}>
         {searchVisible && (
