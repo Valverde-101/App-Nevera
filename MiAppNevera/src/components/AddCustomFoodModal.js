@@ -341,6 +341,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   const [category, setCategory] = useState(categoryNames[0]);
   const [iconUri, setIconUri] = useState(null);
   const [baseIcon, setBaseIcon] = useState(null);
+  const [expirationDays, setExpirationDays] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
@@ -373,6 +374,9 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     setCategory(food.category);
     setIconUri(food.icon);
     setBaseIcon(food.baseIcon);
+    setExpirationDays(
+      food.expirationDays != null ? String(food.expirationDays) : ''
+    );
     setEditingKey(food.key);
     setManageVisible(false);
   };
@@ -383,12 +387,20 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     setCategory(first);
     setIconUri(null);
     setBaseIcon(null);
+    setExpirationDays('');
     setEditingKey(null);
   };
 
   const save = () => {
     if (!name) return;
-    const data = { name, category, icon: iconUri, baseIcon };
+    const days = parseInt(expirationDays, 10);
+    const data = {
+      name,
+      category,
+      icon: iconUri,
+      baseIcon,
+      expirationDays: isNaN(days) ? null : days,
+    };
     if (editingKey) {
       updateCustomFood(editingKey, data);
     } else {
@@ -450,6 +462,13 @@ export default function AddCustomFoodModal({ visible, onClose }) {
               <Text>+</Text>
             </TouchableOpacity>
           </View>
+          <Text>Días de caducidad por defecto</Text>
+          <TextInput
+            style={{ borderWidth:1, marginBottom:10, padding:5 }}
+            keyboardType="numeric"
+            value={expirationDays}
+            onChangeText={setExpirationDays}
+          />
           <Text>Icono</Text>
           {(iconUri || baseIcon) && (
             <Image

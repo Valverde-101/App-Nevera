@@ -1125,6 +1125,8 @@ export function setCustomFoodsMap(list) {
         ...item,
         key,
         baseIcon: item.baseIcon ? normalizeFoodName(item.baseIcon) : null,
+        expirationDays:
+          item.expirationDays != null ? Number(item.expirationDays) : null,
       };
     });
   }

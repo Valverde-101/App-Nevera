@@ -31,18 +31,42 @@ export const CustomFoodsProvider = ({ children }) => {
     });
   }, []);
 
-  const addCustomFood = useCallback(({ name, category, icon, baseIcon }) => {
-    const key = normalizeFoodName(name);
-    const newFood = { name, category, icon: icon || null, baseIcon: baseIcon || null, key };
-    persist(prev => [...prev, newFood]);
-  }, [persist]);
+  const addCustomFood = useCallback(
+    ({ name, category, icon, baseIcon, expirationDays }) => {
+      const key = normalizeFoodName(name);
+      const newFood = {
+        name,
+        category,
+        icon: icon || null,
+        baseIcon: baseIcon || null,
+        expirationDays: expirationDays ?? null,
+        key,
+      };
+      persist(prev => [...prev, newFood]);
+    },
+    [persist],
+  );
 
-  const updateCustomFood = useCallback((key, { name, category, icon, baseIcon }) => {
-    const newKey = normalizeFoodName(name);
-    persist(prev => prev.map(f =>
-      f.key === key ? { name, category, icon: icon || null, baseIcon: baseIcon || null, key: newKey } : f,
-    ));
-  }, [persist]);
+  const updateCustomFood = useCallback(
+    (key, { name, category, icon, baseIcon, expirationDays }) => {
+      const newKey = normalizeFoodName(name);
+      persist(prev =>
+        prev.map(f =>
+          f.key === key
+            ? {
+                name,
+                category,
+                icon: icon || null,
+                baseIcon: baseIcon || null,
+                expirationDays: expirationDays ?? null,
+                key: newKey,
+              }
+            : f,
+        ),
+      );
+    },
+    [persist],
+  );
 
   const removeCustomFood = useCallback(key => {
     persist(prev => prev.filter(f => f.key !== key));
