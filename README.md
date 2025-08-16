@@ -2,6 +2,14 @@
 
 Aplicación de inventario de alimentos escrita en React Native con soporte para web.
 
+## Funcionalidades
+- Gestión de inventario por ubicaciones (nevera, congelador, despensa).
+- Lista de compras integrada.
+- Recetario con ingredientes del inventario.
+- Categorías, ubicaciones y unidades personalizadas.
+- Creación de alimentos personalizados con iconos propios o predeterminados y días de caducidad por defecto.
+- Persistencia local mediante `AsyncStorage` para uso sin conexión.
+
 ## Estructura
 - `MiAppNevera/App.js`: punto de entrada que configura la navegación entre las pantallas.
 - `MiAppNevera/src/screens`: implementa las pantallas de inicio, categorías (nevera, congelador, despensa) y lista de compras.
