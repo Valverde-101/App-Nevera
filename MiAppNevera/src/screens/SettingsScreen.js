@@ -4,7 +4,11 @@ import React, { useLayoutEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-import { palette } from '../theme';
+const palette = {
+  bg: '#121316', surface: '#191b20', surface2: '#20242c', surface3: '#262b35',
+  text: '#ECEEF3', textDim: '#A8B1C0', border: '#2c3038', accent: '#F2B56B',
+};
+
 export default function SettingsScreen({ navigation }) {
   const nav = useNavigation();
   useLayoutEffect(() => {

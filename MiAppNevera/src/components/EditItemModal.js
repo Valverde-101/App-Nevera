@@ -24,7 +24,23 @@ import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
-import { palette } from '../theme';
+import { useLocations } from '../context/LocationsContext';
+
+// ===== Theme (mismo que InventoryScreen/AddItemModal) =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',    // dorado
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
 
 // ===== Gradients por ítem (determinísticos por nombre) =====
 const gradientOptions = [
