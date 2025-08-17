@@ -206,7 +206,7 @@ export default function RecipeDetailScreen({ route }) {
                       addItems(recipe.ingredients.map((ing) => ({ name: ing.name, quantity: ing.quantity, unit: ing.unit })));
                       setConfirmVisible(false);
                     }}
-                    style={[styles.modalBtn, { backgroundColor: '#2a231a', borderColor: '#6a4a1a' }]}
+                    style={[styles.modalBtn, { backgroundColor: palette.selected, borderColor: palette.frame }]}
                   >
                     <Text style={{ color: palette.accent, fontWeight: '700' }}>Añadir todos</Text>
                   </TouchableOpacity>
