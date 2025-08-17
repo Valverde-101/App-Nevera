@@ -3,7 +3,7 @@
 // - ScrollView con scrollbar dorada en Web y gutter estable
 // - Gestión de ingredientes/categorías con modales coherentes
 // - Confirmaciones estilizadas y avisos cuando algo está en uso
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -24,23 +24,14 @@ import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-  danger: '#e53935',
-};
+import { useTheme } from '../context/ThemeContext';
 
 // ========================
 // Gestor de personalizados
 // ========================
 function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const { customFoods, removeCustomFood } = useCustomFoods();
   const { customCategories, categories, removeCategory } = useCategories();
   const { inventory } = useInventory();
@@ -315,6 +306,8 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 // Formulario principal
 // =====================
 export default function AddCustomFoodModal({ visible, onClose }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const { addCustomFood, updateCustomFood } = useCustomFoods();
   const { categories, addCategory } = useCategories();
   const categoryNames = Object.keys(categories);
@@ -485,7 +478,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   // layout
   headerRow: {
     flexDirection: 'row',

@@ -1,5 +1,5 @@
-// AddItemModal.js – dark–premium v2.2.6 (consistente con InventoryScreen) 
-import React, { useEffect, useState, useRef } from 'react';
+// AddItemModal.js – dark–premium v2.2.6 (consistente con InventoryScreen)
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -20,22 +20,7 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
 import { getFoodInfo } from '../foodIcons';
-
-// ===== Theme (igual que InventoryScreen v2.2.6) =====
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  frame: '#3a3429',
-  border: '#2c3038',
-  accent: '#F2B56B',
-  accent2: '#4caf50',
-  danger: '#ff5252',
-  warn: '#ff9f43',
-};
+import { useTheme } from '../context/ThemeContext';
 
 // ===== Gradients por ítem (determinísticos por nombre) =====
 const gradientOptions = [
@@ -55,6 +40,8 @@ const hashString = (s) => {
 const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const today = new Date().toISOString().split('T')[0];
   const { units } = useUnits();
   const { locations } = useLocations();
@@ -251,7 +238,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
     maxHeight: '92%',
@@ -376,3 +363,4 @@ const styles = StyleSheet.create({
   },
   saveFabText: { color: '#1b1d22', fontSize: 16, fontWeight: '600' },
 });
+

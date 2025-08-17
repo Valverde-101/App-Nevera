@@ -4,7 +4,7 @@
 // - Inputs de fecha gris (combina con el tema)
 // - Barra de desplazamiento sutil color dorado en web con gutter estable
 // - Modal de confirmación estilizado
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -25,22 +25,7 @@ import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
-
-// ===== Theme (mismo que InventoryScreen/AddItemModal) =====
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  frame: '#3a3429',
-  border: '#2c3038',
-  accent: '#F2B56B',    // dorado
-  accent2: '#4caf50',
-  danger: '#ff5252',
-  warn: '#ff9f43',
-};
+import { useTheme } from '../context/ThemeContext';
 
 // ===== Gradients por ítem (determinísticos por nombre) =====
 const gradientOptions = [
@@ -60,6 +45,8 @@ const hashString = (s) => {
 const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const { addItem: addShoppingItem } = useShopping();
   const { units } = useUnits();
   const { locations } = useLocations();
@@ -299,7 +286,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
     maxHeight: '92%',
@@ -449,4 +436,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
 
