@@ -24,7 +24,18 @@ import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
-import { palette } from '../theme';
+
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  danger: '#e53935',
+};
 
 // ========================
 // Gestor de personalizados
