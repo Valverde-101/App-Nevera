@@ -1,24 +1,16 @@
 // RecipeBookScreen.js – dark–premium v2.2.14
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useMemo } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useRecipes } from '../context/RecipeContext';
 import { useInventory } from '../context/InventoryContext';
 import AddRecipeModal from '../components/AddRecipeModal';
 import { useLocations } from '../context/LocationsContext';
 import { useNavigation } from '@react-navigation/native';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-};
+import { useTheme } from '../context/ThemeContext';
 
 export default function RecipeBookScreen({ navigation }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   const { recipes, addRecipe } = useRecipes();
   const { inventory } = useInventory();
@@ -38,7 +30,7 @@ export default function RecipeBookScreen({ navigation }) {
         </TouchableOpacity>
       ),
     });
-  }, [nav]);
+  }, [nav, palette]);
 
   const hasIngredients = (recipe) => {
     return recipe.ingredients.every((ing) => {
@@ -94,7 +86,7 @@ export default function RecipeBookScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   headerIconBtn: {
     backgroundColor: palette.surface2,
