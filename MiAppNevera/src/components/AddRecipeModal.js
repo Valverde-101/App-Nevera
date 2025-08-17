@@ -23,18 +23,7 @@ import FoodPickerModal from './FoodPickerModal';
 import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import * as ImagePicker from 'expo-image-picker';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-  danger: '#e53935',
-};
+import { useTheme } from '../context/ThemeContext';
 
 export default function AddRecipeModal({
   visible,
@@ -42,6 +31,8 @@ export default function AddRecipeModal({
   onClose,
   initialRecipe,
 }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const { units, getLabel } = useUnits();
   const [name, setName] = useState('');
   const [image, setImage] = useState('');
@@ -430,7 +421,7 @@ const save = () => {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',

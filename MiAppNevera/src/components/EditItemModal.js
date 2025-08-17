@@ -4,7 +4,7 @@
 // - Inputs de fecha gris (combina con el tema)
 // - Barra de desplazamiento sutil color dorado en web con gutter estable
 // - Modal de confirmación estilizado
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Modal,
   View,
@@ -25,41 +25,13 @@ import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
-
-// ===== Theme (mismo que InventoryScreen/AddItemModal) =====
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  frame: '#3a3429',
-  border: '#2c3038',
-  accent: '#F2B56B',    // dorado
-  accent2: '#4caf50',
-  danger: '#ff5252',
-  warn: '#ff9f43',
-};
-
-// ===== Gradients por ítem (determinísticos por nombre) =====
-const gradientOptions = [
-  { colors: ['#2a231a', '#1c1a17', '#121316'], locations: [0, 0.55, 1], start: {x: 0.1, y: 0.1}, end: {x: 0.9, y: 0.9} },   // amber
-  { colors: ['#1a212a', '#191d24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.9, y: 0.1}, end: {x: 0.1, y: 0.9} },     // steel
-  { colors: ['#261c2a', '#1e1a24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.2, y: 0.0}, end: {x: 1.0, y: 0.8} },     // violet
-  { colors: ['#1c2422', '#18201e', '#121316'], locations: [0, 0.55, 1], start: {x: 0.0, y: 0.8}, end: {x: 1.0, y: 0.2} },     // teal
-  { colors: ['#241f1a', '#1c1a19', '#121316'], locations: [0, 0.55, 1], start: {x: 0.7, y: 0.0}, end: {x: 0.0, y: 0.9} },     // copper
-  { colors: ['#281a1d', '#1f191b', '#121316'], locations: [0, 0.6, 1], start: {x: 0.0, y: 0.0}, end: {x: 1.0, y: 1.0} },     // wine
-];
-const hashString = (s) => {
-  if (!s) return 0;
-  let h = 0;
-  for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
-  return Math.abs(h);
-};
-const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
+import { useTheme, useThemeController } from '../context/ThemeContext';
+import { gradientForKey } from '../theme/gradients';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
+  const palette = useTheme();
+  const { themeName } = useThemeController();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const { addItem: addShoppingItem } = useShopping();
   const { units } = useUnits();
   const { locations } = useLocations();
@@ -93,7 +65,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
     }
   }, [visible, item, units, locations]);
 
-  const g = gradientForKey(item?.name || 'item');
+  const g = gradientForKey(themeName, item?.name || 'item');
 
   const handleSave = () => {
     onSave({
@@ -299,7 +271,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
     maxHeight: '92%',
@@ -449,4 +421,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
 
