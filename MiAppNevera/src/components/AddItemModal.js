@@ -12,6 +12,7 @@ import {
   ScrollView,
   StyleSheet,
   Animated,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useShopping } from '../context/ShoppingContext';
@@ -122,7 +123,10 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             <Text style={styles.foodName} numberOfLines={2}>{foodName}</Text>
           </LinearGradient>
 
-          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={{ padding: 16 }}
+          >
             {/* Ubicación */}
             <Text style={styles.labelBold}>Ubicación</Text>
             <View style={styles.chipWrap}>
@@ -193,13 +197,23 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
               ))}
             </View>
 
-            {/* Fechas */}
+            {/* Fechas (con inputs gris) */}
             <View style={{ marginTop: 6 }}>
               <Text style={styles.labelBold}>Fecha de registro</Text>
-              <DatePicker value={regDate} onChange={setRegDate} />
+              <DatePicker
+                value={regDate}
+                onChange={setRegDate}
+                inputStyle={styles.dateInput}      // si DatePicker lo soporta
+                containerStyle={styles.dateContainer}
+              />
               <View style={{ height: 8 }} />
               <Text style={styles.labelBold}>Fecha de caducidad</Text>
-              <DatePicker value={expDate} onChange={setExpDate} />
+              <DatePicker
+                value={expDate}
+                onChange={setExpDate}
+                inputStyle={styles.dateInput}
+                containerStyle={styles.dateContainer}
+              />
             </View>
 
             {/* Nota */}
@@ -284,6 +298,20 @@ const styles = StyleSheet.create({
   },
   foodName: { flex: 1, color: palette.accent, fontSize: 18, fontWeight: '400' },
 
+  // ScrollView (Web): barra sutil + gutter estable para evitar "bailes"
+  scroll: {
+    ...(Platform.OS === 'web'
+      ? {
+          scrollbarWidth: 'thin',               // Firefox
+          scrollbarColor: `${palette.border} transparent`,
+          // Evita que el layout se mueva cuando aparece/desaparece la barra
+          scrollbarGutter: 'stable both-edges',
+          // Suaviza el comportamiento al borde
+          overscrollBehavior: 'contain',
+        }
+      : {}),
+  },
+
   labelBold: { color: palette.text, fontWeight: '700', marginBottom: 6, marginTop: 10 },
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 4 },
   chip: {
@@ -315,6 +343,7 @@ const styles = StyleSheet.create({
     color: palette.text,
   },
 
+  // Entrada de Nota
   noteInput: {
     borderWidth: 1,
     borderColor: palette.border,
@@ -323,6 +352,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
+  },
+
+  // Estilos sugeridos para DatePicker (si el componente los acepta)
+  dateContainer: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    borderRadius: 10,
+  },
+  dateInput: {
+    backgroundColor: palette.surface2,
+    color: palette.text,
   },
 
   saveFab: {
