@@ -24,11 +24,21 @@ import BatchAddItemModal from '../components/BatchAddItemModal';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
-import { useTheme } from '../context/ThemeContext';
+
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',    // dorado
+  danger: '#e53935',
+};
 
 export default function ShoppingListScreen() {
-  const palette = useTheme();
-  const styles = useMemo(() => createStyles(palette), [palette]);
   const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions?.({
@@ -37,7 +47,7 @@ export default function ShoppingListScreen() {
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [navigation, palette]);
+  }, [navigation]);
 
   const {
     list,
@@ -346,7 +356,7 @@ export default function ShoppingListScreen() {
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   headerRow: {
     paddingHorizontal: 14,
@@ -470,5 +480,4 @@ const createStyles = (palette) => StyleSheet.create({
     marginHorizontal: 6,
   },
 });
-
 
