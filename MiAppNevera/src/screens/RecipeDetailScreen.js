@@ -21,20 +21,11 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useNavigation } from '@react-navigation/native';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-  danger: '#e53935',
-};
+import { useTheme } from '../context/ThemeContext';
 
 export default function RecipeDetailScreen({ route }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   const { index } = route.params;
   const { recipes, updateRecipe } = useRecipes();
@@ -95,7 +86,7 @@ export default function RecipeDetailScreen({ route }) {
         </View>
       ),
     });
-  }, [nav, missing, recipe]);
+  }, [nav, missing, recipe, palette]);
 
   if (!recipe) {
     return (
@@ -229,7 +220,7 @@ export default function RecipeDetailScreen({ route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   scroll: {
     backgroundColor: palette.bg,
     ...(Platform.OS === 'web'

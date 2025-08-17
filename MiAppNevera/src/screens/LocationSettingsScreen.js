@@ -1,5 +1,5 @@
 // LocationSettingsScreen.js – dark–premium v2.2.13
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,22 +14,13 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useLocations } from '../context/LocationsContext';
 import { useInventory } from '../context/InventoryContext';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-  danger: '#e53935',
-};
+import { useTheme } from '../context/ThemeContext';
 
 const icons = ['🥶','❄️','🗃️','📦','🍽️','🧊','🥫','🥕','🥩','🥛'];
 
 export default function LocationSettingsScreen() {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions?.({
@@ -39,7 +30,7 @@ export default function LocationSettingsScreen() {
       headerShadowVisible: false,
       title: 'Ubicaciones',
     });
-  }, [nav]);
+  }, [nav, palette]);
 
   const { locations, addLocation, updateLocation, removeLocation, toggleActive } = useLocations();
   const { inventory } = useInventory();
@@ -189,7 +180,7 @@ export default function LocationSettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   list: {
     ...(Platform.OS === 'web'
