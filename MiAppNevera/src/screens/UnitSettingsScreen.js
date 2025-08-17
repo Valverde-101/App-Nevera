@@ -5,11 +5,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Platform
 import { useNavigation } from '@react-navigation/native';
 import { useUnits } from '../context/UnitsContext';
 
-const palette = {
-  bg: '#121316', surface: '#191b20', surface2: '#20242c', surface3: '#262b35',
-  text: '#ECEEF3', textDim: '#A8B1C0', border: '#2c3038', accent: '#F2B56B', danger: '#e53935',
-};
-
+import { palette } from '../theme';
 export default function UnitSettingsScreen() {
   const nav = useNavigation();
   useLayoutEffect(() => {
