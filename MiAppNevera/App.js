@@ -19,6 +19,9 @@ import { StatusBar } from 'expo-status-bar';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
+import * as WebBrowser from 'expo-web-browser';
+
+WebBrowser.maybeCompleteAuthSession();
 
 const Stack = createNativeStackNavigator();
 
