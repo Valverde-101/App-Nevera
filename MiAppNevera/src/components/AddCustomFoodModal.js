@@ -1,3 +1,8 @@
+// AddCustomFoodModal.js – dark–premium v2.2.13
+// - UI consistente con la app (bg oscuro, inputs grises, botones accent)
+// - ScrollView con scrollbar dorada en Web y gutter estable
+// - Gestión de ingredientes/categorías con modales coherentes
+// - Confirmaciones estilizadas y avisos cuando algo está en uso
 import React, { useState } from 'react';
 import {
   Modal,
@@ -7,8 +12,9 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Button,
   StyleSheet,
+  Platform,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getFoodIcon, getFoodCategory } from '../foodIcons';
@@ -19,24 +25,21 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  dialog: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    width: '100%',
-    maxWidth: 300,
-    alignItems: 'center',
-  },
-});
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  danger: '#e53935',
+};
 
+// ========================
+// Gestor de personalizados
+// ========================
 function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   const { customFoods, removeCustomFood } = useCustomFoods();
   const { customCategories, categories, removeCategory } = useCategories();
@@ -58,32 +61,22 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   const categoryOrder = Object.keys(categories);
 
   const toggleSelect = key => {
-    setSelected(prev =>
-      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key],
-    );
+    setSelected(prev => (prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]));
   };
 
   const selectAll = () => setSelected(customFoods.map(f => f.key));
 
   const isFoodInUse = name => {
-    const inInventory = Object.values(inventory).some(items =>
-      items.some(it => it.name === name),
-    );
+    const inInventory = Object.values(inventory).some(items => items.some(it => it.name === name));
     const inShopping = shoppingList.some(it => it.name === name);
-    const inRecipes = recipes.some(rec =>
-      rec.ingredients.some(ing => ing.name === name),
-    );
+    const inRecipes = recipes.some(rec => rec.ingredients.some(ing => ing.name === name));
     return inInventory || inShopping || inRecipes;
   };
 
   const isCategoryInUse = key => {
-    const inInventory = Object.values(inventory).some(items =>
-      items.some(it => it.foodCategory === key),
-    );
+    const inInventory = Object.values(inventory).some(items => items.some(it => it.foodCategory === key));
     const inShopping = shoppingList.some(it => it.foodCategory === key);
-    const inRecipes = recipes.some(rec =>
-      rec.ingredients.some(ing => getFoodCategory(ing.name) === key),
-    );
+    const inRecipes = recipes.some(rec => rec.ingredients.some(ing => getFoodCategory(ing.name) === key));
     return inInventory || inShopping || inRecipes;
   };
 
@@ -139,88 +132,76 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={{ flex: 1, padding: 20 }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginBottom: 10,
-          }}
-        >
-          <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); onClose(); }}>
-            <Text style={{ fontSize: 24 }}>←</Text>
+      <View style={{ flex: 1, backgroundColor: palette.bg }}>
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); onClose(); }} style={styles.iconBtn}>
+            <Text style={styles.iconTxt}>←</Text>
           </TouchableOpacity>
           {selectMode ? (
             <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity onPress={() => selectAll()} style={{ marginRight: 10 }}>
-                <Text style={{ color: 'blue' }}>Seleccionar todo</Text>
+              <TouchableOpacity onPress={selectAll} style={[styles.actionBtn, { marginRight: 8 }]}>
+                <Text style={styles.actionTxt}>Seleccionar todo</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={deleteSelected} style={{ marginRight: 10 }}>
-                <Text style={{ color: 'red' }}>Eliminar</Text>
+              <TouchableOpacity onPress={deleteSelected} style={[styles.actionBtn, { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e', marginRight: 8 }]}>
+                <Text style={{ color: '#ff9f9f' }}>Eliminar</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); }}>
-                <Text>Cancelar</Text>
+              <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); }} style={styles.actionBtn}>
+                <Text style={styles.actionTxt}>Cancelar</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity onPress={() => setSelectMode(true)}>
-              <Text style={{ color: 'blue' }}>Seleccionar</Text>
+            <TouchableOpacity onPress={() => setSelectMode(true)} style={styles.actionBtn}>
+              <Text style={styles.actionTxt}>Seleccionar</Text>
             </TouchableOpacity>
           )}
         </View>
-        <ScrollView>
-          <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>Categorías personalizadas</Text>
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={{ padding: 16, paddingBottom: 140 }}
+          showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+        >
+          <Text style={styles.blockTitle}>Categorías personalizadas</Text>
           {customCategories.map(cat => (
-            <View
-              key={cat.key}
-              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}
-            >
-              {cat.icon && (
-                <Image
-                  source={{ uri: cat.icon }}
-                  style={{ width: 40, height: 40, marginRight: 10 }}
-                />
-              )}
-              <Text style={{ flex: 1 }}>{cat.name}</Text>
-              <TouchableOpacity onPress={() => handleDeleteCategory(cat)}>
-                <Text style={{ color: 'red' }}>Eliminar</Text>
+            <View key={cat.key} style={styles.row}>
+              {cat.icon && <Image source={{ uri: cat.icon }} style={styles.icon} />}
+              <Text style={[styles.rowText, { flex: 1 }]}>{cat.name} <Text style={styles.rowSub}>• {cat.key}</Text></Text>
+              <TouchableOpacity onPress={() => handleDeleteCategory(cat)} style={[styles.smallBtn, styles.smallBtnDanger]}>
+                <Text style={styles.smallBtnDangerText}>Eliminar</Text>
               </TouchableOpacity>
             </View>
           ))}
-          <Text style={{ fontWeight: 'bold', marginVertical: 5 }}>Ingredientes personalizados</Text>
+
+          <Text style={[styles.blockTitle, { marginTop: 10 }]}>Ingredientes personalizados</Text>
           {categoryOrder.map(catKey => {
             const list = foodsByCategory[catKey];
             if (!list || list.length === 0) return null;
             return (
-              <View key={catKey} style={{ marginBottom: 10 }}>
-                <Text style={{ fontWeight: 'bold', marginBottom: 5 }}>
-                  {categories[catKey]?.name || catKey}
-                </Text>
+              <View key={catKey} style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>{categories[catKey]?.name || catKey}</Text>
+                </View>
                 {list.map(f => {
                   const isSelected = selected.includes(f.key);
                   return (
-                    <View
-                      key={f.key}
-                      style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
-                    >
+                    <View key={f.key} style={[styles.row, isSelected && styles.rowSelected]}>
                       {(f.icon || getFoodIcon(f.baseIcon || f.name)) && (
-                        <Image
-                          source={f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name)}
-                          style={{ width: 40, height: 40, marginRight: 10 }}
-                        />
+                        <Image source={f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name)} style={styles.icon} />
                       )}
-                      <Text style={{ flex: 1 }}>{f.name}</Text>
+                      <Text style={[styles.rowText, { flex: 1 }]}>{f.name}</Text>
                       {selectMode ? (
-                        <TouchableOpacity onPress={() => toggleSelect(f.key)}>
-                          <Text>{isSelected ? '☑' : '☐'}</Text>
+                        <TouchableOpacity onPress={() => toggleSelect(f.key)} style={[styles.smallBtn, isSelected && styles.smallBtnAccent]}>
+                          <Text style={isSelected ? styles.smallBtnAccentText : styles.smallBtnText}>
+                            {isSelected ? '☑' : '☐'}
+                          </Text>
                         </TouchableOpacity>
                       ) : (
                         <>
-                          <TouchableOpacity onPress={() => onEdit(f)} style={{ marginRight: 10 }}>
-                            <Text>Editar</Text>
+                          <TouchableOpacity onPress={() => onEdit(f)} style={styles.smallBtn}>
+                            <Text style={styles.smallBtnText}>Editar</Text>
                           </TouchableOpacity>
-                          <TouchableOpacity onPress={() => handleDeleteFood(f)}>
-                            <Text style={{ color: 'red' }}>Eliminar</Text>
+                          <TouchableOpacity onPress={() => handleDeleteFood(f)} style={[styles.smallBtn, styles.smallBtnDanger]}>
+                            <Text style={styles.smallBtnDangerText}>Eliminar</Text>
                           </TouchableOpacity>
                         </>
                       )}
@@ -232,100 +213,97 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
           })}
         </ScrollView>
 
+        {/* Confirmar eliminación de alimentos */}
         {foodToDelete && (
-          <Modal visible animationType="fade" transparent>
-            <View style={styles.overlay}>
-              <View style={styles.dialog}>
-                {foodToDelete.multiple ? (
-                  <>
-                    <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>
-                      ¿Eliminar ingredientes seleccionados?
-                    </Text>
-                    <ScrollView style={{ maxHeight: 200, width: '100%' }}>
-                      {foodToDelete.items.map(item => (
-                        <View
-                          key={item.key}
-                          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5 }}
-                        >
-                          {(item.icon || getFoodIcon(item.baseIcon || item.name)) && (
-                            <Image
-                              source={
-                                item.icon
-                                  ? { uri: item.icon }
-                                  : getFoodIcon(item.baseIcon || item.name)
-                              }
-                              style={{ width: 30, height: 30, marginRight: 10 }}
-                            />
-                          )}
-                          <Text>{item.name}</Text>
-                        </View>
-                      ))}
-                    </ScrollView>
-                  </>
-                ) : (
-                  <>
-                    {(foodToDelete.icon || getFoodIcon(foodToDelete.baseIcon || foodToDelete.name)) && (
-                      <Image
-                        source={
-                          foodToDelete.icon
-                            ? { uri: foodToDelete.icon }
-                            : getFoodIcon(foodToDelete.baseIcon || foodToDelete.name)
-                        }
-                        style={{ width: 40, height: 40, marginBottom: 10 }}
-                      />
+          <Modal visible animationType="fade" transparent onRequestClose={() => setFoodToDelete(null)}>
+            <TouchableWithoutFeedback onPress={() => setFoodToDelete(null)}>
+              <View style={styles.modalBackdrop}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalCard}>
+                    {foodToDelete.multiple ? (
+                      <>
+                        <Text style={styles.modalTitle}>Eliminar seleccionados</Text>
+                        <ScrollView style={{ maxHeight: 200, width: '100%' }}>
+                          {foodToDelete.items.map(item => (
+                            <View key={item.key} style={[styles.row, { backgroundColor: 'transparent', borderWidth: 0, paddingHorizontal: 0 }]}>
+                              {(item.icon || getFoodIcon(item.baseIcon || item.name)) && (
+                                <Image
+                                  source={item.icon ? { uri: item.icon } : getFoodIcon(item.baseIcon || item.name)}
+                                  style={[styles.icon, { width: 28, height: 28 }]}
+                                />
+                              )}
+                              <Text style={styles.rowText}>{item.name}</Text>
+                            </View>
+                          ))}
+                        </ScrollView>
+                      </>
+                    ) : (
+                      <>
+                        {(foodToDelete.icon || getFoodIcon(foodToDelete.baseIcon || foodToDelete.name)) && (
+                          <Image
+                            source={foodToDelete.icon ? { uri: foodToDelete.icon } : getFoodIcon(foodToDelete.baseIcon || foodToDelete.name)}
+                            style={[styles.icon, { width: 40, height: 40, marginBottom: 10 }]}
+                          />
+                        )}
+                        <Text style={styles.modalBody}>¿Eliminar {foodToDelete.name}?</Text>
+                      </>
                     )}
-                    <Text style={{ marginBottom: 10 }}>
-                      ¿Eliminar {foodToDelete.name}?
-                    </Text>
-                  </>
-                )}
-                <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                  <TouchableOpacity onPress={() => setFoodToDelete(null)} style={{ marginRight: 20 }}>
-                    <Text>Cancelar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={confirmDeleteFood}>
-                    <Text style={{ color: 'red' }}>Eliminar</Text>
-                  </TouchableOpacity>
-                </View>
+                    <View style={styles.modalRow}>
+                      <TouchableOpacity onPress={() => setFoodToDelete(null)} style={[styles.btn, { flex: 1 }]}>
+                        <Text style={styles.btnText}>Cancelar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={confirmDeleteFood} style={[styles.btn, styles.btnDanger, { flex: 1, marginLeft: 12 }]}>
+                        <Text style={styles.btnDangerText}>Eliminar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </Modal>
         )}
+
+        {/* Confirmar eliminación de categoría */}
         {categoryToDelete && (
-          <Modal visible animationType="fade" transparent>
-            <View style={styles.overlay}>
-              <View style={styles.dialog}>
-                {categoryToDelete.icon && (
-                  <Image
-                    source={{ uri: categoryToDelete.icon }}
-                    style={{ width: 40, height: 40, marginBottom: 10 }}
-                  />
-                )}
-                <Text style={{ marginBottom: 10 }}>
-                  ¿Eliminar {categoryToDelete.name}?
-                </Text>
-                <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                  <TouchableOpacity onPress={() => setCategoryToDelete(null)} style={{ marginRight: 20 }}>
-                    <Text>Cancelar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={confirmDeleteCategory}>
-                    <Text style={{ color: 'red' }}>Eliminar</Text>
-                  </TouchableOpacity>
-                </View>
+          <Modal visible animationType="fade" transparent onRequestClose={() => setCategoryToDelete(null)}>
+            <TouchableWithoutFeedback onPress={() => setCategoryToDelete(null)}>
+              <View style={styles.modalBackdrop}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalCard}>
+                    {categoryToDelete.icon && <Image source={{ uri: categoryToDelete.icon }} style={[styles.icon, { width: 40, height: 40, marginBottom: 10 }]} />}
+                    <Text style={styles.modalBody}>¿Eliminar {categoryToDelete.name}?</Text>
+                    <View style={styles.modalRow}>
+                      <TouchableOpacity onPress={() => setCategoryToDelete(null)} style={[styles.btn, { flex: 1 }]}>
+                        <Text style={styles.btnText}>Cancelar</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={confirmDeleteCategory} style={[styles.btn, styles.btnDanger, { flex: 1, marginLeft: 12 }]}>
+                        <Text style={styles.btnDangerText}>Eliminar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </Modal>
         )}
+
+        {/* Aviso simple */}
         {warning && (
-          <Modal visible animationType="fade" transparent>
-            <View style={styles.overlay}>
-              <View style={styles.dialog}>
-                <Text style={{ marginBottom: 10 }}>{warning}</Text>
-                <TouchableOpacity onPress={() => setWarning(null)}>
-                  <Text>Aceptar</Text>
-                </TouchableOpacity>
+          <Modal visible animationType="fade" transparent onRequestClose={() => setWarning(null)}>
+            <TouchableWithoutFeedback onPress={() => setWarning(null)}>
+              <View style={styles.modalBackdrop}>
+                <TouchableWithoutFeedback>
+                  <View style={styles.modalCard}>
+                    <Text style={styles.modalBody}>{warning}</Text>
+                    <View style={styles.modalRow}>
+                      <TouchableOpacity onPress={() => setWarning(null)} style={[styles.btn, styles.btnPrimary, { flex: 1 }]}>
+                        <Text style={styles.btnPrimaryText}>Aceptar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
           </Modal>
         )}
       </View>
@@ -333,6 +311,9 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   );
 }
 
+// =====================
+// Formulario principal
+// =====================
 export default function AddCustomFoodModal({ visible, onClose }) {
   const { addCustomFood, updateCustomFood } = useCustomFoods();
   const { categories, addCategory } = useCategories();
@@ -346,11 +327,8 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   const [manageVisible, setManageVisible] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
   const [catModalVisible, setCatModalVisible] = useState(false);
-  // Lazy-load to prevent a require cycle with FoodPickerModal
-  const FoodPickerModal = React.useMemo(
-    () => require('./FoodPickerModal').default,
-    []
-  );
+  // Lazy-load para evitar require cycle con FoodPickerModal
+  const FoodPickerModal = React.useMemo(() => require('./FoodPickerModal').default, []);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -374,9 +352,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     setCategory(food.category);
     setIconUri(food.icon);
     setBaseIcon(food.baseIcon);
-    setExpirationDays(
-      food.expirationDays != null ? String(food.expirationDays) : ''
-    );
+    setExpirationDays(food.expirationDays != null ? String(food.expirationDays) : '');
     setEditingKey(food.key);
     setManageVisible(false);
   };
@@ -392,10 +368,11 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   };
 
   const save = () => {
-    if (!name) return;
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
     const days = parseInt(expirationDays, 10);
     const data = {
-      name,
+      name: trimmed,
       category,
       icon: iconUri,
       baseIcon,
@@ -407,105 +384,94 @@ export default function AddCustomFoodModal({ visible, onClose }) {
       addCustomFood(data);
     }
     resetForm();
-    onClose();
+    onClose && onClose();
   };
 
   return (
     <Modal visible={visible} animationType="slide">
-      <View style={{ flex:1, padding:20 }}>
-        <View style={{ flexDirection:'row', justifyContent:'space-between', marginBottom:10 }}>
-          <TouchableOpacity onPress={() => { resetForm(); onClose(); }}>
-            <Text style={{ fontSize:24 }}>←</Text>
+      <View style={{ flex: 1, backgroundColor: palette.bg }}>
+        {/* Header */}
+        <View style={styles.headerRow}>
+          <TouchableOpacity onPress={() => { resetForm(); onClose && onClose(); }} style={styles.iconBtn}>
+            <Text style={styles.iconTxt}>←</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setManageVisible(true)}>
-            <Text style={{ color:'blue', marginTop:4 }}>Mis ingredientes</Text>
+          <TouchableOpacity onPress={() => setManageVisible(true)} style={styles.actionBtn}>
+            <Text style={styles.actionTxt}>Mis ingredientes</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView>
-          <Text style={{marginBottom:10, textAlign:'center'}}>
-            Aca podras crear tus propios ingredientes de acuerdo a tus necesidades, puedes usar iconos predefinidos o cargar nuevos iconos a tu eleccion
+
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+          showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+        >
+          <Text style={styles.helpCentered}>
+            Crea tus propios ingredientes. Usa iconos predeterminados o carga una imagen.
           </Text>
-          <Text>Nombre</Text>
+
+          <Text style={styles.label}>Nombre</Text>
           <TextInput
-            style={{ borderWidth:1, marginBottom:10, padding:5 }}
+            style={styles.input}
+            placeholder="Ej. Chimichurri"
+            placeholderTextColor={palette.textDim}
             value={name}
             onChangeText={setName}
           />
-          <Text>Categoría</Text>
-          <View style={{ flexDirection:'row', flexWrap:'wrap', marginBottom:10 }}>
+
+          <Text style={styles.label}>Categoría</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {categoryNames.map(cat => (
               <TouchableOpacity
                 key={cat}
                 onPress={() => setCategory(cat)}
-                style={{
-                  padding:5,
-                  borderWidth:1,
-                  borderColor:'#ccc',
-                  marginRight:5,
-                  marginBottom:5,
-                  backgroundColor: category === cat ? '#ddd' : '#fff',
-                }}
+                style={[styles.chip, category === cat && styles.chipOn]}
               >
-                <Text>{categories[cat]?.name || cat}</Text>
+                <Text style={[styles.chipTxt, category === cat && styles.chipTxtOn]}>
+                  {categories[cat]?.name || cat}
+                </Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity
-              onPress={() => setCatModalVisible(true)}
-              style={{
-                padding:5,
-                borderWidth:1,
-                borderColor:'#ccc',
-                marginRight:5,
-                marginBottom:5,
-              }}
-            >
-              <Text>+</Text>
+            <TouchableOpacity onPress={() => setCatModalVisible(true)} style={[styles.chip, { borderStyle: 'dashed' }]}>
+              <Text style={styles.chipTxt}>＋</Text>
             </TouchableOpacity>
           </View>
-          <Text>Días de caducidad por defecto</Text>
+
+          <Text style={styles.label}>Días de caducidad por defecto</Text>
           <TextInput
-            style={{ borderWidth:1, marginBottom:10, padding:5 }}
+            style={styles.input}
             keyboardType="numeric"
             value={expirationDays}
             onChangeText={setExpirationDays}
+            placeholder="Opcional"
+            placeholderTextColor={palette.textDim}
           />
-          <Text>Icono</Text>
-          {(iconUri || baseIcon) && (
-            <Image
-              source={iconUri ? { uri: iconUri } : getFoodIcon(baseIcon)}
-              style={{ width:60, height:60, marginBottom:10 }}
-            />
+
+          <Text style={styles.label}>Icono</Text>
+          {(iconUri || baseIcon) ? (
+            <Image source={iconUri ? { uri: iconUri } : getFoodIcon(baseIcon)} style={styles.preview} />
+          ) : (
+            <View style={[styles.preview, { alignItems: 'center', justifyContent: 'center' }]}>
+              <Text style={{ color: palette.textDim, fontSize: 12 }}>Sin icono</Text>
+            </View>
           )}
-          <View style={{ flexDirection:'row', marginBottom:10 }}>
-            <Button title="Predeterminado" onPress={() => setPickerVisible(true)} />
-            <View style={{ width:10 }} />
-            <Button title="Cargar" onPress={pickImage} />
+          <View style={{ flexDirection: 'row', marginTop: 8 }}>
+            <TouchableOpacity onPress={() => setPickerVisible(true)} style={[styles.btn, styles.btnNeutral, { flex: 1 }]}>
+              <Text style={styles.btnNeutralText}>Predeterminado</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={pickImage} style={[styles.btn, styles.btnNeutral, { flex: 1, marginLeft: 10 }]}>
+              <Text style={styles.btnNeutralText}>Cargar</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
-        <TouchableOpacity
-          onPress={save}
-          style={{
-            position:'absolute',
-            bottom:20,
-            alignSelf:'center',
-            backgroundColor:'#2196f3',
-            paddingVertical:10,
-            paddingHorizontal:20,
-            borderRadius:6,
-          }}
-        >
-          <Text style={{ color:'#fff', fontSize:16 }}>Guardar</Text>
+
+        {/* Guardar */}
+        <TouchableOpacity onPress={save} style={styles.fab}>
+          <Text style={styles.fabTxt}>Guardar</Text>
         </TouchableOpacity>
-        <FoodPickerModal
-          visible={pickerVisible}
-          onSelect={selectDefault}
-          onClose={() => setPickerVisible(false)}
-        />
-        <ManageCustomFoodsModal
-          visible={manageVisible}
-          onClose={() => setManageVisible(false)}
-          onEdit={startEdit}
-        />
+
+        {/* Modales internos */}
+        <FoodPickerModal visible={pickerVisible} onSelect={selectDefault} onClose={() => setPickerVisible(false)} />
+        <ManageCustomFoodsModal visible={manageVisible} onClose={() => setManageVisible(false)} onEdit={startEdit} />
         <AddCategoryModal
           visible={catModalVisible}
           onClose={() => setCatModalVisible(false)}
@@ -518,3 +484,179 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  // layout
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
+  },
+  iconBtn: {
+    backgroundColor: palette.surface2,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  iconTxt: { color: palette.text, fontSize: 18 },
+  actionBtn: {
+    backgroundColor: palette.surface2,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  actionTxt: { color: palette.text },
+
+  // scrolling
+  scroll: {
+    ...(Platform.OS === 'web'
+      ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${palette.accent} ${palette.surface2}`,
+          scrollbarGutter: 'stable both-edges',
+          overscrollBehavior: 'contain',
+        }
+      : {}),
+  },
+
+  // inputs / labels
+  helpCentered: { color: palette.textDim, textAlign: 'center', marginBottom: 12 },
+  label: { color: palette.text, fontWeight: '700', marginBottom: 6, marginTop: 10 },
+  blockTitle: { color: palette.text, fontWeight: '700', fontSize: 16, marginTop: 8, marginBottom: 6 },
+  input: {
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'web' ? 10 : 8,
+  },
+
+  // chips
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: palette.surface3,
+    borderWidth: 1,
+    borderColor: palette.border,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipOn: { backgroundColor: palette.surface2, borderColor: palette.accent },
+  chipTxt: { color: palette.text },
+  chipTxtOn: { color: palette.accent },
+
+  // preview
+  preview: {
+    width: 72, height: 72, borderRadius: 12,
+    borderWidth: 1, borderColor: palette.border,
+    backgroundColor: palette.surface2,
+  },
+
+  // small buttons
+  btn: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  btnText: { color: palette.text },
+  btnNeutral: { backgroundColor: palette.surface3 },
+  btnNeutralText: { color: palette.text },
+  btnDanger: { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e' },
+  btnDangerText: { color: '#ff9f9f' },
+  btnPrimary: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
+  btnPrimaryText: { color: '#1b1d22', fontWeight: '700' },
+
+  // list / rows
+  section: {
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: palette.surface3,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+  },
+  sectionTitle: { color: palette.text, fontWeight: '700' },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: palette.surface2,
+    borderColor: palette.border,
+    borderBottomWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  rowSelected: { backgroundColor: '#2a231a' },
+  rowText: { color: palette.text },
+  rowSub: { color: palette.textDim, fontSize: 12 },
+  icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
+  smallBtn: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    marginLeft: 6,
+  },
+  smallBtnText: { color: palette.text, fontSize: 14 },
+  smallBtnAccent: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
+  smallBtnAccentText: { color: '#1b1d22', fontWeight: '700' },
+  smallBtnDanger: { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e', marginLeft: 8 },
+  smallBtnDangerText: { color: '#ff9f9f' },
+
+  // modal styles
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    backgroundColor: palette.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 16,
+    width: '100%',
+    maxWidth: 420,
+  },
+  modalTitle: { color: palette.text, fontWeight: '700', fontSize: 16, marginBottom: 8 },
+  modalBody: { color: palette.text, marginBottom: 12 },
+
+  // save FAB
+  fab: {
+    position: 'absolute',
+    bottom: 16,
+    alignSelf: 'center',
+    backgroundColor: palette.accent,
+    borderColor: '#e2b06c',
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  fabTxt: { color: '#1b1d22', fontWeight: '700' },
+});

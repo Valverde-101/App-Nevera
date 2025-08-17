@@ -1,6 +1,18 @@
+// AddCategoryModal.js – dark–premium v2.2.13
 import React, { useState } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, Image, Button } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  border: '#2c3038',
+  accent: '#F2B56B',
+};
 
 export default function AddCategoryModal({ visible, onClose, onSave }) {
   const [name, setName] = useState('');
@@ -17,44 +29,106 @@ export default function AddCategoryModal({ visible, onClose, onSave }) {
   };
 
   const save = () => {
-    if (!name) return;
-    onSave({ name, icon: iconUri });
+    const trimmed = (name || '').trim();
+    if (!trimmed) return;
+    onSave({ name: trimmed, icon: iconUri });
     setName('');
     setIconUri(null);
+    onClose && onClose();
   };
 
   return (
-    <Modal visible={visible} animationType="slide">
-      <View style={{ flex:1, padding:20 }}>
-        <TouchableOpacity onPress={onClose} style={{ marginBottom:10 }}>
-          <Text style={{ fontSize:24 }}>←</Text>
-        </TouchableOpacity>
-        <Text>Nombre de categoría</Text>
-        <TextInput
-          style={{ borderWidth:1, marginBottom:10, padding:5 }}
-          value={name}
-          onChangeText={setName}
-        />
-        <Text>Icono</Text>
-        {iconUri && (
-          <Image source={{ uri: iconUri }} style={{ width:60, height:60, marginBottom:10 }} />
-        )}
-        <Button title="Seleccionar imagen" onPress={pickImage} />
-        <TouchableOpacity
-          onPress={() => { save(); onClose(); }}
-          style={{
-            position:'absolute',
-            bottom:20,
-            alignSelf:'center',
-            backgroundColor:'#2196f3',
-            paddingVertical:10,
-            paddingHorizontal:20,
-            borderRadius:6,
-          }}
-        >
-          <Text style={{ color:'#fff', fontSize:16 }}>Guardar</Text>
-        </TouchableOpacity>
-      </View>
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.backdrop}>
+          <TouchableWithoutFeedback>
+            <View style={styles.card}>
+              <Text style={styles.title}>Nueva categoría</Text>
+              <Text style={styles.help}>Opcionalmente, agrega un icono personalizado.</Text>
+
+              <Text style={styles.label}>Nombre</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Ej. Frutas"
+                placeholderTextColor={palette.textDim}
+                value={name}
+                onChangeText={setName}
+              />
+
+              <Text style={styles.label}>Icono</Text>
+              {iconUri ? (
+                <Image source={{ uri: iconUri }} style={styles.preview} />
+              ) : (
+                <View style={[styles.preview, { alignItems: 'center', justifyContent: 'center' }]}>
+                  <Text style={{ color: palette.textDim, fontSize: 12 }}>Sin icono</Text>
+                </View>
+              )}
+
+              <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                <TouchableOpacity onPress={pickImage} style={[styles.btn, styles.btnNeutral, { flex: 1 }]}>
+                  <Text style={styles.btnNeutralText}>Cargar imagen</Text>
+                </TouchableOpacity>
+                {iconUri && (
+                  <TouchableOpacity onPress={() => setIconUri(null)} style={[styles.btn, { flex: 1, marginLeft: 8 }]}>
+                    <Text style={styles.btnText}>Quitar</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              <View style={{ height: 12 }} />
+
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity onPress={onClose} style={[styles.btn, { flex: 1 }]}>
+                  <Text style={styles.btnText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={save} style={[styles.btn, styles.btnPrimary, { flex: 1, marginLeft: 10 }]}>
+                  <Text style={styles.btnPrimaryText}>Guardar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
+  card: {
+    backgroundColor: palette.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 16,
+    width: '100%',
+    maxWidth: 420,
+  },
+  title: { color: palette.text, fontWeight: '700', fontSize: 16 },
+  help: { color: palette.textDim, marginTop: 4, marginBottom: 12 },
+  label: { color: palette.text, marginBottom: 6, marginTop: 10, fontWeight: '700' },
+  input: {
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'web' ? 10 : 8,
+  },
+  preview: {
+    width: 72, height: 72, borderRadius: 12,
+    borderWidth: 1, borderColor: palette.border,
+    backgroundColor: palette.surface2,
+  },
+  btn: {
+    backgroundColor: palette.surface3,
+    borderWidth: 1, borderColor: palette.border,
+    paddingVertical: 10, borderRadius: 10, alignItems: 'center',
+  },
+  btnText: { color: palette.text },
+  btnNeutral: { backgroundColor: palette.surface3 },
+  btnNeutralText: { color: palette.text },
+  btnPrimary: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
+  btnPrimaryText: { color: '#1b1d22', fontWeight: '700' },
+});

@@ -1,20 +1,46 @@
-import React, { useState } from 'react';
+// LocationSettingsScreen.js – dark–premium v2.2.13
+import React, { useState, useLayoutEffect } from 'react';
 import {
   View,
   Text,
   TextInput,
-  Button,
   FlatList,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
+  StyleSheet,
+  Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useLocations } from '../context/LocationsContext';
 import { useInventory } from '../context/InventoryContext';
 
-const icons = ['🥶','❄️','🗃️','📦','🍽️'];
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  danger: '#e53935',
+};
+
+const icons = ['🥶','❄️','🗃️','📦','🍽️','🧊','🥫','🥕','🥩','🥛'];
 
 export default function LocationSettingsScreen() {
+  const nav = useNavigation();
+  useLayoutEffect(() => {
+    nav.setOptions?.({
+      headerStyle: { backgroundColor: palette.surface },
+      headerTintColor: palette.text,
+      headerTitleStyle: { color: palette.text },
+      headerShadowVisible: false,
+      title: 'Ubicaciones',
+    });
+  }, [nav]);
+
   const { locations, addLocation, updateLocation, removeLocation, toggleActive } = useLocations();
   const { inventory } = useInventory();
   const [name, setName] = useState('');
@@ -48,67 +74,82 @@ export default function LocationSettingsScreen() {
     setConfirmVisible(true);
   };
 
+  const renderRow = ({ item }) => (
+    <View style={styles.row}>
+      <TouchableOpacity style={{ flex: 1 }} onPress={() => startEdit(item)}>
+        <Text style={styles.rowText}>
+          <Text style={{ fontSize: 18 }}>{item.icon}</Text>  {item.name}
+          <Text style={styles.rowSub}>  • {item.key}</Text>
+        </Text>
+        {!item.active && <Text style={[styles.badge, { color: '#ffcc80' }]}>Inactiva</Text>}
+      </TouchableOpacity>
+      <View style={{ flexDirection: 'row' }}>
+        <TouchableOpacity style={[styles.smallBtn, item.active ? null : styles.smallBtnAccent]} onPress={() => toggleActive(item.key)}>
+          <Text style={item.active ? styles.smallBtnText : styles.smallBtnAccentText}>
+            {item.active ? 'Desactivar' : 'Activar'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.smallBtn, styles.smallBtnDanger]} onPress={() => handleRemove(item.key)}>
+          <Text style={styles.smallBtnDangerText}>Eliminar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   return (
-    <View style={{ flex: 1, padding: 20 }}>
+    <View style={styles.container}>
       <FlatList
         data={locations}
         keyExtractor={item => item.key}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 10,
+        renderItem={renderRow}
+        contentContainerStyle={{ padding: 16, paddingBottom: 110 }}
+        style={styles.list}
+        showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+      />
+
+      {/* Editor */}
+      <View style={styles.editor}>
+        <Text style={styles.editorTitle}>{editingKey ? 'Editar ubicación' : 'Añadir ubicación'}</Text>
+        <TextInput
+          placeholder="Nombre"
+          placeholderTextColor={palette.textDim}
+          value={name}
+          onChangeText={setName}
+          style={styles.input}
+        />
+        <View style={{ flexDirection: 'row', marginBottom: 10, flexWrap: 'wrap' }}>
+          {icons.map(ic => (
+            <TouchableOpacity key={ic} onPress={() => setIcon(ic)} style={[styles.iconChip, icon === ic && styles.iconChipOn]}>
+              <Text style={{ fontSize: 18 }}>{ic}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity
+            style={[styles.primaryBtn, { flex: 1 }]}
+            onPress={() => {
+              if (!name.trim()) return;
+              if (editingKey) {
+                updateLocation(editingKey, name.trim(), icon);
+                cancelEdit();
+              } else {
+                addLocation(name.trim(), icon);
+                setName('');
+                setIcon(icons[0]);
+              }
             }}
           >
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => startEdit(item)}>
-              <Text>
-                {item.icon} {item.name}
-              </Text>
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <Button
-                title={item.active ? 'Desactivar' : 'Activar'}
-                onPress={() => toggleActive(item.key)}
-              />
-              <View style={{ width: 10 }} />
-              <Button title="Eliminar" onPress={() => handleRemove(item.key)} />
-            </View>
-          </View>
-        )}
-      />
-      <TextInput
-        placeholder="Nombre"
-        value={name}
-        onChangeText={setName}
-        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-      />
-      <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-        {icons.map(ic => (
-          <TouchableOpacity key={ic} onPress={() => setIcon(ic)} style={{ marginRight: 10 }}>
-            <Text style={{ fontSize: 24, opacity: icon === ic ? 1 : 0.3 }}>{ic}</Text>
+            <Text style={styles.primaryBtnText}>{editingKey ? 'Guardar' : 'Añadir'}</Text>
           </TouchableOpacity>
-        ))}
+          {editingKey ? (
+            <TouchableOpacity style={[styles.btn, { flex: 1, marginLeft: 10 }]} onPress={cancelEdit}>
+              <Text style={styles.btnText}>Cancelar</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
-      <Button
-        title={editingKey ? 'Guardar' : 'Añadir'}
-        onPress={() => {
-          if (name) {
-            if (editingKey) {
-              updateLocation(editingKey, name, icon);
-              cancelEdit();
-            } else {
-              addLocation(name, icon);
-              setName('');
-              setIcon(icons[0]);
-            }
-          }
-        }}
-      />
-      {editingKey && (
-        <Button title="Cancelar" onPress={cancelEdit} />
-      )}
+
+      {/* Confirmación */}
       <Modal
         visible={confirmVisible}
         transparent
@@ -116,46 +157,27 @@ export default function LocationSettingsScreen() {
         onRequestClose={() => setConfirmVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setConfirmVisible(false)}>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(0,0,0,0.3)',
-            }}
-          >
+          <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
-              <View
-                style={{
-                  backgroundColor: '#fff',
-                  padding: 20,
-                  borderRadius: 8,
-                  maxWidth: '80%',
-                }}
-              >
+              <View style={styles.modalCard}>
                 {warning ? (
-                  <Text style={{marginBottom: 10}}>{warning}</Text>
+                  <Text style={styles.modalBody}>{warning}</Text>
                 ) : (
-                  <Text style={{marginBottom: 10}}>
+                  <Text style={styles.modalBody}>
                     ¿Seguro que deseas eliminar esta ubicación?
                   </Text>
                 )}
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-around',
-                    marginTop: 20,
-                  }}
-                >
-                  <Button title="Cancelar" onPress={() => setConfirmVisible(false)} />
+                <View style={styles.modalRow}>
+                  <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setConfirmVisible(false)}>
+                    <Text style={styles.btnText}>Cancelar</Text>
+                  </TouchableOpacity>
                   {!warning && (
-                    <Button
-                      title="Eliminar"
-                      onPress={() => {
-                        removeLocation(pendingKey);
-                        setConfirmVisible(false);
-                      }}
-                    />
+                    <TouchableOpacity
+                      style={[styles.dangerBtn, { flex: 1, marginLeft: 12 }]}
+                      onPress={() => { removeLocation(pendingKey); setConfirmVisible(false); }}
+                    >
+                      <Text style={styles.dangerBtnText}>Eliminar</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
               </View>
@@ -166,3 +188,109 @@ export default function LocationSettingsScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: palette.bg },
+  list: {
+    ...(Platform.OS === 'web'
+      ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${palette.accent} ${palette.surface2}`,
+          scrollbarGutter: 'stable both-edges',
+          overscrollBehavior: 'contain',
+        }
+      : {}),
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: palette.surface2,
+    borderColor: palette.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+  },
+  rowText: { color: palette.text, fontWeight: '700' },
+  rowSub: { color: palette.textDim, fontSize: 12 },
+  badge: { marginTop: 4 },
+  smallBtn: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    marginLeft: 8,
+  },
+  smallBtnText: { color: palette.text },
+  smallBtnAccent: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
+  smallBtnAccentText: { color: '#1b1d22', fontWeight: '700' },
+  smallBtnDanger: { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e' },
+  smallBtnDangerText: { color: '#ff9f9f' },
+
+  editor: {
+    backgroundColor: palette.surface,
+    borderTopWidth: 1,
+    borderColor: palette.border,
+    padding: 12,
+  },
+  editorTitle: { color: palette.text, fontWeight: '700', marginBottom: 6 },
+  input: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: Platform.OS === 'web' ? 10 : 8,
+    marginBottom: 8,
+  },
+  iconChip: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  iconChipOn: { backgroundColor: palette.surface2, borderColor: palette.accent },
+
+  btn: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  btnText: { color: palette.text },
+  primaryBtn: {
+    backgroundColor: palette.accent,
+    borderColor: '#e2b06c',
+    borderWidth: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  primaryBtnText: { color: '#1b1d22', fontWeight: '700' },
+  dangerBtn: {
+    backgroundColor: palette.danger,
+    borderColor: '#ad2c2c',
+    borderWidth: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  dangerBtnText: { color: '#fff', fontWeight: '700' },
+
+  // Modal
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
+  modalCard: { backgroundColor: palette.surface, borderRadius: 12, borderWidth: 1, borderColor: palette.border, padding: 16, width: '100%', maxWidth: 420 },
+  modalBody: { color: palette.text, marginBottom: 12 },
+  modalRow: { flexDirection: 'row', justifyContent: 'space-between' },
+});

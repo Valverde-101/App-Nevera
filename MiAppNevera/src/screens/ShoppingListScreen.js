@@ -1,25 +1,54 @@
-import React, {useState} from 'react';
+// ShoppingListScreen.js – dark–premium v2.2.12
+// Cambios de esta versión:
+// - RESTAURADO: AutoAdd (botón ⚡ y modal) que agrega con cantidad = 0 y evita duplicados.
+// - MANTENIDO: Encabezado de navegación en tema dark–premium (evita barra blanca en “Compras”).
+// - MANTENIDO: Scrollbar dorada en Web, secciones por categoría, estados seleccionado/comprado y modales.
+import React, { useMemo, useState, useLayoutEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  Button,
   Image,
   Modal,
   TouchableWithoutFeedback,
+  StyleSheet,
+  Platform,
 } from 'react-native';
-import {useShopping} from '../context/ShoppingContext';
-import {useInventory} from '../context/InventoryContext';
+import { useNavigation } from '@react-navigation/native';
+import { useShopping } from '../context/ShoppingContext';
+import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddShoppingItemModal from '../components/AddShoppingItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
-import {getFoodIcon} from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',    // dorado
+  danger: '#e53935',
+};
+
 export default function ShoppingListScreen() {
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions?.({
+      headerStyle: { backgroundColor: palette.surface },
+      headerTintColor: palette.text,
+      headerTitleStyle: { color: palette.text },
+      headerShadowVisible: false,
+    });
+  }, [navigation]);
+
   const {
     list,
     addItem,
@@ -28,26 +57,27 @@ export default function ShoppingListScreen() {
     removeItems,
     markPurchased,
   } = useShopping();
-  const {inventory, addItem: addInventoryItem, removeItem: removeInventoryItem} = useInventory();
+  const { inventory, addItem: addInventoryItem, removeItem: removeInventoryItem } = useInventory();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
+
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
-  const [autoVisible, setAutoVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
   const [batchVisible, setBatchVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [autoVisible, setAutoVisible] = useState(false);
 
   const onSelectFood = (name, icon) => {
-    setSelectedFood({name, icon});
+    setSelectedFood({ name, icon });
     setPickerVisible(false);
     setAddVisible(true);
   };
 
-  const onSave = ({quantity, unit}) => {
+  const onSave = ({ quantity, unit }) => {
     if (selectedFood) {
       addItem(selectedFood.name, quantity, unit);
       setSelectedFood(null);
@@ -55,20 +85,20 @@ export default function ShoppingListScreen() {
     }
   };
 
+  // AutoAdd: añade a la lista todos los alimentos del inventario con cantidad 0 (placeholders)
+  // Evita duplicados y NO modifica el inventario aquí
   const handleAutoAdd = () => {
     const zeroItems = locations.flatMap(loc =>
-      inventory[loc.key].filter(item => item.quantity === 0),
+      (inventory[loc.key] || []).filter(item => (item.quantity ?? 0) === 0)
     );
     const newItems = zeroItems
       .filter(it => !list.some(l => l.name === it.name))
-      .map(it => ({name: it.name, quantity: 1, unit: it.unit}));
-    if (newItems.length) {
-      addItems(newItems);
-    }
+      .map(it => ({ name: it.name, quantity: 0, unit: it.unit })); // cantidad 0 según especificación
+    if (newItems.length) addItems(newItems);
     setAutoVisible(false);
   };
 
-  const toggleSelect = index => {
+  const toggleSelect = (index) => {
     setSelected(prev => {
       const updated = prev.includes(index)
         ? prev.filter(i => i !== index)
@@ -84,6 +114,7 @@ export default function ShoppingListScreen() {
       setSelectMode(false);
     } else {
       setSelected(list.map((_, idx) => idx));
+      setSelectMode(true);
     }
   };
 
@@ -94,23 +125,23 @@ export default function ShoppingListScreen() {
     setConfirmVisible(false);
   };
 
-  const handleBatchSave = entries => {
+  // Guardado por lotes (igual que antes)
+  const handleBatchSave = (entries) => {
     const names = new Set(entries.map(e => e.name));
+    // eliminar placeholders qty=0 sin nota de inventario para los que sí guardaremos
     locations.forEach(loc => {
-      for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
-        const invItem = inventory[loc.key][i];
-        if (
-          names.has(invItem.name) &&
-          invItem.quantity === 0 &&
-          (!invItem.note || invItem.note.trim() === '')
-        ) {
+      const arr = inventory[loc.key] || [];
+      for (let i = arr.length - 1; i >= 0; i--) {
+        const invItem = arr[i];
+        if (names.has(invItem.name) && (invItem.quantity ?? 0) === 0 && (!invItem.note || invItem.note.trim() === '')) {
           removeInventoryItem(loc.key, i);
         }
       }
     });
 
+    // añadir/actualizar inventario
     for (const entry of entries) {
-      const {name, location, quantity, unit, regDate, expDate, note} = entry;
+      const { name, location, quantity, unit, regDate, expDate, note } = entry;
       const qty = parseFloat(quantity) || 0;
       const hasNote = note && note.trim() !== '';
       if (qty !== 0 || hasNote) {
@@ -118,103 +149,133 @@ export default function ShoppingListScreen() {
       }
     }
 
+    // marcar como comprados lo editado y los de qty=0 no editados
     const zeroUnselected = list
-      .map((it, idx) => ({it, idx}))
-      .filter(({it, idx}) => it.quantity === 0 && !entries.some(e => e.index === idx))
-      .map(({idx}) => idx);
+      .map((it, idx) => ({ it, idx }))
+      .filter(({ it, idx }) => (it.quantity ?? 0) === 0 && !entries.some(e => e.index === idx))
+      .map(({ idx }) => idx);
     const toMark = [...new Set([...zeroUnselected, ...entries.map(e => e.index)])];
-    if (toMark.length) {
-      markPurchased(toMark);
-    }
+    if (toMark.length) markPurchased(toMark);
+
     setBatchVisible(false);
     setSelected([]);
     setSelectMode(false);
   };
 
-  const grouped = {};
-  list.forEach((item, index) => {
-    const cat = item.foodCategory || 'otros';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push({item, index});
-  });
+  // Agrupar por categoría
+  const grouped = useMemo(() => {
+    const g = {};
+    list.forEach((item, index) => {
+      const cat = item.foodCategory || 'otros';
+      if (!g[cat]) g[cat] = [];
+      g[cat].push({ item, index });
+    });
+    return g;
+  }, [list]);
+
+  const empty = list.length === 0;
 
   return (
-    <View style={{flex:1, padding:20, backgroundColor:'#e6e2e4'}}>
-      <View style={{flexDirection:'row', justifyContent:'space-between', marginBottom:10}}>
+    <View style={styles.container}>
+      {/* Header interno */}
+      <View style={styles.headerRow}>
         {!selectMode ? (
-          <>
-            <Button title="Añadir" onPress={() => setPickerVisible(true)} />
-            <TouchableOpacity onPress={() => setAutoVisible(true)}>
-              <Text style={{fontSize:24}}>⚡</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => setPickerVisible(true)}>
+              <Text style={styles.actionText}>＋ Añadir</Text>
             </TouchableOpacity>
-          </>
+            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
+              <Text style={styles.iconEmoji}>⚡</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
-          <>
-            <Button title="Seleccionar todo" onPress={selectAll} />
-            <Button title="Eliminar" onPress={() => setConfirmVisible(true)} />
-            <Button title="Guardar" onPress={() => setBatchVisible(true)} />
-          </>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.actionBtn} onPress={selectAll}>
+              <Text style={styles.actionText}>Seleccionar todo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]} onPress={() => setBatchVisible(true)}>
+              <Text style={[styles.actionText, { color: palette.accent }]}>Guardar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e' }]} onPress={() => setConfirmVisible(true)}>
+              <Text style={[styles.actionText, { color: '#ff9f9f' }]}>Eliminar</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
-      <ScrollView>
-        {Object.entries(grouped).map(([cat, items]) => (
-          <View key={cat} style={{marginBottom:10}}>
-            <Text style={{fontSize:18, fontWeight:'bold', marginBottom:5}}>
-              {categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </Text>
-            {items.map(({item, index}) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() =>
-                  selectMode ? toggleSelect(index) : togglePurchased(index)
-                }
-                onLongPress={() => {
-                  if (!selectMode) {
-                    setSelectMode(true);
-                    setSelected([index]);
-                  } else {
-                    toggleSelect(index);
-                  }
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection:'row',
-                    alignItems:'center',
-                    padding:5,
-                    backgroundColor: selectMode && selected.includes(index)
-                      ? '#e0f7fa'
-                      : item.purchased
-                      ? '#ddd'
-                      : 'transparent',
-                  }}
-                >
-                  {selectMode && (
-                    <Text style={{marginRight:10}}>
-                      {selected.includes(index) ? '☑️' : '⬜'}
-                    </Text>
-                  )}
-                  {item.icon && (
-                    <Image
-                      source={item.icon}
-                      style={{width:30, height:30, marginRight:10}}
-                    />
-                  )}
-                  <Text
-                    style={{
-                      textDecorationLine: item.purchased ? 'line-through' : 'none',
-                      color: item.purchased ? 'gray' : 'black',
+
+      {/* Lista */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={{ padding: 14, paddingBottom: 80 }}
+        showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+      >
+        {empty ? (
+          <View style={styles.emptyWrap}>
+            <Text style={{ color: palette.textDim, marginBottom: 8 }}>Tu lista de compras está vacía</Text>
+            <TouchableOpacity onPress={() => setPickerVisible(true)} style={styles.emptyBtn}>
+              <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Añadir alimento</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          Object.entries(grouped).map(([cat, items]) => (
+            <View key={cat} style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>
+                  {categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </Text>
+              </View>
+              {items.map(({ item, index }) => {
+                const isSel = selectMode && selected.includes(index);
+                const purchased = !!item.purchased;
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => (selectMode ? toggleSelect(index) : togglePurchased(index))}
+                    onLongPress={() => {
+                      if (!selectMode) {
+                        setSelectMode(true);
+                        setSelected([index]);
+                      } else {
+                        toggleSelect(index);
+                      }
                     }}
                   >
-                    {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
+                    <View
+                      style={[
+                        styles.row,
+                        purchased && styles.rowPurchased,
+                        isSel && styles.rowSelected,
+                      ]}
+                    >
+                      {selectMode && (
+                        <View style={[styles.check, isSel && styles.checkOn]}>
+                          <Text style={{ color: isSel ? '#1b1d22' : palette.textDim }}>
+                            {isSel ? '✓' : ''}
+                          </Text>
+                        </View>
+                      )}
+                      {item.icon && <Image source={item.icon} style={styles.icon} />}
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={[
+                            styles.rowText,
+                            purchased && { textDecorationLine: 'line-through', color: palette.textDim },
+                          ]}
+                          numberOfLines={2}
+                        >
+                          {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          ))
+        )}
       </ScrollView>
 
+      {/* Modales funcionales */}
       <FoodPickerModal
         visible={pickerVisible}
         onSelect={onSelectFood}
@@ -227,14 +288,14 @@ export default function ShoppingListScreen() {
         onSave={onSave}
         onClose={() => setAddVisible(false)}
       />
-
       <BatchAddItemModal
         visible={batchVisible}
-        items={selected.map(idx => ({...list[idx], index: idx}))}
+        items={selected.map(idx => ({ ...list[idx], index: idx }))}
         onSave={handleBatchSave}
         onClose={() => setBatchVisible(false)}
       />
 
+      {/* Confirmar eliminación */}
       <Modal
         visible={confirmVisible}
         transparent
@@ -242,22 +303,20 @@ export default function ShoppingListScreen() {
         onRequestClose={() => setConfirmVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setConfirmVisible(false)}>
-          <View
-            style={{
-              flex:1,
-              justifyContent:'center',
-              alignItems:'center',
-              backgroundColor:'rgba(0,0,0,0.3)',
-            }}
-          >
+          <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
-              <View style={{backgroundColor:'#fff', padding:20, borderRadius:8}}>
-                <Text style={{marginBottom:10}}>
-                  ¿Está seguro de eliminar {selected.length} alimentos de la lista de compras?
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Eliminar seleccionados</Text>
+                <Text style={styles.cardBody}>
+                  ¿Eliminar {selected.length} {selected.length === 1 ? 'alimento' : 'alimentos'} de la lista de compras?
                 </Text>
-                <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <Button title="Cancelar" onPress={() => setConfirmVisible(false)} />
-                  <Button title="Eliminar" onPress={deleteSelected} />
+                <View style={styles.cardActions}>
+                  <TouchableOpacity onPress={() => setConfirmVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={deleteSelected} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -265,6 +324,7 @@ export default function ShoppingListScreen() {
         </TouchableWithoutFeedback>
       </Modal>
 
+      {/* Auto-add modal */}
       <Modal
         visible={autoVisible}
         transparent
@@ -272,22 +332,20 @@ export default function ShoppingListScreen() {
         onRequestClose={() => setAutoVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setAutoVisible(false)}>
-          <View
-            style={{
-              flex:1,
-              justifyContent:'center',
-              alignItems:'center',
-              backgroundColor:'rgba(0,0,0,0.3)',
-            }}
-          >
+          <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
-              <View style={{backgroundColor:'#fff', padding:20, borderRadius:8}}>
-                <Text style={{marginBottom:10}}>
-                  ¿Desea añadir todos los elementos que presenten una cantidad de 0 a la lista de compras? Todos los alimentos que ya se encuentren en la lista no se agregarán.
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Añadir automáticamente</Text>
+                <Text style={styles.cardBody}>
+                  ¿Deseas añadir todos los alimentos con cantidad 0 del inventario a la lista de compras? Los que ya estén en la lista no se agregarán.
                 </Text>
-                <View style={{flexDirection:'row', justifyContent:'space-around'}}>
-                  <Button title="Cancelar" onPress={() => setAutoVisible(false)} />
-                  <Button title="Aceptar" onPress={handleAutoAdd} />
+                <View style={styles.cardActions}>
+                  <TouchableOpacity onPress={() => setAutoVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleAutoAdd} style={[styles.cardBtn, { backgroundColor: palette.accent }]}>
+                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Aceptar</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -297,3 +355,129 @@ export default function ShoppingListScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: palette.bg },
+  headerRow: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface,
+  },
+  headerActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  actionBtn: {
+    backgroundColor: palette.accent,
+    borderColor: '#e2b06c',
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  actionText: { color: '#1b1d22', fontWeight: '700' },
+  iconBtn: {
+    backgroundColor: palette.surface2,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  iconEmoji: { color: palette.accent, fontSize: 18 },
+
+  // ScrollView (Web): barra dorada + gutter estable
+  scroll: {
+    ...(Platform.OS === 'web'
+      ? {
+          scrollbarWidth: 'thin',                          // Firefox
+          scrollbarColor: `${palette.accent} ${palette.surface2}`,
+          scrollbarGutter: 'stable both-edges',
+          overscrollBehavior: 'contain',
+        }
+      : {}),
+  },
+
+  section: {
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  sectionHeader: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: palette.surface3,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+  },
+  sectionTitle: { color: palette.text, fontWeight: '700' },
+
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+  },
+  rowPurchased: { backgroundColor: '#17191d' },
+  rowSelected: { backgroundColor: '#2a231a', borderLeftWidth: 3, borderLeftColor: palette.accent },
+  check: {
+    width: 22, height: 22, borderRadius: 6,
+    borderWidth: 1, borderColor: palette.border,
+    marginRight: 10,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: palette.surface3,
+  },
+  checkOn: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
+  icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
+  rowText: { color: palette.text },
+
+  emptyWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 50,
+  },
+  emptyBtn: {
+    backgroundColor: palette.accent,
+    borderColor: '#e2b06c',
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+
+  // modal styles
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    paddingHorizontal: 20,
+  },
+  card: {
+    backgroundColor: palette.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 16,
+    width: '100%',
+    maxWidth: 420,
+  },
+  cardTitle: { color: palette.text, fontWeight: '700', fontSize: 16, marginBottom: 8 },
+  cardBody: { color: palette.textDim, marginBottom: 14 },
+  cardActions: { flexDirection: 'row', justifyContent: 'space-between' },
+  cardBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.border,
+    marginHorizontal: 6,
+  },
+});
+

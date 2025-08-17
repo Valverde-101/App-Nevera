@@ -1,23 +1,69 @@
-import React, { useEffect, useState } from 'react';
+// EditItemModal.js – dark–premium v2.2.10 (consistente con AddItemModal/FoodPickerModal)
+// - Hero con gradiente por ítem
+// - Chips para ubicación/unidad
+// - Inputs de fecha gris (combina con el tema)
+// - Barra de desplazamiento sutil color dorado en web con gutter estable
+// - Modal de confirmación estilizado
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   Image,
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Animated,
+  Platform,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useShopping } from '../context/ShoppingContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 
+// ===== Theme (mismo que InventoryScreen/AddItemModal) =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',    // dorado
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
+
+// ===== Gradients por ítem (determinísticos por nombre) =====
+const gradientOptions = [
+  { colors: ['#2a231a', '#1c1a17', '#121316'], locations: [0, 0.55, 1], start: {x: 0.1, y: 0.1}, end: {x: 0.9, y: 0.9} },   // amber
+  { colors: ['#1a212a', '#191d24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.9, y: 0.1}, end: {x: 0.1, y: 0.9} },     // steel
+  { colors: ['#261c2a', '#1e1a24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.2, y: 0.0}, end: {x: 1.0, y: 0.8} },     // violet
+  { colors: ['#1c2422', '#18201e', '#121316'], locations: [0, 0.55, 1], start: {x: 0.0, y: 0.8}, end: {x: 1.0, y: 0.2} },     // teal
+  { colors: ['#241f1a', '#1c1a19', '#121316'], locations: [0, 0.55, 1], start: {x: 0.7, y: 0.0}, end: {x: 0.0, y: 0.9} },     // copper
+  { colors: ['#281a1d', '#1f191b', '#121316'], locations: [0, 0.6, 1], start: {x: 0.0, y: 0.0}, end: {x: 1.0, y: 1.0} },     // wine
+];
+const hashString = (s) => {
+  if (!s) return 0;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+  return Math.abs(h);
+};
+const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
+
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const { addItem: addShoppingItem } = useShopping();
   const { units } = useUnits();
   const { locations } = useLocations();
+
   const [location, setLocation] = useState(locations[0]?.key || 'fridge');
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
@@ -27,16 +73,27 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [shoppingVisible, setShoppingVisible] = useState(false);
 
+  // Animación suave al cambiar cantidad
+  const qtyScale = useRef(new Animated.Value(1)).current;
+  const bumpQty = () => {
+    Animated.sequence([
+      Animated.timing(qtyScale, { toValue: 1.1, duration: 120, useNativeDriver: true }),
+      Animated.spring(qtyScale, { toValue: 1, friction: 4, useNativeDriver: true }),
+    ]).start();
+  };
+
   useEffect(() => {
     if (visible && item) {
       setLocation(item.location || locations[0]?.key || 'fridge');
-      setQuantity(item.quantity);
-      setUnit(item.unit);
+      setQuantity(item.quantity ?? 0);
+      setUnit(item.unit || units[0]?.key || 'units');
       setRegDate(item.registered || '');
       setExpDate(item.expiration || '');
       setNote(item.note || '');
     }
-  }, [visible, item]);
+  }, [visible, item, units, locations]);
+
+  const g = gradientForKey(item?.name || 'item');
 
   const handleSave = () => {
     onSave({
@@ -51,165 +108,345 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
 
   return (
     <>
-      <Modal visible={visible} animationType="slide">
-        <View style={{ flex: 1, padding: 20 }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <TouchableOpacity onPress={onClose}>
-              <Text style={{ fontSize: 24 }}>←</Text>
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity
-              onPress={() => setShoppingVisible(true)}
-              style={{ marginRight: 15 }}
-            >
-              <Text style={{ fontSize: 24 }}>🧺</Text>
-            </TouchableOpacity>
-              <TouchableOpacity onPress={() => setConfirmVisible(true)}>
-                <Text style={{ fontSize: 24 }}>🗑️</Text>
+      <Modal visible={visible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.sheet}>
+            {/* Header */}
+            <View style={styles.headerRow}>
+              <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
+                <Text style={styles.iconText}>←</Text>
               </TouchableOpacity>
+              <View style={{ flexDirection: 'row' }}>
+                <TouchableOpacity
+                  onPress={() => setShoppingVisible(true)}
+                  style={[styles.iconBtn, { marginRight: 8 }]}
+                >
+                  <Text style={styles.iconText}>🧺</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setConfirmVisible(true)} style={styles.iconBtn}>
+                  <Text style={styles.iconText}>🗑️</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-          {item?.icon && (
-            <Image
-              source={item.icon}
-              style={{ width: 60, height: 60, alignSelf: 'center', marginBottom: 10 }}
-            />
-          )}
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>{item?.name}</Text>
-          <Text style={{ marginBottom: 5 }}>Ubicación</Text>
-          <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-            {locations.map(opt => (
-              <TouchableOpacity
-                key={opt.key}
-                style={{
-                  padding: 8,
-                  borderWidth: 1,
-                  borderColor: '#ccc',
-                  marginRight: 10,
-                  backgroundColor: location === opt.key ? '#ddd' : '#fff',
-                }}
-                onPress={() => setLocation(opt.key)}
-              >
-                <Text>{opt.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <Text style={{ marginRight: 10 }}>Cantidad:</Text>
-            <TouchableOpacity
-              onPress={() => setQuantity(q => Math.max(0, q - 1))}
-              style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
+
+            {/* Hero */}
+            <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.hero}>
+              <View style={styles.foodIconBox}>
+                {item?.icon && <Image source={item.icon} style={{ width: 64, height: 64 }} resizeMode="contain" />}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.foodName} numberOfLines={2}>{item?.name || 'Alimento'}</Text>
+                {!!item?.foodCategory && (
+                  <Text style={{ color: palette.textDim, fontSize: 12 }} numberOfLines={1}>{item.foodCategory}</Text>
+                )}
+              </View>
+            </LinearGradient>
+
+            <ScrollView
+              style={styles.scroll}
+              contentContainerStyle={{ padding: 16 }}
+              showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
             >
-              <Text>◀</Text>
-            </TouchableOpacity>
-            <TextInput
-              style={{
-                borderWidth: 1,
-                padding: 5,
-                marginRight: 5,
-                width: 60,
-                textAlign: 'center',
-              }}
-              keyboardType="numeric"
-              value={quantity.toString()}
-              onChangeText={t =>
-                setQuantity(parseFloat(t.replace(/[^0-9.]/g, '')) || 0)
-              }
-            />
-            <TouchableOpacity
-              onPress={() => setQuantity(q => q + 1)}
-              style={{ borderWidth: 1, padding: 5 }}
-            >
-              <Text>▶</Text>
+              {/* Ubicación */}
+              <Text style={styles.labelBold}>Ubicación</Text>
+              <View style={styles.chipWrap}>
+                {locations.map((opt, idx) => (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => setLocation(opt.key)}
+                    style={[
+                      styles.chip,
+                      location === opt.key ? styles.chipSelected : null,
+                      (idx % 3 === 0) && { marginLeft: 0 },
+                    ]}
+                  >
+                    <Text style={[styles.chipText, location === opt.key && styles.chipTextSelected]} numberOfLines={1}>
+                      {opt.name}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Cantidad */}
+              <Text style={styles.labelBold}>Cantidad</Text>
+              <View style={styles.qtyRow}>
+                <TouchableOpacity
+                  onPress={() => { setQuantity(q => Math.max(0, (q || 0) - 1)); bumpQty(); }}
+                  style={styles.qtyBtn}
+                >
+                  <Text style={styles.qtyBtnText}>−</Text>
+                </TouchableOpacity>
+
+                <Animated.View style={{ transform: [{ scale: qtyScale }] }}>
+                  <TextInput
+                    style={styles.qtyInput}
+                    keyboardType="numeric"
+                    value={String(quantity)}
+                    onChangeText={(t) => {
+                      const v = parseFloat(t.replace(/[^0-9.]/g, ''));
+                      setQuantity(Number.isFinite(v) ? v : 0);
+                    }}
+                  />
+                </Animated.View>
+
+                <TouchableOpacity
+                  onPress={() => { setQuantity(q => (q || 0) + 1); bumpQty(); }}
+                  style={styles.qtyBtn}
+                >
+                  <Text style={styles.qtyBtnText}>＋</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Unidad */}
+              <Text style={styles.labelBold}>Unidad</Text>
+              <View style={styles.chipWrap}>
+                {units.map((opt, idx) => (
+                  <Pressable
+                    key={opt.key}
+                    onPress={() => setUnit(opt.key)}
+                    style={[
+                      styles.chip,
+                      unit === opt.key ? styles.chipSelected : null,
+                      (idx % 3 === 0) && { marginLeft: 0 },
+                    ]}
+                  >
+                    <Text style={[styles.chipText, unit === opt.key && styles.chipTextSelected]} numberOfLines={1}>
+                      {opt.plural}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {/* Fechas (inputs gris) */}
+              <View style={{ marginTop: 6 }}>
+                <Text style={styles.labelBold}>Fecha de registro</Text>
+                <DatePicker
+                  value={regDate}
+                  onChange={setRegDate}
+                  inputStyle={styles.dateInput}
+                  containerStyle={styles.dateContainer}
+                />
+                <View style={{ height: 8 }} />
+                <Text style={styles.labelBold}>Fecha de caducidad</Text>
+                <DatePicker
+                  value={expDate}
+                  onChange={setExpDate}
+                  inputStyle={styles.dateInput}
+                  containerStyle={styles.dateContainer}
+                />
+              </View>
+
+              {/* Nota */}
+              <Text style={styles.labelBold}>Nota</Text>
+              <TextInput
+                style={styles.noteInput}
+                value={note}
+                onChangeText={setNote}
+                placeholder="Opcional"
+                placeholderTextColor={palette.textDim}
+              />
+
+              <View style={{ height: 70 }} />
+            </ScrollView>
+
+            {/* Guardar */}
+            <TouchableOpacity onPress={handleSave} style={styles.saveFab}>
+              <Text style={styles.saveFabText}>Guardar</Text>
             </TouchableOpacity>
           </View>
-          <Text>Unidad</Text>
-          <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-            {units.map(opt => (
-              <TouchableOpacity
-                key={opt.key}
-                style={{
-                  padding: 8,
-                  borderWidth: 1,
-                  borderColor: '#ccc',
-                  marginRight: 10,
-                  backgroundColor: unit === opt.key ? '#ddd' : '#fff',
-                }}
-                onPress={() => setUnit(opt.key)}
-              >
-                <Text>{opt.plural}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <DatePicker label="Fecha de registro" value={regDate} onChange={setRegDate} />
-          <DatePicker label="Fecha de caducidad" value={expDate} onChange={setExpDate} />
-          <Text>Nota</Text>
-          <TextInput
-            style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-            value={note}
-            onChangeText={setNote}
-          />
-          <TouchableOpacity
-            onPress={handleSave}
-            style={{
-              position: 'absolute',
-              bottom: 20,
-              alignSelf: 'center',
-              backgroundColor: '#2196f3',
-              paddingVertical: 10,
-              paddingHorizontal: 20,
-              borderRadius: 6,
-            }}
-          >
-            <Text style={{ color: '#fff', fontSize: 16 }}>Guardar</Text>
-          </TouchableOpacity>
         </View>
       </Modal>
+
+      {/* Añadir a compras */}
       <AddShoppingItemModal
         visible={shoppingVisible}
         foodName={item?.name}
         foodIcon={item?.icon}
         initialUnit={item?.unit}
-        onSave={({ quantity, unit }) => {
-          addShoppingItem(item.name, quantity || 0, unit);
+        onSave={({ quantity: q, unit: u }) => {
+          addShoppingItem(item?.name, q || 0, u);
+          Alert.alert('Añadido', `${item?.name} añadido a la lista de compras`);
           setShoppingVisible(false);
         }}
         onClose={() => setShoppingVisible(false)}
       />
-      <Modal visible={confirmVisible} transparent animationType="fade">
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <View style={{ backgroundColor: '#fff', padding: 20, alignItems: 'center', width: '80%' }}>
-            {item?.icon && (
-              <Image source={item.icon} style={{ width: 60, height: 60, marginBottom: 10 }} />
-            )}
-            <Text style={{ marginBottom: 20 }}>¿Seguro que deseas eliminar {item?.name}?</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-              <Button title="Cancelar" onPress={() => setConfirmVisible(false)} />
-              <Button
-                title="Eliminar"
-                color="red"
-                onPress={() => {
-                  setConfirmVisible(false);
-                  onDelete();
-                }}
-              />
+
+      {/* Confirmar eliminación */}
+      <Modal visible={confirmVisible} transparent animationType="fade" onRequestClose={() => setConfirmVisible(false)}>
+        <Pressable onPress={() => setConfirmVisible(false)} style={styles.confirmBackdrop}>
+          <Pressable style={styles.confirmCard}>
+            <View style={{ alignItems: 'center', marginBottom: 10 }}>
+              {item?.icon && <Image source={item.icon} style={{ width: 64, height: 64, marginBottom: 10 }} />}
+              <Text style={{ color: palette.text, textAlign: 'center' }}>
+                ¿Seguro que deseas eliminar <Text style={{ color: palette.accent }}>{item?.name}</Text>?
+              </Text>
             </View>
-          </View>
-        </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <TouchableOpacity onPress={() => setConfirmVisible(false)} style={[styles.bottomBtn, { backgroundColor: palette.surface3, flex: 1, marginRight: 8 }]}>
+                <Text style={{ color: palette.text }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { setConfirmVisible(false); onDelete && onDelete(); }}
+                style={[styles.bottomBtn, { backgroundColor: '#e53935', flex: 1, marginLeft: 8 }]}
+              >
+                <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: {
+    maxHeight: '92%',
+    backgroundColor: palette.bg,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.border,
+    overflow: 'hidden',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 6,
+    backgroundColor: palette.surface,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+  },
+  iconBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: palette.surface2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  iconText: { color: palette.text, fontSize: 18 },
+
+  hero: {
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: palette.frame,
+  },
+  foodIconBox: {
+    width: 72, height: 72, borderRadius: 16,
+    backgroundColor: palette.surface2,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: palette.frame,
+    marginRight: 12,
+  },
+  foodName: { color: palette.accent, fontSize: 18, fontWeight: '400', marginBottom: 2 },
+
+  // ScrollView (Web): barra sutil DORADA + gutter estable
+  scroll: {
+    ...(Platform.OS === 'web'
+      ? {
+          scrollbarWidth: 'thin',                          // Firefox
+          scrollbarColor: `${palette.accent} ${palette.surface2}`,
+          scrollbarGutter: 'stable both-edges',            // evita "bailes" al aparecer la barra
+          overscrollBehavior: 'contain',
+        }
+      : {}),
+  },
+
+  labelBold: { color: palette.text, fontWeight: '700', marginBottom: 6, marginTop: 10 },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 4 },
+  chip: {
+    paddingVertical: 8, paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: palette.surface2,
+    borderWidth: 1, borderColor: palette.border,
+    marginRight: 8, marginBottom: 8,
+  },
+  chipSelected: { backgroundColor: palette.surface3, borderColor: palette.accent },
+  chipText: { color: palette.text },
+  chipTextSelected: { color: palette.accent },
+
+  qtyRow: { flexDirection: 'row', alignItems: 'center' },
+  qtyBtn: {
+    backgroundColor: palette.surface3,
+    borderWidth: 1, borderColor: palette.border,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 12, marginHorizontal: 4,
+  },
+  qtyBtnText: { color: palette.accent, fontSize: 18 },
+  qtyInput: {
+    width: 80,
+    textAlign: 'center',
+    backgroundColor: palette.surface2,
+    borderWidth: 1, borderColor: palette.border,
+    borderRadius: 10,
+    paddingVertical: 8, paddingHorizontal: 10,
+    color: palette.text,
+  },
+
+  // Entrada de Nota
+  noteInput: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+
+  // Estilos para DatePicker (gris, consistente)
+  dateContainer: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    borderRadius: 10,
+  },
+  dateInput: {
+    backgroundColor: palette.surface2,
+    color: palette.text,
+  },
+
+  saveFab: {
+    position: 'absolute',
+    bottom: 14, alignSelf: 'center',
+    backgroundColor: palette.accent,
+    paddingVertical: 12, paddingHorizontal: 24,
+    borderRadius: 10,
+    borderWidth: 1, borderColor: '#e2b06c',
+  },
+  saveFabText: { color: '#1b1d22', fontSize: 16, fontWeight: '600' },
+
+  // Confirmación
+  confirmBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  confirmCard: {
+    backgroundColor: palette.surface,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 16,
+    width: '100%',
+    maxWidth: 360,
+  },
+  bottomBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.border,
+    alignItems: 'center',
+  },
+});
+
