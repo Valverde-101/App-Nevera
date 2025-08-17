@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
@@ -12,15 +12,18 @@ import SettingsScreen from './src/screens/SettingsScreen';
 import UnitSettingsScreen from './src/screens/UnitSettingsScreen';
 import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
+import ThemeSettingsScreen from './src/screens/ThemeSettingsScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
+import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+function MainApp() {
+  const { themeName } = useThemeController();
   return (
     <CategoriesProvider>
       <CustomFoodsProvider>
@@ -29,8 +32,8 @@ export default function App() {
             <InventoryProvider>
               <ShoppingProvider>
                 <RecipeProvider>
-                  <NavigationContainer>
-                    <StatusBar style="auto" />
+                  <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
+                    <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
                     <Stack.Navigator>
                     <Stack.Screen
                       name="Inventory"
@@ -58,6 +61,11 @@ export default function App() {
                       options={{ title: 'Ajustes' }}
                     />
                     <Stack.Screen
+                      name="ThemeSettings"
+                      component={ThemeSettingsScreen}
+                      options={{ title: 'Tema de colores' }}
+                    />
+                    <Stack.Screen
                       name="UnitSettings"
                       component={UnitSettingsScreen}
                       options={{ title: 'Tipos de unidad' }}
@@ -81,5 +89,13 @@ export default function App() {
         </UnitsProvider>
       </CustomFoodsProvider>
     </CategoriesProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }

@@ -1,15 +1,13 @@
 
 // SettingsScreen.js – dark–premium v2.2.12
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
-const palette = {
-  bg: '#121316', surface: '#191b20', surface2: '#20242c', surface3: '#262b35',
-  text: '#ECEEF3', textDim: '#A8B1C0', border: '#2c3038', accent: '#F2B56B',
-};
+import { useTheme } from '../context/ThemeContext';
 
 export default function SettingsScreen({ navigation }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions?.({
@@ -18,12 +16,17 @@ export default function SettingsScreen({ navigation }) {
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [nav]);
+  }, [nav, palette]);
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('ThemeSettings')}>
+          <Text style={styles.itemTitle}>Tema de colores</Text>
+          <Text style={styles.itemDesc}>Elige entre claro u oscuro.</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('UnitSettings')}>
           <Text style={styles.itemTitle}>Tipos de unidad</Text>
           <Text style={styles.itemDesc}>Gestiona singular y plural de tus unidades.</Text>
@@ -43,7 +46,7 @@ export default function SettingsScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   scroll: {
     ...(Platform.OS === 'web' ? {
@@ -57,3 +60,4 @@ const styles = StyleSheet.create({
   itemTitle: { color: palette.text, fontWeight: '700', marginBottom: 4 },
   itemDesc: { color: palette.textDim },
 });
+
