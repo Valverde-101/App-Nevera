@@ -1,5 +1,5 @@
 // InventoryScreen.js – dark–premium v2.2.6 (gradientes por ítem + selector segmentado)
-import React, { useState, useLayoutEffect, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,11 +26,41 @@ import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
-import { useTheme, useThemeController } from '../context/ThemeContext';
-import { gradientForKey } from '../theme/gradients';
+
+// ===== Theme =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
+
+// ===== Gradients por ítem =====
+const gradientOptions = [
+  { colors: ['#2a231a', '#1c1a17', '#121316'], locations: [0, 0.55, 1], start: {x: 0.1, y: 0.1}, end: {x: 0.9, y: 0.9} },   // amber
+  { colors: ['#1a212a', '#191d24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.9, y: 0.1}, end: {x: 0.1, y: 0.9} },     // steel
+  { colors: ['#261c2a', '#1e1a24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.2, y: 0.0}, end: {x: 1.0, y: 0.8} },     // violet
+  { colors: ['#1c2422', '#18201e', '#121316'], locations: [0, 0.55, 1], start: {x: 0.0, y: 0.8}, end: {x: 1.0, y: 0.2} },     // teal
+  { colors: ['#241f1a', '#1c1a19', '#121316'], locations: [0, 0.55, 1], start: {x: 0.7, y: 0.0}, end: {x: 0.0, y: 0.9} },     // copper
+  { colors: ['#281a1d', '#1f191b', '#121316'], locations: [0, 0.6, 1], start: {x: 0.0, y: 0.0}, end: {x: 1.0, y: 1.0} },     // wine
+];
+const hashString = (s) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+  return Math.abs(h);
+};
+const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
 
 // ===== Helpers =====
-const getExpiryMeta = (palette, d) => {
+const getExpiryMeta = (d) => {
   if (d === null || isNaN(d)) return null;
   if (d <= 0)  return { bg: palette.danger, text: '#fff', label: 'Venc.' };
   if (d <= 3)  return { bg: palette.warn,   text: '#1b1d22', label: `D-${d}` };
@@ -39,8 +69,6 @@ const getExpiryMeta = (palette, d) => {
 
 // ===== StorageSelector (segmentado, ancho uniforme, clic en todo el segmento) =====
 function StorageSelector({ current, onChange }) {
-  const palette = useTheme();
-  const selectorStyles = useMemo(() => createSelectorStyles(palette), [palette]);
   const { locations } = useLocations();
   const active = locations.filter(l => l.active);
   return (
@@ -71,7 +99,7 @@ function StorageSelector({ current, onChange }) {
   );
 }
 
-const createSelectorStyles = (palette) => StyleSheet.create({
+const selectorStyles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 8, paddingVertical: 6 },
   segment: {
     flex: 1, minHeight: 44, marginHorizontal: 4,
@@ -89,8 +117,6 @@ const createSelectorStyles = (palette) => StyleSheet.create({
 });
 
 export default function InventoryScreen({ navigation }) {
-  const palette = useTheme();
-  const { themeName } = useThemeController();
   const { inventory, addItem, updateItem, removeItem, updateQuantity } = useInventory();
   const { addItems: addShoppingItems } = useShopping();
   const { getLabel } = useUnits();
@@ -379,8 +405,8 @@ export default function InventoryScreen({ navigation }) {
                     const key = `${item.location}-${item.index}`;
                     const selected = selectedItems.some(it => it.key === key);
                     const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                    const meta = getExpiryMeta(palette, daysLeft);
-                    const g = gradientForKey(themeName, item.name || key);
+                    const meta = getExpiryMeta(daysLeft);
+                    const g = gradientForKey(item.name || key);
 
                     return (
                       <TouchableOpacity
@@ -431,8 +457,8 @@ export default function InventoryScreen({ navigation }) {
                       const key = `${item.location}-${item.index}`;
                       const selected = selectedItems.some(it => it.key === key);
                       const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                      const meta = getExpiryMeta(palette, daysLeft);
-                      const g = gradientForKey(themeName, item.name || key);
+                      const meta = getExpiryMeta(daysLeft);
+                      const g = gradientForKey(item.name || key);
 
                       return (
                         <TouchableOpacity
@@ -688,4 +714,3 @@ export default function InventoryScreen({ navigation }) {
     </View>
   );
 }
-

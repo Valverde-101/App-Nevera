@@ -1,14 +1,16 @@
 
 // UnitSettingsScreen.js – dark–premium v2.2.12
-import React, { useState, useLayoutEffect, useMemo } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useUnits } from '../context/UnitsContext';
-import { useTheme } from '../context/ThemeContext';
+
+const palette = {
+  bg: '#121316', surface: '#191b20', surface2: '#20242c', surface3: '#262b35',
+  text: '#ECEEF3', textDim: '#A8B1C0', border: '#2c3038', accent: '#F2B56B', danger: '#e53935',
+};
 
 export default function UnitSettingsScreen() {
-  const palette = useTheme();
-  const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions?.({
@@ -17,7 +19,7 @@ export default function UnitSettingsScreen() {
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [nav, palette]);
+  }, [nav]);
 
   const { units, addUnit, updateUnit, removeUnit } = useUnits();
   const [singular, setSingular] = useState('');
@@ -85,7 +87,7 @@ export default function UnitSettingsScreen() {
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   list: {
     ...(Platform.OS === 'web' ? {
@@ -109,4 +111,3 @@ const createStyles = (palette) => StyleSheet.create({
   primaryBtn: { backgroundColor: palette.accent, borderColor: '#e2b06c', borderWidth: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   primaryBtnText: { color: '#1b1d22', fontWeight: '700' },
 });
-
