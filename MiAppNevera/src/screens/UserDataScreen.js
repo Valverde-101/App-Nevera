@@ -3,7 +3,7 @@
 import React, { useState, useLayoutEffect, useMemo } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
-  StyleSheet, Platform, ScrollView
+  StyleSheet, Platform, ScrollView, Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
+import { signInWithGoogle } from '../utils/googleDrive';
 import { useTheme } from '../context/ThemeContext';
 
 export default function UserDataScreen() {
@@ -39,6 +40,24 @@ export default function UserDataScreen() {
   const [exportConfirm, setExportConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
 
+  const connectGoogle = async () => {
+    try {
+      await signInWithGoogle();
+      if (Platform.OS === 'web') {
+        alert('Conectado con Google Drive.');
+      } else {
+        Alert.alert('Éxito', 'Conectado con Google Drive.');
+      }
+    } catch (e) {
+      console.error('Google sign-in failed', e);
+      if (Platform.OS === 'web') {
+        alert('No se pudo conectar con Google.');
+      } else {
+        Alert.alert('Error', 'No se pudo conectar con Google.');
+      }
+    }
+  };
+
   const resetAll = async () => {
     try { await AsyncStorage.clear(); } catch (e) { console.error('Failed to clear storage', e); }
     resetCustomFoods(); resetUnits(); resetLocations(); resetInventory(); resetShopping(); resetRecipes();
@@ -57,6 +76,14 @@ export default function UserDataScreen() {
           </TouchableOpacity>
           <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={importBackup}>
             <Text style={styles.btnText}>Importar datos</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.title}>Sincronización con Google</Text>
+          <Text style={styles.subtitle}>Conecta tu cuenta para subir respaldos a Drive.</Text>
+          <TouchableOpacity style={styles.primaryBtn} onPress={connectGoogle}>
+            <Text style={styles.primaryBtnText}>Conectar con Google</Text>
           </TouchableOpacity>
         </View>
 
