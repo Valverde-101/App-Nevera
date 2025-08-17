@@ -1,5 +1,5 @@
 
-// BatchAddItemModal.js – dark–premium v2.2.17 (alineado con AddItemModal)
+// BatchAddItemModal.js – compatible con temas v2.2.17 (alineado con AddItemModal)
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
@@ -24,7 +24,7 @@ import { gradientForKey } from '../theme/gradients';
 export default function BatchAddItemModal({ visible, items = [], onSave, onClose }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
-  const styles = useMemo(() => createStyles(palette), [palette]);
+  const styles = useMemo(() => createStyles(palette, themeName), [palette, themeName]);
 
   const today = new Date().toISOString().split('T')[0];
   const { units, getLabel } = useUnits();
@@ -82,7 +82,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
               <Text style={styles.iconText}>←</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={saveAll} style={styles.iconBtnAccent}>
-              <Text style={styles.iconTextDark}>Guardar</Text>
+              <Text style={styles.iconTextOnAccent}>Guardar</Text>
             </TouchableOpacity>
           </View>
 
@@ -222,7 +222,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const createStyles = (palette, themeName) => StyleSheet.create({
   // sheet modal (igual al AddItemModal)
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
@@ -261,10 +261,10 @@ const createStyles = (palette) => StyleSheet.create({
     backgroundColor: palette.accent,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e2b06c',
+    borderColor: palette.frame,
   },
   iconText: { color: palette.text, fontSize: 18 },
-  iconTextDark: { color: '#1b1d22', fontWeight: '700' },
+  iconTextOnAccent: { color: themeName === 'light' ? '#1b1d22' : palette.bg, fontWeight: '700' },
 
   // hero
   hero: {
