@@ -76,14 +76,14 @@ const createSelectorStyles = (palette) => StyleSheet.create({
   segment: {
     flex: 1, minHeight: 44, marginHorizontal: 4,
     borderWidth: 1, borderColor: palette.border,
-    backgroundColor: '#1c1f26',
     justifyContent: 'center', alignItems: 'center',
     borderRadius: 14,
   },
   leftRadius: { borderTopLeftRadius: 14, borderBottomLeftRadius: 14 },
   rightRadius: { borderTopRightRadius: 14, borderBottomRightRadius: 14 },
   segmentSelected: { backgroundColor: palette.surface2, borderColor: palette.accent },
-  segmentIdle: {}, segmentPressed: { opacity: 0.9 },
+  segmentIdle: { backgroundColor: palette.surface },
+  segmentPressed: { opacity: 0.9 },
   label: { fontSize: 15, color: palette.text },
   labelSelected: { color: palette.accent, fontWeight: '700' },
 });
@@ -157,7 +157,10 @@ export default function InventoryScreen({ navigation }) {
       headerTintColor: palette.text,
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
-          <TouchableOpacity onPress={() => setSearchVisible(v => { if (v) setSearch(''); return !v; })} style={{ marginRight: 15 }}>
+          <TouchableOpacity
+            onPress={() => setSearchVisible(v => { if (v) setSearch(''); return !v; })}
+            style={{ marginRight: 15 }}
+          >
             <Text style={{ fontSize: 18, color: palette.text }}>🔍</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Recipes')} style={{ marginRight: 15 }}>
@@ -167,12 +170,24 @@ export default function InventoryScreen({ navigation }) {
             <Text style={{ fontSize: 18, color: palette.text }}>🛒</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setMenuVisible(true)}>
-            <Text style={{ fontSize: 22, paddingHorizontal: 8, borderRadius: 6, color: palette.text, backgroundColor: palette.surface2, borderWidth: 1, borderColor: palette.border }}>⋮</Text>
+            <Text
+              style={{
+                fontSize: 22,
+                paddingHorizontal: 8,
+                borderRadius: 6,
+                color: palette.text,
+                backgroundColor: palette.surface2,
+                borderWidth: 1,
+                borderColor: palette.border,
+              }}
+            >
+              ⋮
+            </Text>
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, palette]);
 
   const allItems = locations.flatMap(loc =>
     inventory[loc.key]?.map((item, index) => ({ ...item, location: loc.key, index })) || [],
