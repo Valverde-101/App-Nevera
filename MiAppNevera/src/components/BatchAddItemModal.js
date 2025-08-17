@@ -1,22 +1,33 @@
-import React, { useEffect, useState } from 'react';
+
+// BatchAddItemModal.js – dark–premium v2.2.17 (alineado con AddItemModal)
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   View,
   Text,
   TextInput,
-  Button,
   TouchableOpacity,
   Image,
   ScrollView,
+  StyleSheet,
+  Platform,
+  Pressable,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
 import { getFoodInfo } from '../foodIcons';
+import { useTheme, useThemeController } from '../context/ThemeContext';
+import { gradientForKey } from '../theme/gradients';
 
-export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
+export default function BatchAddItemModal({ visible, items = [], onSave, onClose }) {
+  const palette = useTheme();
+  const { themeName } = useThemeController();
+  const styles = useMemo(() => createStyles(palette), [palette]);
+
   const today = new Date().toISOString().split('T')[0];
-  const { units } = useUnits();
+  const { units, getLabel } = useUnits();
   const { locations } = useLocations();
   const [data, setData] = useState([]);
 
@@ -48,149 +59,328 @@ export default function BatchAddItemModal({ visible, items, onSave, onClose }) {
     setData(prev => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
   };
 
+  const saveAll = () => {
+    onSave(
+      data.map((d, idx) => ({
+        ...d,
+        index: items[idx].index,
+        name: items[idx].name,
+      })),
+    );
+  };
+
+  // Gradiente estilo AddItemModal (clave genérica "batch")
+  const g = gradientForKey(themeName, 'batch');
+
   return (
-    <Modal visible={visible} animationType="slide">
-      <ScrollView style={{ flex: 1, padding: 20 }}>
-        {items.map((item, idx) => (
-          <View
-            key={idx}
-            style={{
-              marginBottom: 20,
-              borderWidth: 1,
-              borderColor: '#ccc',
-              borderRadius: 8,
-              padding: 10,
-            }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
-              {item.name}
-            </Text>
-            {item.icon && (
-              <Image
-                source={item.icon}
-                style={{ width: 60, height: 60, alignSelf: 'center', marginBottom: 10 }}
-              />
-            )}
-            <Text style={{ marginBottom: 5 }}>Ubicación</Text>
-            <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-              {locations.map(opt => (
-                <TouchableOpacity
-                  key={opt.key}
-                  style={{
-                    padding: 8,
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    marginRight: 10,
-                    backgroundColor: data[idx]?.location === opt.key ? '#ddd' : '#fff',
-                  }}
-                  onPress={() => updateField(idx, 'location', opt.key)}
-                >
-                  <Text>{opt.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}
-            >
-              <Text style={{ marginRight: 10 }}>Cantidad:</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  updateField(
-                    idx,
-                    'quantity',
-                    String(
-                      Math.max(0, (parseFloat(data[idx]?.quantity) || 0) - 1),
-                    ),
-                  )
-                }
-                style={{ borderWidth: 1, padding: 5, marginRight: 5 }}
-              >
-                <Text>◀</Text>
-              </TouchableOpacity>
-              <TextInput
-                style={{
-                  borderWidth: 1,
-                  padding: 5,
-                  marginRight: 5,
-                  width: 60,
-                  textAlign: 'center',
-                }}
-                keyboardType="numeric"
-                value={data[idx]?.quantity}
-                onChangeText={t =>
-                  updateField(idx, 'quantity', t.replace(/[^0-9.]/g, ''))
-                }
-              />
-              <TouchableOpacity
-                onPress={() =>
-                  updateField(
-                    idx,
-                    'quantity',
-                    String((parseFloat(data[idx]?.quantity) || 0) + 1),
-                  )
-                }
-                style={{ borderWidth: 1, padding: 5 }}
-              >
-                <Text>▶</Text>
-              </TouchableOpacity>
-            </View>
-            <Text>Unidad</Text>
-            <View style={{ flexDirection: 'row', marginBottom: 10 }}>
-              {units.map(opt => (
-                <TouchableOpacity
-                  key={opt.key}
-                  style={{
-                    padding: 8,
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    marginRight: 10,
-                    backgroundColor: data[idx]?.unit === opt.key ? '#ddd' : '#fff',
-                  }}
-                  onPress={() => updateField(idx, 'unit', opt.key)}
-                >
-                  <Text>{opt.plural}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <DatePicker
-              label="Fecha de registro"
-              value={data[idx]?.regDate}
-              onChange={t => updateField(idx, 'regDate', t)}
-            />
-            <DatePicker
-              label="Fecha de caducidad"
-              value={data[idx]?.expDate}
-              onChange={t => updateField(idx, 'expDate', t)}
-            />
-            <Text>Nota</Text>
-            <TextInput
-              style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-              value={data[idx]?.note}
-              onChangeText={t => updateField(idx, 'note', t)}
-            />
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.modalBackdrop}>
+        <View style={styles.sheet}>
+          {/* Header */}
+          <View style={styles.headerRow}>
+            <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
+              <Text style={styles.iconText}>←</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={saveAll} style={styles.iconBtnAccent}>
+              <Text style={styles.iconTextDark}>Guardar</Text>
+            </TouchableOpacity>
           </View>
-        ))}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-          <Button title="Volver" onPress={onClose} />
-          <Button
-            title="Guardar"
-            onPress={() =>
-              onSave(
-                data.map((d, idx) => ({
-                  ...d,
-                  index: items[idx].index,
-                  name: items[idx].name,
-                })),
-              )
-            }
-          />
+
+          {/* Hero con gradiente y resumen */}
+          <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.hero}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.heroTitle}>Añadir {items.length} alimento(s)</Text>
+            </View>
+          </LinearGradient>
+
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={{ padding: 16, paddingBottom: 90 }}
+            showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+          >
+            {items.map((item, idx) => (
+              <View key={idx} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.cardRibbon}>
+                  {item.icon && <Image source={item.icon} style={styles.ribbonIcon} />}
+                  <Text style={styles.ribbonTitle} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
+                </LinearGradient>
+                <Text style={styles.cardMeta}>
+                    {data[idx]?.quantity || 0} {getLabel(parseFloat(data[idx]?.quantity) || 0, data[idx]?.unit)}
+                  </Text>
+                </View>
+
+                {/* Ubicación */}
+                <Text style={styles.labelBold}>Ubicación</Text>
+                <View style={styles.chipWrap}>
+                  {locations.map((opt, k) => (
+                    <Pressable
+                      key={opt.key}
+                      onPress={() => updateField(idx, 'location', opt.key)}
+                      style={[
+                        styles.chip,
+                        data[idx]?.location === opt.key && styles.chipSelected,
+                        (k % 3 === 0) && { marginLeft: 0 },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.chipText, data[idx]?.location === opt.key && styles.chipTextSelected]}
+                        numberOfLines={1}
+                      >
+                        {opt.name}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                {/* Cantidad */}
+                <Text style={styles.labelBold}>Cantidad</Text>
+                <View style={styles.qtyRow}>
+                  <TouchableOpacity
+                    onPress={() => updateField(idx, 'quantity', String(Math.max(0, (parseFloat(data[idx]?.quantity) || 0) - 1)))}
+                    style={styles.qtyBtn}
+                  >
+                    <Text style={styles.qtyBtnText}>−</Text>
+                  </TouchableOpacity>
+
+                  <TextInput
+                    style={styles.qtyInput}
+                    keyboardType="numeric"
+                    value={String(data[idx]?.quantity ?? '0')}
+                    onChangeText={(t) => {
+                      const v = parseFloat(t.replace(/[^0-9.]/g, ''));
+                      updateField(idx, 'quantity', Number.isFinite(v) ? String(v) : '0');
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    onPress={() => updateField(idx, 'quantity', String((parseFloat(data[idx]?.quantity) || 0) + 1))}
+                    style={styles.qtyBtn}
+                  >
+                    <Text style={styles.qtyBtnText}>＋</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Unidad */}
+                <Text style={styles.labelBold}>Unidad</Text>
+                <View style={styles.chipWrap}>
+                  {units.map((opt, k) => (
+                    <Pressable
+                      key={opt.key}
+                      onPress={() => updateField(idx, 'unit', opt.key)}
+                      style={[
+                        styles.chip,
+                        data[idx]?.unit === opt.key && styles.chipSelected,
+                        (k % 3 === 0) && { marginLeft: 0 },
+                      ]}
+                    >
+                      <Text
+                        style={[styles.chipText, data[idx]?.unit === opt.key && styles.chipTextSelected]}
+                        numberOfLines={1}
+                      >
+                        {opt.plural}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+
+                {/* Fechas */}
+                <View style={{ marginTop: 6 }}>
+                  <Text style={styles.labelBold}>Fecha de registro</Text>
+                  <DatePicker
+                    value={data[idx]?.regDate}
+                    onChange={t => updateField(idx, 'regDate', t)}
+                    inputStyle={styles.dateInput}
+                    containerStyle={styles.dateContainer}
+                  />
+                  <View style={{ height: 8 }} />
+                  <Text style={styles.labelBold}>Fecha de caducidad</Text>
+                  <DatePicker
+                    value={data[idx]?.expDate}
+                    onChange={t => updateField(idx, 'expDate', t)}
+                    inputStyle={styles.dateInput}
+                    containerStyle={styles.dateContainer}
+                  />
+                </View>
+
+                {/* Nota */}
+                <Text style={styles.labelBold}>Nota</Text>
+                <TextInput
+                  style={styles.noteInput}
+                  value={data[idx]?.note}
+                  onChangeText={t => updateField(idx, 'note', t)}
+                  placeholder="Opcional"
+                  placeholderTextColor={palette.textDim}
+                />
+              </View>
+            ))}
+          </ScrollView>
+
         </View>
-      </ScrollView>
+      </View>
     </Modal>
   );
 }
 
+const createStyles = (palette) => StyleSheet.create({
+  // sheet modal (igual al AddItemModal)
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: {
+    maxHeight: '92%',
+    backgroundColor: palette.bg,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.border,
+    overflow: 'hidden',
+  },
+
+  // header
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 6,
+    backgroundColor: palette.surface,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+  },
+  iconBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: palette.surface2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  iconBtnAccent: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: palette.accent,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2b06c',
+  },
+  iconText: { color: palette.text, fontSize: 18 },
+  iconTextDark: { color: '#1b1d22', fontWeight: '700' },
+
+  // hero
+  hero: {
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: palette.frame,
+  },
+  foodIconBox: {
+    width: 56, height: 56, borderRadius: 14,
+    backgroundColor: palette.surface2,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: palette.frame,
+    marginRight: 12,
+  },
+  heroTitle: { flex: 1, color: palette.accent, fontSize: 18, fontWeight: '400' },
+
+  // scroll
+  scroll: {
+    ...(Platform.OS === 'web'
+      ? {
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${palette.border} transparent`,
+          scrollbarGutter: 'stable both-edges',
+          overscrollBehavior: 'contain',
+        }
+      : {}),
+  },
+
+  // cards
+  card: {
+    backgroundColor: palette.surface2,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 12,
+    marginBottom: 12,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  icon: { width: 30, height: 30, borderRadius: 8, marginRight: 8, resizeMode: 'contain' },
+  cardTitle: { color: palette.text, fontWeight: '700' },
+  cardMeta: { color: palette.textDim },
+
+  cardRibbon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: palette.frame || palette.border,
+  },
+  ribbonIcon: { width: 32, height: 32, marginRight: 10, resizeMode: 'contain' },
+  ribbonTitle: { color: palette.text, fontWeight: '800', fontSize: 18 },
+
+  // labels / inputs (mismos que AddItemModal)
+  labelBold: { color: palette.text, fontWeight: '700', marginBottom: 6, marginTop: 10 },
+  noteInput: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  dateContainer: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    borderRadius: 10,
+  },
+  dateInput: {
+    backgroundColor: palette.surface2,
+    color: palette.text,
+  },
+
+  // chips
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', marginBottom: 4 },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    backgroundColor: palette.surface2,
+    borderWidth: 1,
+    borderColor: palette.border,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  chipSelected: { backgroundColor: palette.surface3, borderColor: palette.accent },
+  chipText: { color: palette.text },
+  chipTextSelected: { color: palette.accent },
+
+  // qty controls (idéntico al AddItemModal)
+  qtyRow: { flexDirection: 'row', alignItems: 'center' },
+  qtyBtn: {
+    backgroundColor: palette.surface3,
+    borderWidth: 1, borderColor: palette.border,
+    paddingHorizontal: 16, paddingVertical: 10,
+    borderRadius: 12, marginHorizontal: 4,
+  },
+  qtyBtnText: { color: palette.accent, fontSize: 18 },
+  qtyInput: {
+    width: 80,
+    textAlign: 'center',
+    backgroundColor: palette.surface2,
+    borderWidth: 1, borderColor: palette.border,
+    borderRadius: 10,
+    paddingVertical: 8, paddingHorizontal: 10,
+    color: palette.text,
+  },
+});
