@@ -2,7 +2,17 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { palette } from '../theme';
+
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  border: '#2c3038',
+  accent: '#F2B56B',
+};
 
 export default function AddCategoryModal({ visible, onClose, onSave }) {
   const [name, setName] = useState('');

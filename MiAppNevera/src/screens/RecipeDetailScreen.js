@@ -21,7 +21,18 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useNavigation } from '@react-navigation/native';
-import { palette } from '../theme';
+
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  danger: '#e53935',
+};
 
 export default function RecipeDetailScreen({ route }) {
   const nav = useNavigation();

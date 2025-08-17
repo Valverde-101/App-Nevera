@@ -24,7 +24,19 @@ import BatchAddItemModal from '../components/BatchAddItemModal';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
-import { palette } from '../theme';
+
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',    // dorado
+  danger: '#e53935',
+};
 
 export default function ShoppingListScreen() {
   const navigation = useNavigation();

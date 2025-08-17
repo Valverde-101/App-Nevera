@@ -26,8 +26,22 @@ import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { palette } from '../theme';
 
+// ===== Theme (igual que InventoryScreen/AddItemModal v2.2.6) =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
 
 // ===== Gradients por ítem (determinísticos por nombre) =====
 const gradientOptions = [
