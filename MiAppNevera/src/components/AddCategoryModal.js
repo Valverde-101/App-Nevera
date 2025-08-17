@@ -1,20 +1,12 @@
 // AddCategoryModal.js – dark–premium v2.2.13
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-};
+import { useTheme } from '../context/ThemeContext';
 
 export default function AddCategoryModal({ visible, onClose, onSave }) {
+  const palette = useTheme();
+  const styles = useMemo(() => createStyles(palette), [palette]);
   const [name, setName] = useState('');
   const [iconUri, setIconUri] = useState(null);
 
@@ -93,7 +85,7 @@ export default function AddCategoryModal({ visible, onClose, onSave }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette) => StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
   card: {
     backgroundColor: palette.surface,
