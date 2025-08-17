@@ -23,18 +23,7 @@ import FoodPickerModal from './FoodPickerModal';
 import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import * as ImagePicker from 'expo-image-picker';
-
-const palette = {
-  bg: '#121316',
-  surface: '#191b20',
-  surface2: '#20242c',
-  surface3: '#262b35',
-  text: '#ECEEF3',
-  textDim: '#A8B1C0',
-  border: '#2c3038',
-  accent: '#F2B56B',
-  danger: '#e53935',
-};
+import { palette } from '../theme';
 
 export default function AddRecipeModal({
   visible,
