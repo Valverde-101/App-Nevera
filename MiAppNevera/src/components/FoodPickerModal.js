@@ -1,3 +1,4 @@
+// FoodPickerModal.js – dark–premium v2.2.10 (stable, overlay-like scrollbars on web)
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -9,6 +10,10 @@ import {
   TouchableOpacity,
   View,
   TouchableWithoutFeedback,
+  Pressable,
+  StyleSheet,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foodIcons, {
@@ -20,6 +25,40 @@ import foodIcons, {
 import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { LinearGradient } from 'expo-linear-gradient';
+
+// ===== Theme (igual que InventoryScreen/AddItemModal v2.2.6) =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
+
+// ===== Gradients por ítem (determinísticos por nombre) =====
+const gradientOptions = [
+  { colors: ['#2a231a', '#1c1a17', '#121316'], locations: [0, 0.55, 1], start: {x: 0.1, y: 0.1}, end: {x: 0.9, y: 0.9} },   // amber
+  { colors: ['#1a212a', '#191d24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.9, y: 0.1}, end: {x: 0.1, y: 0.9} },     // steel
+  { colors: ['#261c2a', '#1e1a24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.2, y: 0.0}, end: {x: 1.0, y: 0.8} },     // violet
+  { colors: ['#1c2422', '#18201e', '#121316'], locations: [0, 0.55, 1], start: {x: 0.0, y: 0.8}, end: {x: 1.0, y: 0.2} },     // teal
+  { colors: ['#241f1a', '#1c1a19', '#121316'], locations: [0, 0.55, 1], start: {x: 0.7, y: 0.0}, end: {x: 0.0, y: 0.9} },     // copper
+  { colors: ['#281a1d', '#1f191b', '#121316'], locations: [0, 0.6, 1], start: {x: 0.0, y: 0.0}, end: {x: 1.0, y: 1.0} },     // wine
+];
+const hashString = (s) => {
+  if (!s) return 0;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+  return Math.abs(h);
+};
+const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
 
 export default function FoodPickerModal({
   visible,
@@ -40,6 +79,11 @@ export default function FoodPickerModal({
   const [hiddenFoods, setHiddenFoods] = useState([]);
   const { customFoods } = useCustomFoods();
   const [addVisible, setAddVisible] = useState(false);
+
+  // === Estados para "ocultar" scrollbars sin mover layout (web) ===
+  const [hoverCat, setHoverCat] = useState(false);
+  const [hoverGrid, setHoverGrid] = useState(false);
+  const [hoverManage, setHoverManage] = useState(false);
 
   useEffect(() => {
     const names = Object.keys(categories);
@@ -112,216 +156,411 @@ export default function FoodPickerModal({
 
   const foods = [...defaultFoods, ...customList];
 
+  // Ancho de las cards de categoría ~ como las cards de alimentos (aprox).
+  const winW = Dimensions.get('window').width;
+  const catCardWidth = Math.max(160, Math.min(240, Math.floor(winW * 0.42)));
+
+  // ==== Scrollbar helpers (WEB): mantener gutter estable y "ocultar" con transparencia ====
+  const webScrollBase = Platform.OS === 'web' ? { scrollbarWidth: 'thin', scrollbarGutter: 'stable both-edges' } : null;
+  const webScrollVisible = Platform.OS === 'web' ? { scrollbarColor: `${palette.accent} ${palette.surface2}` } : null;
+  const webScrollHidden = Platform.OS === 'web' ? { scrollbarColor: `transparent transparent` } : null;
+
   return (
     <>
-      <Modal visible={visible} animationType="slide">
-        <View style={{ flex: 1, padding: 20 }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 10,
-          }}
-        >
-          <TouchableOpacity onPress={onClose}>
-            <Text style={{ fontSize: 24 }}>←</Text>
-          </TouchableOpacity>
-          <View style={{ flexDirection: 'row' }}>
-            <TouchableOpacity
-              onPress={() =>
-                setSearchVisible(v => {
-                  if (v) setSearch('');
-                  return !v;
-                })
-              }
-              style={{ marginRight: 15 }}
-            >
-              <Text style={{ fontSize: 24 }}>🔍</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setAddVisible(true)} style={{ marginRight: 15 }}>
-              <Text style={{ fontSize: 24 }}>＋</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setMenuVisible(true)}>
-              <Text style={{ fontSize: 24 }}>⋮</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-          {/* Top half: category icons */}
-          <View style={{ flex: 1 }}>
-            <ScrollView horizontal contentContainerStyle={{ alignItems: 'center' }}>
-              {categoryNames.map(cat => (
+      <Modal visible={visible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.sheet}>
+            {/* Header */}
+            <View style={styles.headerRow}>
+              <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
+                <Text style={styles.iconText}>←</Text>
+              </TouchableOpacity>
+              <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity
-                  key={cat}
-                  style={{ alignItems: 'center', marginRight: 20 }}
-                  onPress={() => setCurrentCategory(cat)}
-                >
-                  {categories[cat]?.icon && (
-                    <Image
-                      source={categories[cat].icon}
-                      style={{
-                        width: 50,
-                        height: 50,
-                        opacity: currentCategory === cat ? 1 : 0.5,
-                      }}
-                    />
-                  )}
-                  <Text style={{ textAlign: 'center', marginTop: 5 }}>
-                    {categories[cat]?.name ||
-                      cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-          </ScrollView>
-        </View>
-
-        {/* Bottom half: foods for selected category */}
-        <View style={{ flex: 2 }}>
-          {searchVisible && (
-            <TextInput
-              style={{ borderWidth: 1, padding: 5, marginBottom: 10 }}
-              placeholder="Buscar alimento"
-              value={search}
-              onChangeText={setSearch}
-            />
-          )}
-          <ScrollView
-            contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap' }}
-          >
-            {foods.map(food => {
-              const isSelected = selected.includes(food.key);
-              return (
-                <TouchableOpacity
-                  key={food.key}
-                  style={{ width: '25%', alignItems: 'center', marginBottom: 20 }}
                   onPress={() =>
-                    selectMode
-                      ? toggleSelect(food.key)
-                      : onSelect(food.label, food.icon)
+                    setSearchVisible(v => {
+                      if (v) setSearch('');
+                      return !v;
+                    })
                   }
-                  onLongPress={() => {
-                    if (!selectMode) {
-                      setSelectMode(true);
-                      toggleSelect(food.key);
-                    }
-                  }}
+                  style={[styles.iconBtn, { marginRight: 8 }]}
                 >
-                  <View
-                    style={{
-                      borderWidth: selectMode ? 1 : 0,
-                      borderColor: isSelected ? '#2196f3' : 'transparent',
-                      borderRadius: 8,
-                      padding: 5,
-                    }}
-                  >
-                    {food.icon && (
-                      <Image
-                        source={food.icon}
-                        style={{ width: 50, height: 50 }}
-                      />
-                    )}
-                  </View>
-                  <Text style={{ textAlign: 'center', marginTop: 5 }}>{food.label}</Text>
+                  <Text style={styles.iconText}>🔍</Text>
                 </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-          {selectMode ? (
-            <View
-              style={{ flexDirection: 'row', justifyContent: 'space-between' }}
-            >
-              <Button
-                title="Cancelar"
-                onPress={() => {
-                  setSelectMode(false);
-                  setSelected([]);
-                }}
-              />
-              <Button title="Guardar" onPress={handleSave} />
-            </View>
-          ) : null}
-        </View>
-      </View>
-    </Modal>
-    <Modal visible={menuVisible} transparent animationType="fade">
-      <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-        <View
-          style={{
-            flex: 1,
-            alignItems: 'flex-end',
-            paddingTop: 40,
-            paddingRight: 20,
-            backgroundColor: 'rgba(0,0,0,0.3)',
-          }}
-        >
-          <View style={{ backgroundColor: '#fff', padding: 10, borderRadius: 4 }}>
-            <TouchableOpacity
-              onPress={() => {
-                setMenuVisible(false);
-                setManageVisible(true);
-              }}
-            >
-              <Text>Administrar alimentos predeterminados</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
-    <Modal visible={manageVisible} animationType="slide">
-      <View style={{ flex: 1, padding: 20 }}>
-        <View style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}>
-          <Text style={{ textAlign: 'center' }}>
-            Lista completa de todos los alimentos predeterminados
-          </Text>
-          <Text style={{ textAlign: 'center' }}>
-            Los alimentos sombreados no se mostraran en la lista de agregar alimentos
-          </Text>
-        </View>
-        <ScrollView>
-          {baseCategoryNames.map(cat => (
-            <View key={cat} style={{ marginBottom: 15 }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 5 }}>
-                {baseCategories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {baseCategories[cat].items.map(name => {
-                  const hidden = hiddenFoods.includes(name);
-                  return (
-                    <TouchableOpacity
-                      key={name}
-                      style={{ width: '25%', alignItems: 'center', marginBottom: 20 }}
-                      onPress={() =>
-                        setHiddenFoods(prev =>
-                          prev.includes(name)
-                            ? prev.filter(n => n !== name)
-                            : [...prev, name],
-                        )
-                      }
-                    >
-                      <View
-                        style={{
-                          borderRadius: 8,
-                          padding: 5,
-                          backgroundColor: hidden ? '#ddd' : 'transparent',
-                        }}
-                      >
-                        <Image
-                          source={foodIcons[name]}
-                          style={{ width: 50, height: 50, opacity: hidden ? 0.5 : 1 }}
-                        />
-                      </View>
-                      <Text style={{ textAlign: 'center', marginTop: 5 }}>{name}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                <TouchableOpacity onPress={() => setAddVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}>
+                  <Text style={styles.iconText}>＋</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
+                  <Text style={styles.iconText}>⋮</Text>
+                </TouchableOpacity>
               </View>
             </View>
-          ))}
-        </ScrollView>
-        <Button title="Cerrar" onPress={() => setManageVisible(false)} />
-      </View>
-    </Modal>
-    <AddCustomFoodModal visible={addVisible} onClose={() => setAddVisible(false)} />
+
+            {/* Categorías: cards grandes en carrusel horizontal */}
+            <View style={styles.catBar}>
+              <ScrollView
+                horizontal
+                contentContainerStyle={styles.catRow}
+                onMouseEnter={() => setHoverCat(true)}
+                onMouseLeave={() => setHoverCat(false)}
+                showsHorizontalScrollIndicator={Platform.OS === 'web' ? true : false}
+                style={[
+                  Platform.OS === 'web' ? webScrollBase : null,
+                  Platform.OS === 'web' ? (hoverCat ? webScrollVisible : webScrollHidden) : null,
+                ]}
+              >
+                {categoryNames.map((cat) => {
+                  const active = currentCategory === cat;
+                  const g = gradientForKey(cat);
+                  return (
+                    <Pressable
+                      key={cat}
+                      onPress={() => setCurrentCategory(cat)}
+                      style={{ width: catCardWidth, paddingHorizontal: 6 }}
+                    >
+                      <View style={[styles.catCard, active && styles.catCardActive]}>
+                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.catCardGrad}>
+                          <View style={styles.catIconBox}>
+                            {categories[cat]?.icon && (
+                              <Image
+                                source={categories[cat].icon}
+                                style={{ width: 44, height: 44 }}
+                                resizeMode="contain"
+                              />
+                            )}
+                          </View>
+                          <Text style={[styles.catTitle, active && styles.catTitleActive]} numberOfLines={1}>
+                            {categories[cat]?.name || cat}
+                          </Text>
+                        </LinearGradient>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
+            {/* Search */}
+            {searchVisible && (
+              <View style={{ paddingHorizontal: 12, paddingTop: 6, backgroundColor: palette.bg }}>
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Buscar alimento"
+                  placeholderTextColor={palette.textDim}
+                  value={search}
+                  onChangeText={setSearch}
+                />
+              </View>
+            )}
+
+            {/* Foods grid */}
+            <ScrollView
+              onMouseEnter={() => setHoverGrid(true)}
+              onMouseLeave={() => setHoverGrid(false)}
+              style={[
+                { flex: 1 },
+                Platform.OS === 'web' ? webScrollBase : null,
+                Platform.OS === 'web' ? (hoverGrid ? webScrollVisible : webScrollHidden) : null,
+              ]}
+              contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', padding: 8 }}
+              showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+            >
+              {foods.map(food => {
+                const isSelected = selected.includes(food.key);
+                const g = gradientForKey(food.key);
+                return (
+                  <TouchableOpacity
+                    key={food.key}
+                    style={{ width: '25%', padding: 6 }}
+                    onPress={() =>
+                      selectMode
+                        ? toggleSelect(food.key)
+                        : onSelect(food.label, food.icon)
+                    }
+                    onLongPress={() => {
+                      if (!selectMode) {
+                        setSelectMode(true);
+                        toggleSelect(food.key);
+                      }
+                    }}
+                  >
+                    <View style={[styles.card, isSelected && styles.cardSelected]}>
+                      {/* Badge selección */}
+                      {selectMode && (
+                        <View style={[styles.badge, { backgroundColor: isSelected ? palette.accent : palette.surface3 }]}>
+                          <Text style={{ color: isSelected ? '#1b1d22' : palette.text }}>✓</Text>
+                        </View>
+                      )}
+                      <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.cardGrad}>
+                        <View style={styles.foodIconBox}>
+                          {food.icon && (
+                            <Image source={food.icon} style={{ width: 44, height: 44 }} resizeMode="contain" />
+                          )}
+                        </View>
+                        <Text numberOfLines={2} style={styles.foodLabel}>{food.label}</Text>
+                      </LinearGradient>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            {/* Toolbar selección */}
+            {selectMode ? (
+              <View style={styles.bottomBar}>
+                <TouchableOpacity
+                  onPress={() => { setSelectMode(false); setSelected([]); }}
+                  style={[styles.bottomBtn, { backgroundColor: palette.surface3 }]}
+                >
+                  <Text style={{ color: palette.text }}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleSave} style={[styles.bottomBtn, { backgroundColor: palette.accent }]}>
+                  <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Guardar</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Menú */}
+      <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={styles.menuBackdrop}>
+            <View style={styles.menuCard}>
+              <TouchableOpacity
+                onPress={() => {
+                  setMenuVisible(false);
+                  setManageVisible(true);
+                }}
+                style={styles.menuItem}
+              >
+                <Text style={{ color: palette.text }}>Administrar alimentos predeterminados</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Administrar predeterminados */}
+      <Modal visible={manageVisible} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.sheet, { padding: 12 }]}>
+            <View style={{ borderWidth: 1, borderColor: palette.border, backgroundColor: palette.surface2, padding: 10, marginBottom: 10, borderRadius: 10 }}>
+              <Text style={{ textAlign: 'center', color: palette.text }}>
+                Lista completa de todos los alimentos predeterminados
+              </Text>
+              <Text style={{ textAlign: 'center', color: palette.textDim }}>
+                Los alimentos sombreados no se mostrarán en la lista de agregar
+              </Text>
+            </View>
+            <ScrollView
+              onMouseEnter={() => setHoverManage(true)}
+              onMouseLeave={() => setHoverManage(false)}
+              style={[
+                { flex: 1 },
+                Platform.OS === 'web' ? webScrollBase : null,
+                Platform.OS === 'web' ? (hoverManage ? webScrollVisible : webScrollHidden) : null,
+              ]}
+              contentContainerStyle={{ paddingBottom: 10 }}
+              showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+            >
+              {baseCategoryNames.map(cat => (
+                <View key={cat} style={{ marginBottom: 14 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '700', marginBottom: 6, color: palette.accent }}>
+                    {baseCategories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {baseCategories[cat].items.map(name => {
+                      const hidden = hiddenFoods.includes(name);
+                      return (
+                        <Pressable
+                          key={name}
+                          style={{ width: '25%', padding: 6, alignItems: 'center' }}
+                          onPress={() =>
+                            setHiddenFoods(prev =>
+                              prev.includes(name)
+                                ? prev.filter(n => n !== name)
+                                : [...prev, name],
+                            )
+                          }
+                        >
+                          <View
+                            style={{
+                              borderRadius: 12,
+                              padding: 6,
+                              backgroundColor: hidden ? palette.surface3 : palette.surface2,
+                              borderWidth: 1,
+                              borderColor: palette.border,
+                            }}
+                          >
+                            <Image
+                              source={foodIcons[name]}
+                              style={{ width: 44, height: 44, opacity: hidden ? 0.5 : 1 }}
+                              resizeMode="contain"
+                            />
+                          </View>
+                          <Text style={{ textAlign: 'center', marginTop: 5, color: palette.text }} numberOfLines={2}>{name}</Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setManageVisible(false)} style={[styles.bottomBtn, { alignSelf: 'center', backgroundColor: palette.accent, marginBottom: 10 }]}>
+              <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Añadir personalizado */}
+      <AddCustomFoodModal visible={addVisible} onClose={() => setAddVisible(false)} />
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  sheet: {
+    flex: 1,
+    backgroundColor: palette.bg,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.border,
+    overflow: 'hidden',
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 6,
+    backgroundColor: palette.surface,
+    borderBottomWidth: 1,
+    borderColor: palette.border,
+  },
+  iconBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: palette.surface2,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  iconText: { color: palette.text, fontSize: 18 },
+
+  // === Categorías (cards grandes en carrusel) ===
+  catBar: {
+    backgroundColor: palette.surface,
+    borderBottomWidth: 1,
+    borderColor: palette.frame,
+  },
+  catRow: {
+    alignItems: 'stretch',
+    paddingHorizontal: 6,
+    paddingVertical: 10,
+  },
+  catCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.frame,
+    overflow: 'hidden',
+  },
+  catCardActive: { borderColor: palette.accent },
+  catCardGrad: { padding: 10, alignItems: 'center', justifyContent: 'center' },
+  catIconBox: {
+    width: 56, height: 56, borderRadius: 12,
+    backgroundColor: palette.surface2,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: palette.frame,
+    marginBottom: 6,
+  },
+  catTitle: { color: palette.text, fontSize: 14 },
+  catTitleActive: { color: palette.accent },
+
+  // === Search ===
+  searchInput: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 8,
+  },
+
+  // === Food cards ===
+  card: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.frame,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  cardSelected: { borderColor: palette.accent },
+  badge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    zIndex: 10,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  cardGrad: { padding: 8, alignItems: 'center' },
+  foodIconBox: {
+    width: 56, height: 56, borderRadius: 12,
+    backgroundColor: palette.surface2,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: palette.frame,
+    marginBottom: 6,
+  },
+  foodLabel: { textAlign: 'center', color: palette.accent, fontSize: 12, fontWeight: '400' },
+
+  bottomBar: {
+    position: 'absolute',
+    left: 0, right: 0, bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: palette.surface2,
+    borderTopWidth: 1,
+    borderColor: palette.border,
+  },
+  bottomBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.border,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+
+  // === Menú ===
+  menuBackdrop: {
+    flex: 1,
+    alignItems: 'flex-end',
+    paddingTop: 40,
+    paddingRight: 20,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  menuCard: {
+    backgroundColor: palette.surface,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.border,
+  },
+  menuItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+});

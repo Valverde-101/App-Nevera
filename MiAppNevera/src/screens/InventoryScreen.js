@@ -1,5 +1,5 @@
 // InventoryScreen.js – dark–premium v2.2.6 (gradientes por ítem + selector segmentado)
-import React, { useState, useLayoutEffect, useEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Dimensions,
   Pressable,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useInventory } from '../context/InventoryContext';
@@ -311,23 +312,59 @@ export default function InventoryScreen({ navigation }) {
     clearSelection(); setTransferType(null);
   };
 
-    const handleAddToShopping = () => {
+  const handleAddToShopping = () => {
     const items = getSelectedFullItems().map(it => ({ name: it.name, quantity: it.quantity, unit: it.unit }));
     addShoppingItems(items);
     clearSelection();
     setShoppingVisible(false);
   };
 
-    const handleDelete = () => {
+  const handleDelete = () => {
     selectedItems.slice().sort((a, b) => a.location === b.location ? b.index - a.index : a.location.localeCompare(b.location)).forEach(sel => removeItem(sel.location, sel.index));
     clearSelection(); setConfirmVisible(false);
   };
+
+  // ===== Scrollbar (custom, tema consistente) =====
+  const [containerH, setContainerH] = useState(1);
+  const [contentH, setContentH] = useState(1);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const fade = useRef(new Animated.Value(0)).current;
+  const timerRef = useRef(null);
+
+  const showScrollbar = () => {
+    fade.setValue(1);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      Animated.timing(fade, { toValue: 0, duration: 300, useNativeDriver: true }).start();
+    }, 700);
+  };
+
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+  const onScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false, listener: showScrollbar }
+  );
+
+  const thumbH = Math.max(24, containerH * (containerH / Math.max(contentH, 1)));
+  const maxScroll = Math.max(contentH - containerH, 1);
+  const maxThumbTravel = Math.max(containerH - thumbH, 0);
+  const thumbTranslateY = scrollY.interpolate({
+    inputRange: [0, maxScroll],
+    outputRange: [0, maxThumbTravel],
+    extrapolate: 'clamp',
+  });
+
+  const scrollable = contentH > containerH;
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.bg }}>
       <StorageSelector current={storage} onChange={setStorage} />
 
-      <View style={{ paddingHorizontal: 12, paddingTop: 6, flex: 1 }}>
+      <View
+        style={{ paddingHorizontal: 12, paddingTop: 6, flex: 1, position: 'relative' }}
+        onLayout={e => setContainerH(e.nativeEvent.layout.height)}
+      >
         {searchVisible && (
           <TextInput
             placeholder="Buscar..."
@@ -338,7 +375,15 @@ export default function InventoryScreen({ navigation }) {
           />
         )}
 
-        <ScrollView style={{ marginTop: 4 }}>
+        <Animated.ScrollView
+          style={{ marginTop: 4 }}
+          showsVerticalScrollIndicator={false}
+          onContentSizeChange={(w, h) => setContentH(h)}
+          onScroll={onScroll}
+          scrollEventThrottle={16}
+          onScrollBeginDrag={showScrollbar}
+          onMomentumScrollBegin={showScrollbar}
+        >
           {groupOrder.map(cat => {
             const items = grouped[cat];
             if (!items || items.length === 0) return null;
@@ -377,20 +422,25 @@ export default function InventoryScreen({ navigation }) {
                               {item.icon && (<Image source={item.icon} style={{ width: 40, height: 40 }} resizeMode="contain" />)}
                             </View>
                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
-                              <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400', flex: 1 }} numberOfLines={2}>{item.name}</Text>
-                              {daysLeft !== null && (
-                                <View style={{ marginLeft: 10, backgroundColor: palette.danger, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
-                                  <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700' }}>{`D-${daysLeft}`}</Text>
-                                </View>
-                              )}
-
+                              {/* Nombre + badge pegado a la izquierda */}
+                              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
+                                <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{item.name}</Text>
+                                {meta && (
+                                  <View style={{ marginLeft: 10, backgroundColor: meta.bg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
+                                    <Text style={{ color: meta.text, fontSize: 12, fontWeight: '700' }}>{meta.label}</Text>
+                                  </View>
+                                )}
+                              </View>
+                              {/* Controles de cantidad a la derecha */}
                               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, -1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>←</Text>
                                 </TouchableOpacity>
-                                <Text style={{ color: palette.textDim, fontSize: 12, marginHorizontal: 4 }}>
-                                  {item.quantity} {getLabel(item.quantity, item.unit)}
-                                </Text>
+                                <View style={{ width: 80, alignItems: 'center' }}>
+                                  <Text style={{ color: palette.textDim, fontSize: 12 }}>
+                                    {item.quantity} {getLabel(item.quantity, item.unit)}
+                                  </Text>
+                                </View>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>→</Text>
                                 </TouchableOpacity>
@@ -443,7 +493,37 @@ export default function InventoryScreen({ navigation }) {
               </View>
             );
           })}
-        </ScrollView>
+        </Animated.ScrollView>
+
+        {/* Scrollbar overlay */}
+        {scrollable && (
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 6,
+              bottom: 6,
+              right: 4,
+              width: 4,
+              borderRadius: 2,
+              backgroundColor: 'transparent',
+              opacity: fade,
+            }}
+          >
+            <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, borderRadius: 2, backgroundColor: 'rgba(44,48,56,0.35)' }} />
+            <Animated.View
+              style={{
+                position: 'absolute',
+                left: 0,
+                width: 4,
+                borderRadius: 2,
+                height: thumbH,
+                transform: [{ translateY: thumbTranslateY }],
+                backgroundColor: palette.accent,
+              }}
+            />
+          </Animated.View>
+        )}
       </View>
 
       {/* FAB */}
