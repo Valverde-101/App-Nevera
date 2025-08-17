@@ -1,6 +1,6 @@
 
 // UserDataScreen.js – dark–premium v2.2.12
-import React, { useState, useLayoutEffect, useMemo } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
   StyleSheet, Platform, ScrollView
@@ -14,11 +14,13 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
-import { useTheme } from '../context/ThemeContext';
+
+const palette = {
+  bg: '#121316', surface: '#191b20', surface2: '#20242c', surface3: '#262b35',
+  text: '#ECEEF3', textDim: '#A8B1C0', border: '#2c3038', accent: '#F2B56B', danger: '#e53935',
+};
 
 export default function UserDataScreen() {
-  const palette = useTheme();
-  const styles = useMemo(() => createStyles(palette), [palette]);
   const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions?.({
@@ -27,7 +29,7 @@ export default function UserDataScreen() {
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [navigation, palette]);
+  }, [navigation]);
 
   const { resetInventory } = useInventory();
   const { resetUnits } = useUnits();
@@ -117,7 +119,7 @@ export default function UserDataScreen() {
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   scroll: {
     ...(Platform.OS === 'web' ? {
@@ -142,4 +144,3 @@ const createStyles = (palette) => StyleSheet.create({
   modalBody: { color: palette.textDim, marginBottom: 12 },
   modalRow: { flexDirection: 'row' },
 });
-

@@ -1,5 +1,5 @@
 // FoodPickerModal.js – dark–premium v2.2.10 (stable, overlay-like scrollbars on web)
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Image,
@@ -26,7 +26,22 @@ import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../context/ThemeContext';
+
+// ===== Theme (igual que InventoryScreen/AddItemModal v2.2.6) =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
 
 // ===== Gradients por ítem (determinísticos por nombre) =====
 const gradientOptions = [
@@ -51,8 +66,6 @@ export default function FoodPickerModal({
   onClose,
   onMultiSelect,
 }) {
-  const palette = useTheme();
-  const styles = useMemo(() => createStyles(palette), [palette]);
   const { categories } = useCategories();
   const categoryNames = Object.keys(categories);
   const baseCategoryNames = Object.keys(baseCategories);
@@ -408,7 +421,7 @@ export default function FoodPickerModal({
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const styles = StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
     flex: 1,
@@ -551,4 +564,3 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
   },
 });
-

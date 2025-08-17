@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
@@ -17,12 +17,10 @@ import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
-import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
-function MainApp() {
-  const { themeName } = useThemeController();
+export default function App() {
   return (
     <CategoriesProvider>
       <CustomFoodsProvider>
@@ -31,8 +29,8 @@ function MainApp() {
             <InventoryProvider>
               <ShoppingProvider>
                 <RecipeProvider>
-                  <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
-                    <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
+                  <NavigationContainer>
+                    <StatusBar style="auto" />
                     <Stack.Navigator>
                     <Stack.Screen
                       name="Inventory"
@@ -83,13 +81,5 @@ function MainApp() {
         </UnitsProvider>
       </CustomFoodsProvider>
     </CategoriesProvider>
-  );
-}
-
-export default function App() {
-  return (
-    <ThemeProvider>
-      <MainApp />
-    </ThemeProvider>
   );
 }
