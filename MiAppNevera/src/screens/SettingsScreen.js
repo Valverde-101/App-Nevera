@@ -1,13 +1,15 @@
 
 // SettingsScreen.js – dark–premium v2.2.12
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '../context/ThemeContext';
+
+const palette = {
+  bg: '#121316', surface: '#191b20', surface2: '#20242c', surface3: '#262b35',
+  text: '#ECEEF3', textDim: '#A8B1C0', border: '#2c3038', accent: '#F2B56B',
+};
 
 export default function SettingsScreen({ navigation }) {
-  const palette = useTheme();
-  const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions?.({
@@ -16,7 +18,7 @@ export default function SettingsScreen({ navigation }) {
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [nav, palette]);
+  }, [nav]);
 
   return (
     <View style={styles.container}>
@@ -41,7 +43,7 @@ export default function SettingsScreen({ navigation }) {
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
   scroll: {
     ...(Platform.OS === 'web' ? {
@@ -55,4 +57,3 @@ const createStyles = (palette) => StyleSheet.create({
   itemTitle: { color: palette.text, fontWeight: '700', marginBottom: 4 },
   itemDesc: { color: palette.textDim },
 });
-
