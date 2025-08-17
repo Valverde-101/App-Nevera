@@ -522,7 +522,7 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 6,
   },
-  ingRowSelected: { backgroundColor: '#2a231a', borderColor: '#6a4a1a' },
+  ingRowSelected: { backgroundColor: palette.selected, borderColor: '#6a4a1a' },
   ingIcon: { width: 30, height: 30, marginRight: 8, resizeMode: 'contain' },
   ingText: { color: palette.text },
 
