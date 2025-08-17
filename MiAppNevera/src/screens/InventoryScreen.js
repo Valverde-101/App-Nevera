@@ -37,6 +37,8 @@ const getExpiryMeta = (palette, d) => {
   return        { bg: palette.accent, text: '#1b1d22', label: `D-${d}` };
 };
 
+const SELECTED_BORDER_WIDTH = 3;
+
 // ===== StorageSelector (segmentado, ancho uniforme, clic en todo el segmento) =====
 function StorageSelector({ current, onChange }) {
   const palette = useTheme();
@@ -404,7 +406,7 @@ export default function InventoryScreen({ navigation }) {
                         onLongPress={() => { setMultiSelect(true); toggleSelection(item.location, item.index); }}
                         onPress={() => { if (multiSelect) toggleSelection(item.location, item.index); else setEditingItem({ ...item, index: item.index, category: item.location, location: item.location }); }}
                       >
-                        <View style={{ borderRadius: 14, borderWidth: 1, borderColor: selected ? palette.accent : palette.frame, overflow: 'hidden', position: 'relative' }}>
+                        <View style={{ borderRadius: 14, borderWidth: selected ? SELECTED_BORDER_WIDTH : 1, borderColor: selected ? palette.accent : palette.frame, overflow: 'hidden', position: 'relative' }}>
                           
                           <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={{ padding: 10, flexDirection: 'row', alignItems: 'center' }}>
                             <View style={{ width: 52, height: 52, borderRadius: 12, backgroundColor: palette.surface2, alignItems: 'center', justifyContent: 'center', marginRight: 10, borderWidth: 1, borderColor: palette.frame }}>
@@ -456,7 +458,7 @@ export default function InventoryScreen({ navigation }) {
                           onLongPress={() => { setMultiSelect(true); toggleSelection(item.location, item.index); }}
                           onPress={() => { if (multiSelect) toggleSelection(item.location, item.index); else setEditingItem({ ...item, index: item.index, category: item.location, location: item.location }); }}
                         >
-                          <View style={{ borderRadius: 16, borderWidth: 1, borderColor: selected ? palette.accent : palette.frame, overflow: 'hidden', position: 'relative' }}>
+                          <View style={{ borderRadius: 16, borderWidth: selected ? SELECTED_BORDER_WIDTH : 1, borderColor: selected ? palette.accent : palette.frame, overflow: 'hidden', position: 'relative' }}>
                             {meta && (
                               <View style={{ position: 'absolute', top: 6, left: 6, paddingHorizontal: 7, paddingVertical: 3, backgroundColor: meta.bg, borderRadius: 6, zIndex: 20 }}>
                                 <Text style={{ fontSize: 11, color: meta.text, fontWeight: '700' }}>{meta.label}</Text>
