@@ -1,5 +1,5 @@
 // FoodPickerModal.js – dark–premium v2.2.10 (stable, overlay-like scrollbars on web)
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Button,
   Image,
@@ -26,8 +26,39 @@ import AddCustomFoodModal from './AddCustomFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme, useThemeController } from '../context/ThemeContext';
-import { gradientForKey } from '../theme/gradients';
+
+// ===== Theme (igual que InventoryScreen/AddItemModal v2.2.6) =====
+const palette = {
+  bg: '#121316',
+  surface: '#191b20',
+  surface2: '#20242c',
+  surface3: '#262b35',
+  text: '#ECEEF3',
+  textDim: '#A8B1C0',
+  frame: '#3a3429',
+  border: '#2c3038',
+  accent: '#F2B56B',
+  accent2: '#4caf50',
+  danger: '#ff5252',
+  warn: '#ff9f43',
+};
+
+// ===== Gradients por ítem (determinísticos por nombre) =====
+const gradientOptions = [
+  { colors: ['#2a231a', '#1c1a17', '#121316'], locations: [0, 0.55, 1], start: {x: 0.1, y: 0.1}, end: {x: 0.9, y: 0.9} },   // amber
+  { colors: ['#1a212a', '#191d24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.9, y: 0.1}, end: {x: 0.1, y: 0.9} },     // steel
+  { colors: ['#261c2a', '#1e1a24', '#121316'], locations: [0, 0.6, 1], start: {x: 0.2, y: 0.0}, end: {x: 1.0, y: 0.8} },     // violet
+  { colors: ['#1c2422', '#18201e', '#121316'], locations: [0, 0.55, 1], start: {x: 0.0, y: 0.8}, end: {x: 1.0, y: 0.2} },     // teal
+  { colors: ['#241f1a', '#1c1a19', '#121316'], locations: [0, 0.55, 1], start: {x: 0.7, y: 0.0}, end: {x: 0.0, y: 0.9} },     // copper
+  { colors: ['#281a1d', '#1f191b', '#121316'], locations: [0, 0.6, 1], start: {x: 0.0, y: 0.0}, end: {x: 1.0, y: 1.0} },     // wine
+];
+const hashString = (s) => {
+  if (!s) return 0;
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; }
+  return Math.abs(h);
+};
+const gradientForKey = (key) => gradientOptions[hashString(key) % gradientOptions.length];
 
 export default function FoodPickerModal({
   visible,
@@ -35,9 +66,6 @@ export default function FoodPickerModal({
   onClose,
   onMultiSelect,
 }) {
-  const palette = useTheme();
-  const { themeName } = useThemeController();
-  const styles = useMemo(() => createStyles(palette), [palette]);
   const { categories } = useCategories();
   const categoryNames = Object.keys(categories);
   const baseCategoryNames = Object.keys(baseCategories);
@@ -183,7 +211,7 @@ export default function FoodPickerModal({
               >
                 {categoryNames.map((cat) => {
                   const active = currentCategory === cat;
-                  const g = gradientForKey(themeName, cat);
+                  const g = gradientForKey(cat);
                   return (
                     <Pressable
                       key={cat}
@@ -239,7 +267,7 @@ export default function FoodPickerModal({
             >
               {foods.map(food => {
                 const isSelected = selected.includes(food.key);
-                const g = gradientForKey(themeName, food.key);
+                const g = gradientForKey(food.key);
                 return (
                   <TouchableOpacity
                     key={food.key}
@@ -393,7 +421,7 @@ export default function FoodPickerModal({
   );
 }
 
-const createStyles = (palette) => StyleSheet.create({
+const styles = StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {
     flex: 1,
@@ -536,4 +564,3 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
   },
 });
-
