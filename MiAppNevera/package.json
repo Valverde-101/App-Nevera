@@ -36,6 +36,8 @@
   "devDependencies": {
     "metro": "^0.82.5",
     "metro-config": "^0.82.5",
-    "metro-resolver": "^0.82.5"
+    "metro-resolver": "^0.82.5",
+    "typescript": "~5.8.3",
+    "@types/react": "~19.0.10"
   }
 }
