@@ -12,6 +12,7 @@ export const dark = {
   danger: '#ff5252',
   warn: '#ff9f43',
   selected: '#2a231a',
+  marked: '#17191d',
 };
 
 export const light = {
@@ -27,7 +28,8 @@ export const light = {
   accent2: '#4caf50',
   danger: '#e11d48',
   warn: '#f59e0b',
-  selected: '#fbe8d1',
+  selected: '#e8bd88',
+  marked: '#fbe8d1',
 };
 
 export const themes = { dark, light };

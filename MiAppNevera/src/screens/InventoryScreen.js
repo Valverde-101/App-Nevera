@@ -37,7 +37,7 @@ const getExpiryMeta = (palette, d) => {
   return        { bg: palette.accent, text: '#1b1d22', label: `D-${d}` };
 };
 
-const SELECTED_BORDER_WIDTH = 3;
+const SELECTED_BORDER_WIDTH = 2;
 
 // ===== StorageSelector (segmentado, ancho uniforme, clic en todo el segmento) =====
 function StorageSelector({ current, onChange }) {

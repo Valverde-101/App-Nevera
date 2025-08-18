@@ -413,7 +413,7 @@ const createStyles = (palette) => StyleSheet.create({
     borderColor: palette.border,
     backgroundColor: palette.surface2,
   },
-  rowPurchased: { backgroundColor: '#17191d' },
+  rowPurchased: { backgroundColor: palette.marked },
   rowSelected: { backgroundColor: palette.selected, borderLeftWidth: 3, borderLeftColor: palette.accent },
   check: {
     width: 22, height: 22, borderRadius: 6,

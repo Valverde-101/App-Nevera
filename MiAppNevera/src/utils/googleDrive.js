@@ -1,6 +1,6 @@
 import * as AuthSession from 'expo-auth-session';
 
-const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID';
+const CLIENT_ID = '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com';
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
 let accessToken = null;
 
