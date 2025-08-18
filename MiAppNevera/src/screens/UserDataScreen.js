@@ -15,6 +15,7 @@ import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function UserDataScreen() {
   const palette = useTheme();
@@ -35,6 +36,7 @@ export default function UserDataScreen() {
   const { resetShopping } = useShopping();
   const { resetRecipes } = useRecipes();
   const { resetCustomFoods } = useCustomFoods();
+  const { user, signInWithGoogle, signOut } = useAuth();
 
   const [exportConfirm, setExportConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
@@ -58,6 +60,25 @@ export default function UserDataScreen() {
           <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={importBackup}>
             <Text style={styles.btnText}>Importar datos</Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.title}>Sincronización con Google</Text>
+          {user ? (
+            <>
+              <Text style={styles.subtitle}>Conectado como {user.email}</Text>
+              <TouchableOpacity style={styles.btn} onPress={signOut}>
+                <Text style={styles.btnText}>Desconectar</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.subtitle}>Conecta tu cuenta de Google para guardar tus datos en la nube.</Text>
+              <TouchableOpacity style={styles.primaryBtn} onPress={signInWithGoogle}>
+                <Text style={styles.primaryBtnText}>Conectar</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         <View style={[styles.card, { borderColor: '#4a1e1e' }]}>
