@@ -48,8 +48,6 @@ export default function UserDataScreen() {
   const [uploadConfirm, setUploadConfirm] = useState(false);
   const [googleToken, setGoogleToken] = useState(null);
   const [googleUser, setGoogleUser] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
@@ -97,8 +95,6 @@ export default function UserDataScreen() {
   };
 
   const handleUpload = async () => {
-    if (uploading) return;
-    setUploading(true);
     try {
       await uploadBackupToGoogleDrive(googleToken);
       if (Platform.OS === 'web') {
@@ -113,14 +109,10 @@ export default function UserDataScreen() {
       } else {
         Alert.alert('Error', 'No se pudo subir el respaldo.');
       }
-    } finally {
-      setUploading(false);
     }
   };
 
   const handleDownload = async () => {
-    if (downloading) return;
-    setDownloading(true);
     try {
       await downloadBackupFromGoogleDrive(googleToken);
     } catch (e) {
@@ -130,8 +122,6 @@ export default function UserDataScreen() {
       } else {
         Alert.alert('Error', 'No se pudo restaurar el respaldo.');
       }
-    } finally {
-      setDownloading(false);
     }
   };
 
@@ -167,22 +157,10 @@ export default function UserDataScreen() {
               <Text style={styles.connectedText}>
                 Conectado como {googleUser?.email || 'usuario'}
               </Text>
-              <TouchableOpacity
-                style={[styles.primaryBtn, uploading && { opacity: 0.5 }]}
-                disabled={uploading}
-                onPress={() => setUploadConfirm(true)}
-              >
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => setUploadConfirm(true)}>
                 <Text style={styles.primaryBtnText}>Subir respaldo</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.btn,
-                  { marginTop: 10 },
-                  (uploading || downloading) && { opacity: 0.5 },
-                ]}
-                disabled={uploading || downloading}
-                onPress={handleDownload}
-              >
+              <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={handleDownload}>
                 <Text style={styles.btnText}>Restaurar respaldo</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={handleDisconnect}>
@@ -232,8 +210,7 @@ export default function UserDataScreen() {
                   </TouchableOpacity>
                   <View style={{ width: 12 }} />
                   <TouchableOpacity
-                    style={[styles.primaryBtn, { flex: 1 }, uploading && { opacity: 0.5 }]}
-                    disabled={uploading}
+                    style={[styles.primaryBtn, { flex: 1 }]}
                     onPress={() => { setUploadConfirm(false); handleUpload(); }}
                   >
                     <Text style={styles.primaryBtnText}>Aceptar</Text>
