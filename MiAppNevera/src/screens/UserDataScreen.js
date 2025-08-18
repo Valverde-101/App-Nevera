@@ -1,9 +1,9 @@
 
 // UserDataScreen.js – dark–premium v2.2.12
-import React, { useState, useLayoutEffect, useMemo } from 'react';
+import React, { useState, useLayoutEffect, useMemo, useEffect } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
-  StyleSheet, Platform, ScrollView
+  StyleSheet, Platform, ScrollView, Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -14,10 +14,17 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme, useThemeController } from '../context/ThemeContext';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
+import * as Updates from 'expo-updates';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function UserDataScreen() {
   const palette = useTheme();
+  const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const navigation = useNavigation();
   useLayoutEffect(() => {
@@ -38,17 +45,146 @@ export default function UserDataScreen() {
 
   const [exportConfirm, setExportConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [uploadConfirm, setUploadConfirm] = useState(false);
+  const [googleToken, setGoogleToken] = useState(null);
+  const [googleUser, setGoogleUser] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
+    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+  });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem('googleAuth');
+        if (stored) {
+          const { token, user } = JSON.parse(stored);
+          setGoogleToken(token);
+          setGoogleUser(user);
+        }
+      } catch (e) {
+        console.error('Failed to load google auth', e);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const token = response.authentication.accessToken;
+      setGoogleToken(token);
+      (async () => {
+        try {
+          const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const user = await userRes.json();
+          setGoogleUser(user);
+          await AsyncStorage.setItem('googleAuth', JSON.stringify({ token, user }));
+        } catch (e) {
+          console.error('Failed to fetch user info', e);
+        }
+      })();
+    }
+  }, [response]);
+
+  const handleDisconnect = async () => {
+    setGoogleToken(null);
+    setGoogleUser(null);
+    await AsyncStorage.removeItem('googleAuth');
+  };
+
+  const handleUpload = async () => {
+    if (isUploading) return;
+    setIsUploading(true);
+    try {
+      await uploadBackupToGoogleDrive(googleToken);
+      if (Platform.OS === 'web') {
+        alert('Respaldo subido a Google Drive.');
+      } else {
+        Alert.alert('Éxito', 'Respaldo subido a Google Drive.');
+      }
+    } catch (e) {
+      console.error('Upload to Drive failed', e);
+      if (Platform.OS === 'web') {
+        alert('No se pudo subir el respaldo.');
+      } else {
+        Alert.alert('Error', 'No se pudo subir el respaldo.');
+      }
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      await downloadBackupFromGoogleDrive(googleToken);
+    } catch (e) {
+      console.error('Download from Drive failed', e);
+      if (Platform.OS === 'web') {
+        alert('No se pudo restaurar el respaldo.');
+      } else {
+        Alert.alert('Error', 'No se pudo restaurar el respaldo.');
+      }
+    }
+  };
 
   const resetAll = async () => {
-    try { await AsyncStorage.clear(); } catch (e) { console.error('Failed to clear storage', e); }
+    try {
+      const currentTheme = themeName;
+      await AsyncStorage.clear();
+      await AsyncStorage.setItem('themeName', currentTheme);
+    } catch (e) {
+      console.error('Failed to clear storage', e);
+    }
     resetCustomFoods(); resetUnits(); resetLocations(); resetInventory(); resetShopping(); resetRecipes();
     setResetConfirm(false);
+    if (Platform.OS === 'web') {
+      sessionStorage.setItem('reset_notice', '1');
+      window.location.reload();
+    } else {
+      Alert.alert('Reinicio', 'La aplicación se reiniciará', [
+        { text: 'OK', onPress: () => Updates.reloadAsync() },
+      ]);
+    }
   };
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Sincronización</Text>
+          <Text style={styles.subtitle}>Conecta tu cuenta de Google para guardar un respaldo en la nube.</Text>
+          {googleToken ? (
+            <>
+              <Text style={styles.connectedText}>
+                Conectado como {googleUser?.email || 'usuario'}
+              </Text>
+              <TouchableOpacity
+                style={styles.primaryBtn}
+                disabled={isUploading}
+                onPress={() => setUploadConfirm(true)}
+              >
+                <Text style={styles.primaryBtnText}>
+                  {isUploading ? 'Subiendo…' : 'Subir respaldo'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={handleDownload}>
+                <Text style={styles.btnText}>Restaurar respaldo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={handleDisconnect}>
+                <Text style={styles.btnText}>Desconectar cuenta</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity style={styles.btn} disabled={!request} onPress={() => promptAsync()}>
+              <Text style={styles.btnText}>Conectar con Google</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         <View style={styles.card}>
           <Text style={styles.title}>Respaldo y datos</Text>
           <Text style={styles.subtitle}>Exporta o importa todos tus datos.</Text>
@@ -68,6 +204,34 @@ export default function UserDataScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal visible={uploadConfirm} transparent animationType="fade" onRequestClose={() => setUploadConfirm(false)}>
+        <TouchableWithoutFeedback onPress={() => setUploadConfirm(false)}>
+          <View style={styles.modalBackdrop}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalCard}>
+                <Text style={styles.modalTitle}>Subir respaldo</Text>
+                <Text style={styles.modalBody}>
+                  Se subirá un respaldo con todos sus datos y configuraciones actuales,
+                  sobrescribiendo anteriores respaldos. ¿Deseas continuar?
+                </Text>
+                <View style={styles.modalRow}>
+                  <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setUploadConfirm(false)}>
+                    <Text style={styles.btnText}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <View style={{ width: 12 }} />
+                  <TouchableOpacity
+                    style={[styles.primaryBtn, { flex: 1 }]}
+                    onPress={() => { setUploadConfirm(false); handleUpload(); }}
+                  >
+                    <Text style={styles.primaryBtnText}>Aceptar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       <Modal visible={exportConfirm} transparent animationType="fade" onRequestClose={() => setExportConfirm(false)}>
         <TouchableWithoutFeedback onPress={() => setExportConfirm(false)}>
@@ -130,6 +294,7 @@ const createStyles = (palette) => StyleSheet.create({
   card: { backgroundColor: palette.surface2, borderRadius: 12, borderWidth: 1, borderColor: palette.border, padding: 14, marginBottom: 14 },
   title: { color: palette.text, fontWeight: '700', fontSize: 16, marginBottom: 6 },
   subtitle: { color: palette.textDim, marginBottom: 12 },
+  connectedText: { color: palette.textDim, marginBottom: 10 },
   btn: { backgroundColor: palette.surface3, borderColor: palette.border, borderWidth: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
   btnText: { color: palette.text },
   primaryBtn: { backgroundColor: palette.accent, borderColor: '#e2b06c', borderWidth: 1, paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
