@@ -60,24 +60,25 @@ const readAsBase64 = async uri => {
   }
 };
 
-export const exportBackup = async () => {
-  try {
-    const keys = await AsyncStorage.getAllKeys();
-    const entries = await AsyncStorage.multiGet(keys);
-    const data = {};
-    entries.forEach(([k, v]) => {
-      try {
-        data[k] = JSON.parse(v);
-      } catch {
-        data[k] = v;
-      }
-    });
+const ZIP_NAME = 'RefriMudanza.zip';
 
-    const zip = new JSZip();
-    const iconFolder = zip.folder('icons');
-    const imageFolder = zip.folder('images');
-    const exportedIcons = new Map();
-    const exportedImages = new Map();
+const generateZipContent = async () => {
+  const keys = await AsyncStorage.getAllKeys();
+  const entries = await AsyncStorage.multiGet(keys);
+  const data = {};
+  entries.forEach(([k, v]) => {
+    try {
+      data[k] = JSON.parse(v);
+    } catch {
+      data[k] = v;
+    }
+  });
+
+  const zip = new JSZip();
+  const iconFolder = zip.folder('icons');
+  const imageFolder = zip.folder('images');
+  const exportedIcons = new Map();
+  const exportedImages = new Map();
 
     const deriveExt = uri => {
       if (uri.startsWith('data:')) {
@@ -205,38 +206,47 @@ export const exportBackup = async () => {
     }
 
     zip.file('data.json', JSON.stringify(data));
-    const zipName = 'RefriMudanza.zip';
     const zipType = Platform.OS === 'web' ? 'uint8array' : 'base64';
     const zipContent = await zip.generateAsync({ type: zipType });
+    return { zipContent, zipName: ZIP_NAME };
+};
 
+export const createBackupFile = async () => {
+  const { zipContent, zipName } = await generateZipContent();
+  if (Platform.OS === 'web') {
+    return { blob: new Blob([zipContent], { type: 'application/zip' }), name: zipName };
+  }
+  const fileUri = FileSystem.documentDirectory + zipName;
+  await FileSystem.writeAsStringAsync(fileUri, zipContent, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  return { uri: fileUri, name: zipName };
+};
+
+export const exportBackup = async () => {
+  try {
+    const { blob, uri, name } = await createBackupFile();
     if (Platform.OS === 'web') {
-      const blob = new Blob([zipContent], { type: 'application/zip' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = zipName;
+      link.download = name;
       document.body.appendChild(link);
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
       alert('Datos exportados correctamente.');
     } else {
-      const fileUri = FileSystem.documentDirectory + zipName;
-      await FileSystem.writeAsStringAsync(fileUri, zipContent, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, {
+        await Sharing.shareAsync(uri, {
           mimeType: 'application/zip',
           dialogTitle: 'Exportar datos',
           UTI: 'public.zip-archive',
         });
+        Alert.alert('Éxito', 'Datos exportados correctamente.');
       } else {
         Alert.alert('Error', 'No se puede compartir el archivo en este dispositivo.');
-        return;
       }
-      Alert.alert('Éxito', 'Datos exportados correctamente.');
     }
   } catch (e) {
     console.error('Failed to export data', e);
@@ -245,6 +255,118 @@ export const exportBackup = async () => {
     } else {
       Alert.alert('Error', 'No se pudieron exportar los datos.');
     }
+  }
+};
+
+export const importBackupFromZipData = async zipData => {
+  const zip = await JSZip.loadAsync(zipData, {
+    base64: Platform.OS !== 'web',
+  });
+  const dataEntry = zip.file('data.json');
+  if (!dataEntry) throw new Error('Missing data.json');
+  const dataStr = await dataEntry.async('string');
+  const data = JSON.parse(dataStr);
+
+  const iconMap = {};
+  const imageMap = {};
+
+  if (Platform.OS === 'web') {
+    const iconFiles = Object.keys(zip.files).filter(
+      name => name.startsWith('icons/') && !zip.files[name].dir,
+    );
+    for (const name of iconFiles) {
+      const base64 = await zip.file(name).async('base64');
+      const ext = name.split('.').pop().toLowerCase();
+      const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+      iconMap[name] = `data:${mime};base64,${base64}`;
+    }
+
+    const imageFiles = Object.keys(zip.files).filter(
+      name => name.startsWith('images/') && !zip.files[name].dir,
+    );
+    for (const name of imageFiles) {
+      const base64 = await zip.file(name).async('base64');
+      const ext = name.split('.').pop().toLowerCase();
+      const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
+      imageMap[name] = `data:${mime};base64,${base64}`;
+    }
+  } else {
+    const iconsDir = FileSystem.documentDirectory + 'icons/';
+    await FileSystem.makeDirectoryAsync(iconsDir, { intermediates: true }).catch(() => {});
+    const iconFiles = Object.keys(zip.files).filter(
+      name => name.startsWith('icons/') && !zip.files[name].dir,
+    );
+    for (const name of iconFiles) {
+      const base64 = await zip.file(name).async('base64');
+      const filename = name.replace('icons/', '');
+      const dest = iconsDir + filename;
+      await FileSystem.writeAsStringAsync(dest, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      iconMap[name] = dest;
+    }
+
+    const imagesDir = FileSystem.documentDirectory + 'images/';
+    await FileSystem.makeDirectoryAsync(imagesDir, { intermediates: true }).catch(() => {});
+    const imageFiles = Object.keys(zip.files).filter(
+      name => name.startsWith('images/') && !zip.files[name].dir,
+    );
+    for (const name of imageFiles) {
+      const base64 = await zip.file(name).async('base64');
+      const filename = name.replace('images/', '');
+      const dest = imagesDir + filename;
+      await FileSystem.writeAsStringAsync(dest, base64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      imageMap[name] = dest;
+    }
+  }
+
+  if (Array.isArray(data.customCategories)) {
+    for (const cat of data.customCategories) {
+      if (cat.icon && iconMap[cat.icon]) cat.icon = iconMap[cat.icon];
+    }
+  }
+  if (Array.isArray(data.customFoods)) {
+    for (const food of data.customFoods) {
+      if (food.icon && iconMap[food.icon]) food.icon = iconMap[food.icon];
+    }
+  }
+
+  if (Array.isArray(data.locations)) {
+    for (const loc of data.locations) {
+      if (loc.icon && iconMap[loc.icon]) loc.icon = iconMap[loc.icon];
+    }
+  }
+
+  if (Array.isArray(data.recipes)) {
+    for (const rec of data.recipes) {
+      if (rec.image && imageMap[rec.image]) {
+        rec.image = imageMap[rec.image];
+      }
+      if (Array.isArray(rec.ingredients)) {
+        for (const ing of rec.ingredients) {
+          const key = ing.icon?.uri || ing.icon;
+          if (key && iconMap[key]) {
+            ing.icon = { uri: iconMap[key] };
+          }
+        }
+      }
+    }
+  }
+
+  await AsyncStorage.clear();
+  await AsyncStorage.multiSet(
+    Object.entries(data).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)]),
+  );
+
+  if (Platform.OS === 'web') {
+    alert('Datos importados correctamente. La aplicación se recargará.');
+    window.location.reload();
+  } else {
+    Alert.alert('Éxito', 'Datos importados correctamente.', [
+      { text: 'OK', onPress: () => Updates.reloadAsync() },
+    ]);
   }
 };
 
@@ -298,115 +420,7 @@ export const importBackup = async () => {
       });
     }
 
-    const zip = await JSZip.loadAsync(zipData, {
-      base64: Platform.OS !== 'web',
-    });
-    const dataEntry = zip.file('data.json');
-    if (!dataEntry) throw new Error('Missing data.json');
-    const dataStr = await dataEntry.async('string');
-    const data = JSON.parse(dataStr);
-
-    const iconMap = {};
-    const imageMap = {};
-
-    if (Platform.OS === 'web') {
-      const iconFiles = Object.keys(zip.files).filter(
-        name => name.startsWith('icons/') && !zip.files[name].dir,
-      );
-      for (const name of iconFiles) {
-        const base64 = await zip.file(name).async('base64');
-        const ext = name.split('.').pop().toLowerCase();
-        const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
-        iconMap[name] = `data:${mime};base64,${base64}`;
-      }
-
-      const imageFiles = Object.keys(zip.files).filter(
-        name => name.startsWith('images/') && !zip.files[name].dir,
-      );
-      for (const name of imageFiles) {
-        const base64 = await zip.file(name).async('base64');
-        const ext = name.split('.').pop().toLowerCase();
-        const mime = ext === 'jpg' ? 'image/jpeg' : `image/${ext}`;
-        imageMap[name] = `data:${mime};base64,${base64}`;
-      }
-    } else {
-      const iconsDir = FileSystem.documentDirectory + 'icons/';
-      await FileSystem.makeDirectoryAsync(iconsDir, { intermediates: true }).catch(() => {});
-      const iconFiles = Object.keys(zip.files).filter(
-        name => name.startsWith('icons/') && !zip.files[name].dir,
-      );
-      for (const name of iconFiles) {
-        const base64 = await zip.file(name).async('base64');
-        const filename = name.replace('icons/', '');
-        const dest = iconsDir + filename;
-        await FileSystem.writeAsStringAsync(dest, base64, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        iconMap[name] = dest;
-      }
-
-      const imagesDir = FileSystem.documentDirectory + 'images/';
-      await FileSystem.makeDirectoryAsync(imagesDir, { intermediates: true }).catch(() => {});
-      const imageFiles = Object.keys(zip.files).filter(
-        name => name.startsWith('images/') && !zip.files[name].dir,
-      );
-      for (const name of imageFiles) {
-        const base64 = await zip.file(name).async('base64');
-        const filename = name.replace('images/', '');
-        const dest = imagesDir + filename;
-        await FileSystem.writeAsStringAsync(dest, base64, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        imageMap[name] = dest;
-      }
-    }
-
-    if (Array.isArray(data.customCategories)) {
-      for (const cat of data.customCategories) {
-        if (cat.icon && iconMap[cat.icon]) cat.icon = iconMap[cat.icon];
-      }
-    }
-    if (Array.isArray(data.customFoods)) {
-      for (const food of data.customFoods) {
-        if (food.icon && iconMap[food.icon]) food.icon = iconMap[food.icon];
-      }
-    }
-
-    if (Array.isArray(data.locations)) {
-      for (const loc of data.locations) {
-        if (loc.icon && iconMap[loc.icon]) loc.icon = iconMap[loc.icon];
-      }
-    }
-
-    if (Array.isArray(data.recipes)) {
-      for (const rec of data.recipes) {
-        if (rec.image && imageMap[rec.image]) {
-          rec.image = imageMap[rec.image];
-        }
-        if (Array.isArray(rec.ingredients)) {
-          for (const ing of rec.ingredients) {
-            const key = ing.icon?.uri || ing.icon;
-            if (key && iconMap[key]) {
-              ing.icon = { uri: iconMap[key] };
-            }
-          }
-        }
-      }
-    }
-
-    await AsyncStorage.clear();
-    await AsyncStorage.multiSet(
-      Object.entries(data).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)]),
-    );
-
-    if (Platform.OS === 'web') {
-      alert('Datos importados correctamente. La aplicación se recargará.');
-      window.location.reload();
-    } else {
-      Alert.alert('Éxito', 'Datos importados correctamente.', [
-        { text: 'OK', onPress: () => Updates.reloadAsync() },
-      ]);
-    }
+    await importBackupFromZipData(zipData);
   } catch (e) {
     console.error('Failed to import data', e);
     if (Platform.OS === 'web') {
