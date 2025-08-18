@@ -1,9 +1,9 @@
 
 // UserDataScreen.js – dark–premium v2.2.12
-import React, { useState, useLayoutEffect, useMemo } from 'react';
+import React, { useState, useLayoutEffect, useMemo, useEffect } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
-  StyleSheet, Platform, ScrollView
+  StyleSheet, Platform, ScrollView, Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +15,11 @@ import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useTheme } from '../context/ThemeContext';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function UserDataScreen() {
   const palette = useTheme();
@@ -38,6 +43,49 @@ export default function UserDataScreen() {
 
   const [exportConfirm, setExportConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [googleToken, setGoogleToken] = useState(null);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    scopes: ['https://www.googleapis.com/auth/drive.file', 'profile'],
+    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      setGoogleToken(response.authentication.accessToken);
+    }
+  }, [response]);
+
+  const handleUpload = async () => {
+    try {
+      await uploadBackupToGoogleDrive(googleToken);
+      if (Platform.OS === 'web') {
+        alert('Respaldo subido a Google Drive.');
+      } else {
+        Alert.alert('Éxito', 'Respaldo subido a Google Drive.');
+      }
+    } catch (e) {
+      console.error('Upload to Drive failed', e);
+      if (Platform.OS === 'web') {
+        alert('No se pudo subir el respaldo.');
+      } else {
+        Alert.alert('Error', 'No se pudo subir el respaldo.');
+      }
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      await downloadBackupFromGoogleDrive(googleToken);
+    } catch (e) {
+      console.error('Download from Drive failed', e);
+      if (Platform.OS === 'web') {
+        alert('No se pudo restaurar el respaldo.');
+      } else {
+        Alert.alert('Error', 'No se pudo restaurar el respaldo.');
+      }
+    }
+  };
 
   const resetAll = async () => {
     try { await AsyncStorage.clear(); } catch (e) { console.error('Failed to clear storage', e); }
@@ -49,6 +97,25 @@ export default function UserDataScreen() {
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Sincronización</Text>
+          <Text style={styles.subtitle}>Conecta tu cuenta de Google para guardar un respaldo en la nube.</Text>
+          {googleToken ? (
+            <>
+              <TouchableOpacity style={styles.primaryBtn} onPress={handleUpload}>
+                <Text style={styles.primaryBtnText}>Subir respaldo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={handleDownload}>
+                <Text style={styles.btnText}>Restaurar respaldo</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <TouchableOpacity style={styles.btn} disabled={!request} onPress={() => promptAsync()}>
+              <Text style={styles.btnText}>Conectar con Google</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
         <View style={styles.card}>
           <Text style={styles.title}>Respaldo y datos</Text>
           <Text style={styles.subtitle}>Exporta o importa todos tus datos.</Text>
