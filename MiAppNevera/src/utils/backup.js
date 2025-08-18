@@ -60,7 +60,7 @@ const readAsBase64 = async uri => {
   }
 };
 
-export const exportBackup = async () => {
+export const exportBackup = async (share = true) => {
   try {
     const keys = await AsyncStorage.getAllKeys();
     const entries = await AsyncStorage.multiGet(keys);
@@ -211,32 +211,38 @@ export const exportBackup = async () => {
 
     if (Platform.OS === 'web') {
       const blob = new Blob([zipContent], { type: 'application/zip' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = zipName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-      alert('Datos exportados correctamente.');
+      if (share) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = zipName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        alert('Datos exportados correctamente.');
+      }
+      return null;
     } else {
       const fileUri = FileSystem.documentDirectory + zipName;
       await FileSystem.writeAsStringAsync(fileUri, zipContent, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(fileUri, {
-          mimeType: 'application/zip',
-          dialogTitle: 'Exportar datos',
-          UTI: 'public.zip-archive',
-        });
-      } else {
-        Alert.alert('Error', 'No se puede compartir el archivo en este dispositivo.');
-        return;
+      if (share) {
+        if (await Sharing.isAvailableAsync()) {
+          await Sharing.shareAsync(fileUri, {
+            mimeType: 'application/zip',
+            dialogTitle: 'Exportar datos',
+            UTI: 'public.zip-archive',
+          });
+        } else {
+          Alert.alert('Error', 'No se puede compartir el archivo en este dispositivo.');
+          return null;
+        }
+        Alert.alert('Éxito', 'Datos exportados correctamente.');
       }
-      Alert.alert('Éxito', 'Datos exportados correctamente.');
+      return fileUri;
     }
   } catch (e) {
     console.error('Failed to export data', e);
@@ -248,10 +254,14 @@ export const exportBackup = async () => {
   }
 };
 
-export const importBackup = async () => {
+export const importBackup = async (providedUri = null) => {
   try {
     let zipData;
-    if (Platform.OS === 'web') {
+    if (providedUri) {
+      zipData = await FileSystem.readAsStringAsync(providedUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    } else if (Platform.OS === 'web') {
       const file = await new Promise(resolve => {
         const input = document.createElement('input');
         input.type = 'file';
