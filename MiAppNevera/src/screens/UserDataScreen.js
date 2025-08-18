@@ -14,8 +14,6 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
-import { useAuth } from '../context/AuthContext';
-import { uploadBackupToDrive, downloadBackupFromDrive } from '../utils/googleDrive';
 import { useTheme } from '../context/ThemeContext';
 
 export default function UserDataScreen() {
@@ -37,18 +35,9 @@ export default function UserDataScreen() {
   const { resetShopping } = useShopping();
   const { resetRecipes } = useRecipes();
   const { resetCustomFoods } = useCustomFoods();
-  const { user, token, signIn, signOut } = useAuth();
 
   const [exportConfirm, setExportConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
-
-  const syncToDrive = async () => {
-    if (token) await uploadBackupToDrive(token);
-  };
-
-  const restoreFromDrive = async () => {
-    if (token) await downloadBackupFromDrive(token);
-  };
 
   const resetAll = async () => {
     try { await AsyncStorage.clear(); } catch (e) { console.error('Failed to clear storage', e); }
@@ -69,31 +58,6 @@ export default function UserDataScreen() {
           <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={importBackup}>
             <Text style={styles.btnText}>Importar datos</Text>
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.title}>Sincronización con Google</Text>
-          {user ? (
-            <>
-              <Text style={styles.subtitle}>Conectado como {user.email}</Text>
-              <TouchableOpacity style={styles.primaryBtn} onPress={syncToDrive}>
-                <Text style={styles.primaryBtnText}>Subir respaldo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={restoreFromDrive}>
-                <Text style={styles.btnText}>Restaurar respaldo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={signOut}>
-                <Text style={styles.btnText}>Cerrar sesión</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <Text style={styles.subtitle}>Conecta tu cuenta de Google para guardar tus datos en la nube.</Text>
-              <TouchableOpacity style={styles.primaryBtn} onPress={signIn}>
-                <Text style={styles.primaryBtnText}>Conectar con Google</Text>
-              </TouchableOpacity>
-            </>
-          )}
         </View>
 
         <View style={[styles.card, { borderColor: '#4a1e1e' }]}>
