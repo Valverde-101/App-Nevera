@@ -22,8 +22,6 @@
     "expo-document-picker": "^13.1.6",
     "expo-splash-screen": "~0.30.10",
     "expo-status-bar": "~2.2.3",
-    "expo-auth-session": "^6.2.1",
-    "expo-web-browser": "^14.2.0",
     "jszip": "^3.10.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
