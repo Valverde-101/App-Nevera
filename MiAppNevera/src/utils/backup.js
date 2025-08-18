@@ -5,6 +5,7 @@ import * as Sharing from 'expo-sharing';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Updates from 'expo-updates';
 import JSZip from 'jszip';
+import { uploadFileToDrive } from './googleDrive';
 
 const isCustomUri = uri => {
   if (!uri || typeof uri !== 'string') return false;
@@ -206,11 +207,11 @@ export const exportBackup = async () => {
 
     zip.file('data.json', JSON.stringify(data));
     const zipName = 'RefriMudanza.zip';
-    const zipType = Platform.OS === 'web' ? 'uint8array' : 'base64';
-    const zipContent = await zip.generateAsync({ type: zipType });
+    const zipBase64 = await zip.generateAsync({ type: 'base64' });
 
     if (Platform.OS === 'web') {
-      const blob = new Blob([zipContent], { type: 'application/zip' });
+      const byteArray = Uint8Array.from(atob(zipBase64), c => c.charCodeAt(0));
+      const blob = new Blob([byteArray], { type: 'application/zip' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -222,7 +223,7 @@ export const exportBackup = async () => {
       alert('Datos exportados correctamente.');
     } else {
       const fileUri = FileSystem.documentDirectory + zipName;
-      await FileSystem.writeAsStringAsync(fileUri, zipContent, {
+      await FileSystem.writeAsStringAsync(fileUri, zipBase64, {
         encoding: FileSystem.EncodingType.Base64,
       });
 
@@ -237,6 +238,22 @@ export const exportBackup = async () => {
         return;
       }
       Alert.alert('Éxito', 'Datos exportados correctamente.');
+    }
+
+    try {
+      await uploadFileToDrive(zipName, zipBase64);
+      if (Platform.OS === 'web') {
+        alert('Datos subidos a Google Drive.');
+      } else {
+        Alert.alert('Éxito', 'Datos subidos a Google Drive.');
+      }
+    } catch (e) {
+      console.error('Failed to upload to Google Drive', e);
+      if (Platform.OS === 'web') {
+        alert('No se pudieron subir los datos a Google Drive.');
+      } else {
+        Alert.alert('Error', 'No se pudieron subir los datos a Google Drive.');
+      }
     }
   } catch (e) {
     console.error('Failed to export data', e);

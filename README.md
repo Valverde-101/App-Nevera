@@ -42,3 +42,16 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
 El estado de inventario y lista de compras se guarda localmente usando `AsyncStorage`,
 permitiendo uso sin conexión. La misma base de código funciona en Android, iOS y web
 mediante `react-native-web` y Expo.
+
+### Sincronización con Google Drive
+
+Para habilitar la subida automática de respaldos a Google Drive, define una variable de
+entorno con tu ID de cliente OAuth de Google antes de ejecutar la app:
+
+```bash
+export EXPO_PUBLIC_GOOGLE_CLIENT_ID=tu_client_id
+npm start
+```
+
+Cada usuario iniciará sesión con su propia cuenta de Google; el ID de cliente solo
+identifica a la aplicación frente a Google.
