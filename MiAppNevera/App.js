@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Platform } from 'react-native';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import { InventoryProvider } from './src/context/InventoryContext';
@@ -24,6 +25,15 @@ const Stack = createNativeStackNavigator();
 
 function MainApp() {
   const { themeName } = useThemeController();
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      const msg = sessionStorage.getItem('reset_notice');
+      if (msg) {
+        alert('La aplicación se reinició.');
+        sessionStorage.removeItem('reset_notice');
+      }
+    }
+  }, []);
   return (
     <CategoriesProvider>
       <CustomFoodsProvider>
