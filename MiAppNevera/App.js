@@ -19,6 +19,7 @@ import { StatusBar } from 'expo-status-bar';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
+import { AuthProvider } from './src/context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -94,8 +95,10 @@ function MainApp() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <MainApp />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
