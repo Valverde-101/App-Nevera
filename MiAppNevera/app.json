@@ -8,8 +8,9 @@
       "android",
       "web"
     ],
+    "scheme": "frigoflow",
     "android": {
-      "package": "com.anonymous.miappnevera"
+      "package": "com.freigoflow.app"
     },
     "extra": {
       "eas": {
