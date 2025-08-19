@@ -2,7 +2,6 @@
   "expo": {
     "name": "MiAppNevera",
     "slug": "miappnevera",
-    "scheme": "miappnevera",
     "version": "0.0.1",
     "platforms": [
       "ios",
