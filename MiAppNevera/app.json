@@ -2,8 +2,6 @@
   "expo": {
     "name": "MiAppNevera",
     "slug": "miappnevera",
-    "owner": "hope-101",
-    "scheme": "miappnevera",
     "version": "0.0.1",
     "platforms": [
       "ios",
