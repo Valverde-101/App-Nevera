@@ -16,9 +16,11 @@ import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import * as WebBrowser from 'expo-web-browser';
+import * as AuthSession from 'expo-auth-session';
 import * as Google from 'expo-auth-session/providers/google';
 import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
 import * as Updates from 'expo-updates';
+import Constants from 'expo-constants';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -50,10 +52,18 @@ export default function UserDataScreen() {
   const [googleUser, setGoogleUser] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const useProxy = Platform.OS === 'web' || Constants.appOwnership === 'expo';
+  const redirectUri = AuthSession.makeRedirectUri({
+    scheme: 'miappnevera',
+    useProxy,
+    projectId: Constants.expoConfig?.extra?.eas?.projectId,
+  });
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    expoClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
+    webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+    redirectUri,
   });
 
   useEffect(() => {
@@ -190,7 +200,11 @@ export default function UserDataScreen() {
               </TouchableOpacity>
             </>
           ) : (
-            <TouchableOpacity style={styles.btn} disabled={!request} onPress={() => promptAsync()}>
+            <TouchableOpacity
+              style={styles.btn}
+              disabled={!request}
+              onPress={() => promptAsync({ useProxy, redirectUri })}
+            >
               <Text style={styles.btnText}>Conectar con Google</Text>
             </TouchableOpacity>
           )}
