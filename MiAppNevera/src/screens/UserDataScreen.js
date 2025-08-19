@@ -17,6 +17,7 @@ import { exportBackup, importBackup } from '../utils/backup';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
+import * as AuthSession from 'expo-auth-session';
 import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
 import * as Updates from 'expo-updates';
 
@@ -52,8 +53,9 @@ export default function UserDataScreen() {
   const [downloading, setDownloading] = useState(false);
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+    redirectUri: AuthSession.makeRedirectUri(),
   });
 
   useEffect(() => {
