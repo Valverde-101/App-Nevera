@@ -53,7 +53,7 @@ export default function UserDataScreen() {
   const [downloading, setDownloading] = useState(false);
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
-    androidClientId: process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID,
+    androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
     redirectUri: AuthSession.makeRedirectUri(),
   });

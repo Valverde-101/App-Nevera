@@ -9,7 +9,7 @@
       "web"
     ],
     "android": {
-      "package": "com.freigoflow.app"
+      "package": "com.anonymous.miappnevera"
     },
     "extra": {
       "eas": {
