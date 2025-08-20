@@ -51,9 +51,10 @@ export default function UserDataScreen() {
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
+    webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+    redirectUri: Platform.OS === 'web' ? window.location.origin : undefined,
   });
 
   useEffect(() => {
