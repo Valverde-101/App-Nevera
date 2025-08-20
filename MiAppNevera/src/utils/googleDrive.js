@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 import { createBackupFile, importBackupFromZipData } from './backup';
 
 const BASE_BACKUP_NAME = 'RefriMudanza';
@@ -6,9 +7,6 @@ const MAX_REVISIONS = 10;
 
 export const uploadBackupToGoogleDrive = async (accessToken) => {
   const file = await createBackupFile();
-  if (Platform.OS !== 'web') {
-    throw new Error('Solo disponible en la versión web.');
-  }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupName = `${BASE_BACKUP_NAME}_${timestamp}.zip`;
@@ -38,28 +36,42 @@ export const uploadBackupToGoogleDrive = async (accessToken) => {
   if (!existing) {
     metadata.parents = ['appDataFolder'];
   }
-  const form = new FormData();
-  const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
-  form.append('metadata', metadataBlob);
-  form.append('file', file.blob, backupName);
 
   const url = existing
     ? `https://www.googleapis.com/upload/drive/v3/files/${existing.id}?uploadType=multipart&fields=id`
     : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id';
   const method = existing ? 'PATCH' : 'POST';
 
-  const res = await fetch(url, {
-    method,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: form,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || 'Upload failed');
+  let data;
+  if (Platform.OS === 'web') {
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+    form.append('file', file.blob, backupName);
+    const res = await fetch(url, {
+      method,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      body: form,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Upload failed');
+    }
+    data = await res.json();
+  } else {
+    const res = await FileSystem.uploadAsync(url, file.uri, {
+      httpMethod: method,
+      headers: { Authorization: `Bearer ${accessToken}` },
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      fieldName: 'file',
+      parameters: { metadata: JSON.stringify(metadata) },
+      mimeType: 'application/zip',
+    });
+    if (res.status < 200 || res.status >= 300) {
+      throw new Error(res.body || 'Upload failed');
+    }
+    data = JSON.parse(res.body);
+    await FileSystem.deleteAsync(file.uri).catch(() => {});
   }
-  const data = await res.json();
 
   if (existing) {
     try {
@@ -90,10 +102,6 @@ export const uploadBackupToGoogleDrive = async (accessToken) => {
 };
 
 export const downloadBackupFromGoogleDrive = async (accessToken) => {
-  if (Platform.OS !== 'web') {
-    throw new Error('Solo disponible en la versión web.');
-  }
-
   const listParams = new URLSearchParams({
     q: `name contains '${BASE_BACKUP_NAME}_' and trashed=false`,
     spaces: 'appDataFolder',
@@ -118,15 +126,30 @@ export const downloadBackupFromGoogleDrive = async (accessToken) => {
     throw new Error('Tipo de archivo inválido');
   }
 
-  const fileRes = await fetch(
-    `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
-    { headers: { Authorization: `Bearer ${accessToken}` } }
-  );
-  if (!fileRes.ok) {
-    const text = await fileRes.text();
-    throw new Error(text || 'Download failed');
+  const downloadUrl = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`;
+  let arrayBuffer;
+  if (Platform.OS === 'web') {
+    const fileRes = await fetch(downloadUrl, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!fileRes.ok) {
+      const text = await fileRes.text();
+      throw new Error(text || 'Download failed');
+    }
+    arrayBuffer = await fileRes.arrayBuffer();
+  } else {
+    const tempUri = FileSystem.cacheDirectory + 'backup.zip';
+    const res = await FileSystem.downloadAsync(downloadUrl, tempUri, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const base64 = await FileSystem.readAsStringAsync(res.uri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const binary = global.atob(base64);
+    const array = Uint8Array.from(binary, c => c.charCodeAt(0));
+    arrayBuffer = array.buffer;
+    await FileSystem.deleteAsync(res.uri).catch(() => {});
   }
-  const arrayBuffer = await fileRes.arrayBuffer();
   const zipData = new Uint8Array(arrayBuffer);
   await importBackupFromZipData(zipData);
 };
