@@ -20,7 +20,12 @@ import * as Google from 'expo-auth-session/providers/google';
 import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
 import * as Updates from 'expo-updates';
 
-WebBrowser.maybeCompleteAuthSession();
+let GoogleSignin;
+if (Platform.OS !== 'web') {
+  GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
+} else {
+  WebBrowser.maybeCompleteAuthSession();
+}
 
 export default function UserDataScreen() {
   const palette = useTheme();
@@ -50,11 +55,25 @@ export default function UserDataScreen() {
   const [googleUser, setGoogleUser] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const isWeb = Platform.OS === 'web';
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
+    webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
     scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+    ...(isWeb && typeof window !== 'undefined'
+      ? { redirectUri: window.location.origin }
+      : {}),
   });
+
+  useEffect(() => {
+    if (!isWeb) {
+      GoogleSignin.configure({
+        scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
+        webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+        androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
+      });
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -72,6 +91,7 @@ export default function UserDataScreen() {
   }, []);
 
   useEffect(() => {
+    if (!isWeb) return;
     if (response?.type === 'success') {
       const token = response.authentication.accessToken;
       setGoogleToken(token);
@@ -88,12 +108,33 @@ export default function UserDataScreen() {
         }
       })();
     }
-  }, [response]);
+  }, [response, isWeb]);
+
+  const signInNative = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      const { accessToken } = await GoogleSignin.getTokens();
+      setGoogleToken(accessToken);
+      setGoogleUser(userInfo.user);
+      await AsyncStorage.setItem('googleAuth', JSON.stringify({ token: accessToken, user: userInfo.user }));
+    } catch (e) {
+      console.error('Google sign-in failed', e);
+      Alert.alert('Error', 'No se pudo iniciar sesión con Google.');
+    }
+  };
 
   const handleDisconnect = async () => {
     setGoogleToken(null);
     setGoogleUser(null);
     await AsyncStorage.removeItem('googleAuth');
+    if (!isWeb) {
+      try {
+        await GoogleSignin.signOut();
+      } catch (e) {
+        console.error('Google sign-out failed', e);
+      }
+    }
   };
 
   const handleUpload = async () => {
@@ -190,7 +231,11 @@ export default function UserDataScreen() {
               </TouchableOpacity>
             </>
           ) : (
-            <TouchableOpacity style={styles.btn} disabled={!request} onPress={() => promptAsync()}>
+            <TouchableOpacity
+              style={styles.btn}
+              disabled={isWeb && !request}
+              onPress={isWeb ? () => promptAsync() : signInNative}
+            >
               <Text style={styles.btnText}>Conectar con Google</Text>
             </TouchableOpacity>
           )}
