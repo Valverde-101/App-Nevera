@@ -9,7 +9,8 @@
       "web"
     ],
     "android": {
-      "package": "com.anonymous.miappnevera"
+      "package": "com.anonymous.miappnevera",
+      "edgeToEdgeEnabled": true
     },
     "extra": {
       "eas": {
