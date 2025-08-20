@@ -23,7 +23,6 @@
     "expo-splash-screen": "~0.30.10",
     "expo-status-bar": "~2.2.3",
     "expo-auth-session": "^6.2.1",
-    "@react-native-google-signin/google-signin": "^15.0.0",
     "jszip": "^3.10.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
