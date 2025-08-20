@@ -39,6 +39,27 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
    npm start
    ```
 
+## Compilar versión de producción en Windows
+
+1. Preparar proyecto nativo si usas Expo:
+   ```bash
+   npx expo prebuild
+   ```
+2. Asigna una letra de unidad a la carpeta del proyecto para acortar la ruta:
+   ```powershell
+   subst N: "C:\Users\leoni\OneDrive\Documentos\GitHub\App-Nevera\MiAppNevera"
+   ```
+3. Ve al directorio `android` usando la nueva ruta:
+   ```powershell
+   cd N:\android
+   ```
+4. Limpia y genera el APK de release:
+   ```powershell
+   .\gradlew clean
+   $env:NODE_ENV = "production"
+   .\gradlew assembleRelease
+   ```
+
 El estado de inventario y lista de compras se guarda localmente usando `AsyncStorage`,
 permitiendo uso sin conexión. La misma base de código funciona en Android, iOS y web
 mediante `react-native-web` y Expo.
