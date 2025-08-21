@@ -26,7 +26,7 @@ export const light = {
   border: '#d1d5db',
   accent: '#d88c34',
   accent2: '#4caf50',
-  danger: '#e11d48',
+  danger: '#e85072',
   warn: '#f59e0b',
   selected: '#e8bd88',
   marked: '#fbe8d1',
