@@ -128,9 +128,9 @@ export default function FoodPickerModal({
 
   const foods = [...defaultFoods, ...customList];
 
-  // Cards de categoría cuadradas
+  // Ancho de las cards de categoría ~ como las cards de alimentos (aprox).
   const winW = Dimensions.get('window').width;
-  const catCardSize = Math.max(80, Math.min(120, Math.floor(winW * 0.25)));
+  const catCardWidth = Math.max(160, Math.min(240, Math.floor(winW * 0.42)));
 
   // ==== Scrollbar helpers (WEB): mantener gutter estable y "ocultar" con transparencia ====
   const webScrollBase = Platform.OS === 'web' ? { scrollbarWidth: 'thin', scrollbarGutter: 'stable both-edges' } : null;
@@ -147,7 +147,7 @@ export default function FoodPickerModal({
               <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
                 <Text style={styles.iconText}>←</Text>
               </TouchableOpacity>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity
                   onPress={() =>
                     setSearchVisible(v => {
@@ -159,11 +159,8 @@ export default function FoodPickerModal({
                 >
                   <Text style={styles.iconText}>🔍</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setAddVisible(true)}
-                  style={[styles.createBtn, { marginRight: 8 }]}
-                >
-                  <Text style={styles.createText}>Crear Nuevo</Text>
+                <TouchableOpacity onPress={() => setAddVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}>
+                  <Text style={styles.iconText}>＋</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
                   <Text style={styles.iconText}>⋮</Text>
@@ -191,10 +188,10 @@ export default function FoodPickerModal({
                     <Pressable
                       key={cat}
                       onPress={() => setCurrentCategory(cat)}
-                      style={{ paddingHorizontal: 6 }}
+                      style={{ width: catCardWidth, paddingHorizontal: 6 }}
                     >
-                      <View style={[styles.catCard, active && styles.catCardActive, { width: catCardSize, height: catCardSize }]}>
-                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={[styles.catCardGrad, { flex: 1 }]}> 
+                      <View style={[styles.catCard, active && styles.catCardActive]}>
+                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.catCardGrad}>
                           <View style={styles.catIconBox}>
                             {categories[cat]?.icon && (
                               <Image
@@ -427,16 +424,6 @@ const createStyles = (palette) => StyleSheet.create({
     borderColor: palette.border,
   },
   iconText: { color: palette.text, fontSize: 18 },
-  createBtn: {
-    flex: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: palette.accent,
-    borderRadius: 8,
-  },
-  createText: { color: palette.bg, fontSize: 14, fontWeight: '600' },
 
   // === Categorías (cards grandes en carrusel) ===
   catBar: {
