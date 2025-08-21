@@ -219,8 +219,8 @@ const createStyles = (palette) => StyleSheet.create({
   smallBtnText: { color: palette.text },
   smallBtnAccent: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   smallBtnAccentText: { color: '#1b1d22', fontWeight: '700' },
-  smallBtnDanger: { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e' },
-  smallBtnDangerText: { color: '#ff9f9f' },
+  smallBtnDanger: { backgroundColor: palette.danger, borderColor: '#ad2c2c' },
+  smallBtnDangerText: { color: '#fff', fontWeight: '700' },
 
   editor: {
     backgroundColor: palette.surface,
