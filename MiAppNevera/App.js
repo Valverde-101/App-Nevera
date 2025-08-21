@@ -6,7 +6,6 @@ import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import { InventoryProvider } from './src/context/InventoryContext';
 import { ShoppingProvider } from './src/context/ShoppingContext';
-import { SavedListsProvider } from './src/context/SavedListsContext';
 import RecipeBookScreen from './src/screens/RecipeBookScreen';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
 import { RecipeProvider } from './src/context/RecipeContext';
@@ -15,7 +14,6 @@ import UnitSettingsScreen from './src/screens/UnitSettingsScreen';
 import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
 import ThemeSettingsScreen from './src/screens/ThemeSettingsScreen';
-import SavedListsScreen from './src/screens/SavedListsScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
@@ -43,11 +41,10 @@ function MainApp() {
           <LocationsProvider>
             <InventoryProvider>
               <ShoppingProvider>
-                <SavedListsProvider>
-                  <RecipeProvider>
-                    <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
-                      <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
-                      <Stack.Navigator>
+                <RecipeProvider>
+                  <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
+                    <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
+                    <Stack.Navigator>
                     <Stack.Screen
                       name="Inventory"
                       component={InventoryScreen}
@@ -57,11 +54,6 @@ function MainApp() {
                       name="Shopping"
                       component={ShoppingListScreen}
                       options={{ title: 'Compras' }}
-                    />
-                    <Stack.Screen
-                      name="SavedLists"
-                      component={SavedListsScreen}
-                      options={{ title: 'Listas guardadas' }}
                     />
                     <Stack.Screen
                       name="Recipes"
@@ -98,10 +90,9 @@ function MainApp() {
                       component={UserDataScreen}
                       options={{ title: 'Datos de usuario' }}
                     />
-                      </Stack.Navigator>
-                    </NavigationContainer>
-                  </RecipeProvider>
-                </SavedListsProvider>
+                    </Stack.Navigator>
+                  </NavigationContainer>
+                </RecipeProvider>
               </ShoppingProvider>
             </InventoryProvider>
           </LocationsProvider>
