@@ -3,7 +3,7 @@
 import React, { useState, useLayoutEffect, useMemo, useEffect } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
-  StyleSheet, Platform, ScrollView, Alert, NativeModules
+  StyleSheet, Platform, ScrollView, Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -20,13 +20,7 @@ import * as Google from 'expo-auth-session/providers/google';
 import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
 import * as Updates from 'expo-updates';
 
-const isWeb = Platform.OS === 'web';
-let GoogleSignin;
-if (!isWeb && NativeModules?.RNGoogleSignin) {
-  GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
-} else if (isWeb) {
-  WebBrowser.maybeCompleteAuthSession();
-}
+WebBrowser.maybeCompleteAuthSession();
 
 export default function UserDataScreen() {
   const palette = useTheme();
@@ -52,32 +46,15 @@ export default function UserDataScreen() {
   const [exportConfirm, setExportConfirm] = useState(false);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [uploadConfirm, setUploadConfirm] = useState(false);
-  const [downloadConfirm, setDownloadConfirm] = useState(false);
   const [googleToken, setGoogleToken] = useState(null);
   const [googleUser, setGoogleUser] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
-      webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
-      scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-      ...(isWeb && typeof window !== 'undefined'
-        ? { redirectUri: window.location.origin }
-        : {}),
-    },
-    { useProxy: !isWeb }
-  );
-
-  useEffect(() => {
-    if (GoogleSignin?.configure) {
-      GoogleSignin.configure({
-        scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
-        webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
-        androidClientId: '388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com',
-      });
-    }
-  }, []);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    clientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
+    scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
+    redirectUri: Platform.select({ web: window.location.origin, default: undefined }),
+  });
 
   useEffect(() => {
     (async () => {
@@ -93,59 +70,30 @@ export default function UserDataScreen() {
       }
     })();
   }, []);
-  const handleAuthResponse = async (token) => {
-    setGoogleToken(token);
-    try {
-      const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const user = await userRes.json();
-      setGoogleUser(user);
-      await AsyncStorage.setItem('googleAuth', JSON.stringify({ token, user }));
-    } catch (e) {
-      console.error('Failed to fetch user info', e);
-    }
-  };
 
   useEffect(() => {
-    if (isWeb && response?.type === 'success') {
-      handleAuthResponse(response.authentication.accessToken);
-    }
-  }, [response, isWeb]);
-
-  const signInNative = async () => {
-    if (GoogleSignin?.hasPlayServices) {
-      try {
-        await GoogleSignin.hasPlayServices();
-        await GoogleSignin.signIn();
-        const { accessToken } = await GoogleSignin.getTokens();
-        if (accessToken) {
-          await handleAuthResponse(accessToken);
-          return;
+    if (response?.type === 'success') {
+      const token = response.authentication.accessToken;
+      setGoogleToken(token);
+      (async () => {
+        try {
+          const userRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const user = await userRes.json();
+          setGoogleUser(user);
+          await AsyncStorage.setItem('googleAuth', JSON.stringify({ token, user }));
+        } catch (e) {
+          console.error('Failed to fetch user info', e);
         }
-      } catch (e) {
-        console.error('Google sign-in failed, falling back to web flow', e);
-      }
+      })();
     }
-    const res = await promptAsync();
-    if (res?.type === 'success') {
-      await handleAuthResponse(res.authentication.accessToken);
-    } else {
-      Alert.alert('Error', 'No se pudo iniciar sesión con Google.');
-    }
-  };
+  }, [response]);
 
   const handleDisconnect = async () => {
     setGoogleToken(null);
     setGoogleUser(null);
     await AsyncStorage.removeItem('googleAuth');
-    if (GoogleSignin?.signOut) {
-      try {
-        await GoogleSignin.signOut();
-      } catch (e) {
-        console.error('Google sign-out failed', e);
-      }
-    }
   };
 
   const handleUpload = async () => {
@@ -233,7 +181,7 @@ export default function UserDataScreen() {
                   (uploading || downloading) && { opacity: 0.5 },
                 ]}
                 disabled={uploading || downloading}
-                onPress={() => setDownloadConfirm(true)}
+                onPress={handleDownload}
               >
                 <Text style={styles.btnText}>Restaurar respaldo</Text>
               </TouchableOpacity>
@@ -242,11 +190,7 @@ export default function UserDataScreen() {
               </TouchableOpacity>
             </>
           ) : (
-            <TouchableOpacity
-              style={styles.btn}
-              disabled={isWeb && !request}
-              onPress={isWeb ? () => promptAsync() : signInNative}
-            >
+            <TouchableOpacity style={styles.btn} disabled={!request} onPress={() => promptAsync()}>
               <Text style={styles.btnText}>Conectar con Google</Text>
             </TouchableOpacity>
           )}
@@ -279,8 +223,8 @@ export default function UserDataScreen() {
               <View style={styles.modalCard}>
                 <Text style={styles.modalTitle}>Subir respaldo</Text>
                 <Text style={styles.modalBody}>
-                  Se guardará en Google Drive una copia de tus datos y configuraciones actuales,
-                  reemplazando cualquier respaldo anterior. ¿Deseas continuar?
+                  Se subirá un respaldo con todos sus datos y configuraciones actuales,
+                  sobrescribiendo anteriores respaldos. ¿Deseas continuar?
                 </Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setUploadConfirm(false)}>
@@ -291,35 +235,6 @@ export default function UserDataScreen() {
                     style={[styles.primaryBtn, { flex: 1 }, uploading && { opacity: 0.5 }]}
                     disabled={uploading}
                     onPress={() => { setUploadConfirm(false); handleUpload(); }}
-                  >
-                    <Text style={styles.primaryBtnText}>Aceptar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
-      <Modal visible={downloadConfirm} transparent animationType="fade" onRequestClose={() => setDownloadConfirm(false)}>
-        <TouchableWithoutFeedback onPress={() => setDownloadConfirm(false)}>
-          <View style={styles.modalBackdrop}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Restaurar respaldo</Text>
-                <Text style={styles.modalBody}>
-                  Se reemplazarán todos los datos locales con la copia almacenada en Google Drive.
-                  Esta acción sobrescribirá tu información actual. ¿Deseas continuar?
-                </Text>
-                <View style={styles.modalRow}>
-                  <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setDownloadConfirm(false)}>
-                    <Text style={styles.btnText}>Cancelar</Text>
-                  </TouchableOpacity>
-                  <View style={{ width: 12 }} />
-                  <TouchableOpacity
-                    style={[styles.primaryBtn, { flex: 1 }, downloading && { opacity: 0.5 }]}
-                    disabled={downloading}
-                    onPress={() => { setDownloadConfirm(false); handleDownload(); }}
                   >
                     <Text style={styles.primaryBtnText}>Aceptar</Text>
                   </TouchableOpacity>
