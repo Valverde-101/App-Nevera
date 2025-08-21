@@ -20,11 +20,14 @@ import { useShopping } from '../context/ShoppingContext';
 import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddShoppingItemModal from '../components/AddShoppingItemModal';
+import AddCustomItemModal from '../components/AddCustomItemModal';
+import SaveListModal from '../components/SaveListModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
+import { useSavedLists } from '../context/SavedListsContext';
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -42,11 +45,14 @@ export default function ShoppingListScreen() {
   const {
     list,
     addItem,
+    addCustomItem,
     addItems,
     togglePurchased,
     removeItems,
     markPurchased,
+    resetShopping,
   } = useShopping();
+  const { saveList } = useSavedLists();
   const { inventory, addItem: addInventoryItem, removeItem: removeInventoryItem } = useInventory();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
@@ -60,6 +66,9 @@ export default function ShoppingListScreen() {
   const [batchVisible, setBatchVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [autoVisible, setAutoVisible] = useState(false);
+  const [customVisible, setCustomVisible] = useState(false);
+  const [saveVisible, setSaveVisible] = useState(false);
+  const [clearVisible, setClearVisible] = useState(false);
 
   const onSelectFood = (name, icon) => {
     setSelectedFood({ name, icon });
@@ -72,6 +81,13 @@ export default function ShoppingListScreen() {
       addItem(selectedFood.name, quantity, unit);
       setSelectedFood(null);
       setAddVisible(false);
+    }
+  };
+
+  const onSaveCustom = ({ name, quantity, unit }) => {
+    if (name) {
+      addCustomItem(name, quantity, unit);
+      setCustomVisible(false);
     }
   };
 
@@ -113,6 +129,16 @@ export default function ShoppingListScreen() {
     setSelected([]);
     setSelectMode(false);
     setConfirmVisible(false);
+  };
+
+  const handleSaveCurrent = ({ name, note, items }) => {
+    saveList(name, note, items);
+    setSaveVisible(false);
+  };
+
+  const clearAll = () => {
+    resetShopping();
+    setClearVisible(false);
   };
 
   // Guardado por lotes (igual que antes)
@@ -174,9 +200,23 @@ export default function ShoppingListScreen() {
             <TouchableOpacity style={styles.actionBtn} onPress={() => setPickerVisible(true)}>
               <Text style={styles.actionText}>＋ Añadir</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
-              <Text style={styles.iconEmoji}>⚡</Text>
+            <TouchableOpacity style={[styles.actionBtn, { marginLeft: 8 }]} onPress={() => setCustomVisible(true)}>
+              <Text style={styles.actionText}>✎ Personalizado</Text>
             </TouchableOpacity>
+            <View style={{ flexDirection: 'row' }}>
+              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
+                <Text style={styles.iconEmoji}>⚡</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setSaveVisible(true)}>
+                <Text style={styles.iconEmoji}>💾</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setClearVisible(true)}>
+                <Text style={styles.iconEmoji}>🗑️</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => navigation.navigate('SavedLists')}>
+                <Text style={styles.iconEmoji}>📁</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <View style={styles.headerActions}>
@@ -278,11 +318,22 @@ export default function ShoppingListScreen() {
         onSave={onSave}
         onClose={() => setAddVisible(false)}
       />
+      <AddCustomItemModal
+        visible={customVisible}
+        onSave={onSaveCustom}
+        onClose={() => setCustomVisible(false)}
+      />
       <BatchAddItemModal
         visible={batchVisible}
         items={selected.map(idx => ({ ...list[idx], index: idx }))}
         onSave={handleBatchSave}
         onClose={() => setBatchVisible(false)}
+      />
+      <SaveListModal
+        visible={saveVisible}
+        items={list}
+        onSave={handleSaveCurrent}
+        onClose={() => setSaveVisible(false)}
       />
 
       {/* Confirmar eliminación */}
@@ -305,6 +356,33 @@ export default function ShoppingListScreen() {
                     <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={deleteSelected} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Clear all modal */}
+      <Modal
+        visible={clearVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setClearVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setClearVisible(false)}>
+          <View style={styles.modalBackdrop}>
+            <TouchableWithoutFeedback>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Limpiar lista</Text>
+                <Text style={styles.cardBody}>¿Eliminar todos los alimentos de la lista de compras?</Text>
+                <View style={styles.cardActions}>
+                  <TouchableOpacity onPress={() => setClearVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={clearAll} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
                     <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
