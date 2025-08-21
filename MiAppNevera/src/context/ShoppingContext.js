@@ -83,6 +83,16 @@ export const ShoppingProvider = ({children}) => {
     ));
   }, [persist]);
 
+  // Replace entire list (used when loading saved lists)
+  const replaceList = useCallback(items => {
+    persist(() => items.map(it => ({
+      ...it,
+      icon: it.icon || getFoodIcon(it.name),
+      foodCategory: it.foodCategory || getFoodCategory(it.name),
+      purchased: !!it.purchased,
+    })));
+  }, [persist]);
+
   const resetShopping = useCallback(() => {
     setList([]);
     AsyncStorage.removeItem('shopping').catch(e => {
@@ -91,8 +101,8 @@ export const ShoppingProvider = ({children}) => {
   }, []);
 
   const value = useMemo(
-    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping}),
-    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping],
+    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, replaceList}),
+    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, replaceList],
   );
 
   return (
