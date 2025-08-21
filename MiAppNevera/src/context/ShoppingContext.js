@@ -49,19 +49,6 @@ export const ShoppingProvider = ({children}) => {
     persist(prev => [...prev, newItem]);
   }, [persist]);
 
-  // Adds a custom item without checking known foods
-  const addCustomItem = useCallback((name, quantity = 1, unit = 'units') => {
-    const newItem = {
-      name,
-      quantity,
-      unit,
-      icon: null,
-      foodCategory: 'varios',
-      purchased: false,
-    };
-    persist(prev => [...prev, newItem]);
-  }, [persist]);
-
   const addItems = useCallback(items => {
     const newItems = items.map(({name, quantity = 1, unit = 'units'}) => ({
       name,
@@ -96,16 +83,6 @@ export const ShoppingProvider = ({children}) => {
     ));
   }, [persist]);
 
-  // Replace entire list (used when loading saved lists)
-  const replaceList = useCallback(items => {
-    persist(() => items.map(it => ({
-      ...it,
-      icon: it.icon || getFoodIcon(it.name),
-      foodCategory: it.foodCategory || getFoodCategory(it.name),
-      purchased: !!it.purchased,
-    })));
-  }, [persist]);
-
   const resetShopping = useCallback(() => {
     setList([]);
     AsyncStorage.removeItem('shopping').catch(e => {
@@ -114,8 +91,8 @@ export const ShoppingProvider = ({children}) => {
   }, []);
 
   const value = useMemo(
-    () => ({list, addItem, addCustomItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, replaceList}),
-    [list, addItem, addCustomItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, replaceList],
+    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping}),
+    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping],
   );
 
   return (
