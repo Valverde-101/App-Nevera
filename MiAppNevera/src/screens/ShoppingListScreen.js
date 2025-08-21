@@ -25,9 +25,6 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
-import AddMiscItemModal from '../components/AddMiscItemModal';
-import SaveShoppingListModal from '../components/SaveShoppingListModal';
-import { useSavedLists } from '../context/SavedListsContext';
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -46,17 +43,14 @@ export default function ShoppingListScreen() {
     list,
     addItem,
     addItems,
-    addCustomItem,
     togglePurchased,
     removeItems,
     markPurchased,
-    resetShopping,
   } = useShopping();
   const { inventory, addItem: addInventoryItem, removeItem: removeInventoryItem } = useInventory();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
-  const { addList } = useSavedLists();
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
@@ -66,9 +60,6 @@ export default function ShoppingListScreen() {
   const [batchVisible, setBatchVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [autoVisible, setAutoVisible] = useState(false);
-  const [miscVisible, setMiscVisible] = useState(false);
-  const [saveVisible, setSaveVisible] = useState(false);
-  const [clearVisible, setClearVisible] = useState(false);
 
   const onSelectFood = (name, icon) => {
     setSelectedFood({ name, icon });
@@ -95,23 +86,6 @@ export default function ShoppingListScreen() {
       .map(it => ({ name: it.name, quantity: 0, unit: it.unit })); // cantidad 0 según especificación
     if (newItems.length) addItems(newItems);
     setAutoVisible(false);
-  };
-
-  const handleSaveList = ({ name, note }) => {
-    addList(name, note, list);
-    setSaveVisible(false);
-  };
-
-  const handleAddMisc = ({ name, quantity, unit }) => {
-    if (name && name.trim() !== '') {
-      addCustomItem(name, quantity, unit);
-    }
-    setMiscVisible(false);
-  };
-
-  const confirmClear = () => {
-    resetShopping();
-    setClearVisible(false);
   };
 
   const toggleSelect = (index) => {
@@ -199,18 +173,6 @@ export default function ShoppingListScreen() {
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionBtn} onPress={() => setPickerVisible(true)}>
               <Text style={styles.actionText}>＋ Añadir</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setMiscVisible(true)}>
-              <Text style={styles.iconEmoji}>✏️</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setSaveVisible(true)}>
-              <Text style={styles.iconEmoji}>💾</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setClearVisible(true)}>
-              <Text style={styles.iconEmoji}>🗑️</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => navigation.navigate('SavedLists')}>
-              <Text style={styles.iconEmoji}>📁</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
               <Text style={styles.iconEmoji}>⚡</Text>
@@ -316,17 +278,6 @@ export default function ShoppingListScreen() {
         onSave={onSave}
         onClose={() => setAddVisible(false)}
       />
-      <AddMiscItemModal
-        visible={miscVisible}
-        onSave={handleAddMisc}
-        onClose={() => setMiscVisible(false)}
-      />
-      <SaveShoppingListModal
-        visible={saveVisible}
-        items={list}
-        onSave={handleSaveList}
-        onClose={() => setSaveVisible(false)}
-      />
       <BatchAddItemModal
         visible={batchVisible}
         items={selected.map(idx => ({ ...list[idx], index: idx }))}
@@ -355,35 +306,6 @@ export default function ShoppingListScreen() {
                   </TouchableOpacity>
                   <TouchableOpacity onPress={deleteSelected} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
                     <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
-      {/* Confirmar limpiar lista */}
-      <Modal
-        visible={clearVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setClearVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setClearVisible(false)}>
-          <View style={styles.modalBackdrop}>
-            <TouchableWithoutFeedback>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Limpiar lista</Text>
-                <Text style={styles.cardBody}>
-                  ¿Eliminar todos los alimentos de la lista de compras?
-                </Text>
-                <View style={styles.cardActions}>
-                  <TouchableOpacity onPress={() => setClearVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>Cancelar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={confirmClear} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>Limpiar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -433,7 +355,7 @@ const createStyles = (palette) => StyleSheet.create({
     borderColor: palette.border,
     backgroundColor: palette.surface,
   },
-  headerActions: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
+  headerActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   actionBtn: {
     backgroundColor: palette.accent,
     borderColor: '#e2b06c',

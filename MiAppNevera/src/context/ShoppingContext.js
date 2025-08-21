@@ -61,19 +61,6 @@ export const ShoppingProvider = ({children}) => {
     persist(prev => [...prev, ...newItems]);
   }, [persist]);
 
-  // Añade un ítem sin icono y con categoría fija "varios".
-  const addCustomItem = useCallback((name, quantity = 1, unit = 'units') => {
-    const newItem = {
-      name,
-      quantity,
-      unit,
-      icon: undefined,
-      foodCategory: 'varios',
-      purchased: false,
-    };
-    persist(prev => [...prev, newItem]);
-  }, [persist]);
-
   const togglePurchased = useCallback(index => {
     persist(prev => prev.map((item, idx) =>
       idx === index ? {...item, purchased: !item.purchased} : item,
@@ -103,19 +90,9 @@ export const ShoppingProvider = ({children}) => {
     });
   }, []);
 
-  // Reemplaza la lista completa (usado al cargar listas guardadas)
-  const replaceList = useCallback(items => {
-    const mapped = items.map(it => ({
-      ...it,
-      icon: it.icon || getFoodIcon(it.name),
-      foodCategory: it.foodCategory || getFoodCategory(it.name) || 'varios',
-    }));
-    persist(mapped);
-  }, [persist]);
-
   const value = useMemo(
-    () => ({list, addItem, addItems, addCustomItem, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, replaceList}),
-    [list, addItem, addItems, addCustomItem, togglePurchased, removeItem, removeItems, markPurchased, resetShopping, replaceList],
+    () => ({list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping}),
+    [list, addItem, addItems, togglePurchased, removeItem, removeItems, markPurchased, resetShopping],
   );
 
   return (
