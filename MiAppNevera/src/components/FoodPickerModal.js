@@ -128,9 +128,9 @@ export default function FoodPickerModal({
 
   const foods = [...defaultFoods, ...customList];
 
-  // Ancho de las cards de categoría ~ como las cards de alimentos (aprox).
+  // Cards de categoría cuadradas
   const winW = Dimensions.get('window').width;
-  const catCardWidth = Math.max(160, Math.min(240, Math.floor(winW * 0.42)));
+  const catCardSize = Math.max(80, Math.min(120, Math.floor(winW * 0.25)));
 
   // ==== Scrollbar helpers (WEB): mantener gutter estable y "ocultar" con transparencia ====
   const webScrollBase = Platform.OS === 'web' ? { scrollbarWidth: 'thin', scrollbarGutter: 'stable both-edges' } : null;
@@ -147,7 +147,7 @@ export default function FoodPickerModal({
               <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
                 <Text style={styles.iconText}>←</Text>
               </TouchableOpacity>
-              <View style={{ flexDirection: 'row' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
                   onPress={() =>
                     setSearchVisible(v => {
@@ -159,8 +159,11 @@ export default function FoodPickerModal({
                 >
                   <Text style={styles.iconText}>🔍</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setAddVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}>
-                  <Text style={styles.iconText}>＋</Text>
+                <TouchableOpacity
+                  onPress={() => setAddVisible(true)}
+                  style={[styles.createBtn, { marginRight: 8 }]}
+                >
+                  <Text style={styles.createText}>Crear Nuevo</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
                   <Text style={styles.iconText}>⋮</Text>
@@ -188,10 +191,10 @@ export default function FoodPickerModal({
                     <Pressable
                       key={cat}
                       onPress={() => setCurrentCategory(cat)}
-                      style={{ width: catCardWidth, paddingHorizontal: 6 }}
+                      style={{ paddingHorizontal: 6 }}
                     >
-                      <View style={[styles.catCard, active && styles.catCardActive]}>
-                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.catCardGrad}>
+                      <View style={[styles.catCard, active && styles.catCardActive, { width: catCardSize, height: catCardSize }]}>
+                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={[styles.catCardGrad, { flex: 1 }]}> 
                           <View style={styles.catIconBox}>
                             {categories[cat]?.icon && (
                               <Image
@@ -372,7 +375,9 @@ export default function FoodPickerModal({
                               resizeMode="contain"
                             />
                           </View>
-                          <Text style={{ textAlign: 'center', marginTop: 5, color: palette.text }} numberOfLines={2}>{name}</Text>
+                          <Text style={{ textAlign: 'center', marginTop: 5, color: palette.text }} numberOfLines={2}>
+                            {getFoodInfo(name)?.name || name}
+                          </Text>
                         </Pressable>
                       );
                     })}
@@ -416,14 +421,28 @@ const createStyles = (palette) => StyleSheet.create({
     borderColor: palette.border,
   },
   iconBtn: {
+    height: 40,
     paddingHorizontal: 10,
-    paddingVertical: 6,
     backgroundColor: palette.surface2,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: palette.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconText: { color: palette.text, fontSize: 18 },
+  createBtn: {
+    flex: 1,
+    height: 40,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.accent,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2b06c',
+  },
+  createText: { color: palette.bg, fontSize: 16, fontWeight: '600' },
 
   // === Categorías (cards grandes en carrusel) ===
   catBar: {
