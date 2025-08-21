@@ -45,11 +45,11 @@ export default function UnitSettingsScreen() {
       <TouchableOpacity style={styles.smallBtn} onPress={() => startEdit(item)}>
         <Text style={styles.smallBtnText}>✏️ Editar</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.smallBtn, { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e', marginLeft: 8 }]} onPress={() => removeUnit(item.key)}>
-        <Text style={{ color: '#ff9f9f' }}>🗑️ Eliminar</Text>
-      </TouchableOpacity>
-    </View>
-  );
+        <TouchableOpacity style={[styles.smallBtn, styles.smallBtnDanger, { marginLeft: 8 }]} onPress={() => removeUnit(item.key)}>
+          <Text style={styles.smallBtnDangerText}>🗑️ Eliminar</Text>
+        </TouchableOpacity>
+      </View>
+    );
 
   return (
     <View style={styles.container}>
@@ -100,6 +100,8 @@ const createStyles = (palette) => StyleSheet.create({
   rowSub: { color: palette.textDim, fontSize: 12 },
   smallBtn: { backgroundColor: palette.surface3, borderColor: palette.border, borderWidth: 1, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10 },
   smallBtnText: { color: palette.text },
+  smallBtnDanger: { backgroundColor: palette.danger, borderColor: '#ad2c2c' },
+  smallBtnDangerText: { color: '#fff', fontWeight: '700' },
   editor: { backgroundColor: palette.surface, borderTopWidth: 1, borderColor: palette.border, padding: 12 },
   editorTitle: { color: palette.text, fontWeight: '700', marginBottom: 6 },
   input: { backgroundColor: palette.surface2, color: palette.text, borderColor: palette.border, borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: Platform.OS === 'web' ? 10 : 8, marginBottom: 8 },
