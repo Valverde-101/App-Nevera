@@ -128,9 +128,9 @@ export default function FoodPickerModal({
 
   const foods = [...defaultFoods, ...customList];
 
-  // Cards de categoría cuadradas
+  // Ancho de las cards de categoría ~ como las cards de alimentos (aprox).
   const winW = Dimensions.get('window').width;
-  const catCardSize = Math.max(80, Math.min(120, Math.floor(winW * 0.25)));
+  const catCardWidth = Math.max(160, Math.min(240, Math.floor(winW * 0.42)));
 
   // ==== Scrollbar helpers (WEB): mantener gutter estable y "ocultar" con transparencia ====
   const webScrollBase = Platform.OS === 'web' ? { scrollbarWidth: 'thin', scrollbarGutter: 'stable both-edges' } : null;
@@ -159,8 +159,8 @@ export default function FoodPickerModal({
                 >
                   <Text style={styles.iconText}>🔍</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setAddVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}> 
-                  <Text style={[styles.iconText, { fontSize: 14 }]}>Crear Personalizado</Text>
+                <TouchableOpacity onPress={() => setAddVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}>
+                  <Text style={styles.iconText}>＋</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
                   <Text style={styles.iconText}>⋮</Text>
@@ -188,10 +188,10 @@ export default function FoodPickerModal({
                     <Pressable
                       key={cat}
                       onPress={() => setCurrentCategory(cat)}
-                      style={{ paddingHorizontal: 6 }}
+                      style={{ width: catCardWidth, paddingHorizontal: 6 }}
                     >
-                      <View style={[styles.catCard, active && styles.catCardActive, { width: catCardSize, height: catCardSize }]}>
-                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={[styles.catCardGrad, { flex: 1 }]}> 
+                      <View style={[styles.catCard, active && styles.catCardActive]}>
+                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.catCardGrad}>
                           <View style={styles.catIconBox}>
                             {categories[cat]?.icon && (
                               <Image
