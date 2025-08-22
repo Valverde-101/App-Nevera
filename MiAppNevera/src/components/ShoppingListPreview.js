@@ -12,6 +12,8 @@ import {
 import { useUnits } from '../context/UnitsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
+import { getFoodInfo } from '../foodIcons';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import CostPieChart from './CostPieChart';
 
 export default function ShoppingListPreview({ items = [], onItemPress, onItemLongPress, selected = [], style }) {
@@ -19,6 +21,8 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
   const { categories } = useCategories();
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
+  // subscribe to default food overrides so preview names update
+  const { overrides } = useDefaultFoods();
 
   const [detailsVisible, setDetailsVisible] = useState(false);
 
@@ -77,6 +81,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
             </View>
             {arr.map(({ item, index }) => {
               const isSelected = selected.includes(index);
+              const label = getFoodInfo(item.name)?.name || item.name;
               return (
                 <TouchableOpacity
                   key={index}
@@ -87,7 +92,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                   <View style={[styles.row, isSelected && styles.rowSelected]}>
                     {item.icon && <Image source={item.icon} style={styles.icon} />}
                     <Text style={styles.rowText} numberOfLines={2}>
-                      {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                      {label} - {item.quantity} {getLabel(item.quantity, item.unit)}
                     </Text>
                     {item.totalPrice > 0 && (
                       <Text style={styles.priceBadge}>
