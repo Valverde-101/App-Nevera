@@ -249,7 +249,7 @@ function createStyles(palette, themeName) {
       borderColor: palette.frame || palette.border,
     },
     ribbonIcon: { width: 32, height: 32, marginRight: 10, resizeMode: 'contain' },
-    ribbonTitle: { color: palette.foodName, fontWeight: '800', fontSize: 18 },
+    ribbonTitle: { color: palette.text, fontWeight: '800', fontSize: 18 },
     cardMeta: { color: palette.textDim },
     labelBold: { color: palette.text, fontWeight: '700', marginBottom: 6, marginTop: 10 },
     qtyRow: { flexDirection: 'row', alignItems: 'center' },

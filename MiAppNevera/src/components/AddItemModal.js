@@ -268,7 +268,7 @@ const createStyles = (palette) => StyleSheet.create({
     borderWidth: 1, borderColor: palette.frame,
     marginRight: 12,
   },
-  foodName: { flex: 1, color: palette.foodName, fontSize: 18, fontWeight: '400' },
+  foodName: { flex: 1, color: palette.accent, fontSize: 18, fontWeight: '400' },
 
   // ScrollView (Web): barra sutil + gutter estable para evitar "bailes"
   scroll: {

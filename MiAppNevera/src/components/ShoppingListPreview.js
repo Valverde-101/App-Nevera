@@ -38,8 +38,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                 <View style={[styles.row, isSelected && styles.rowSelected]}>
                   {item.icon && <Image source={item.icon} style={styles.icon} />}
                   <Text style={styles.rowText} numberOfLines={2}>
-                    <Text style={{ color: palette.foodName }}>{item.name}</Text>
-                    {` — ${item.quantity} ${getLabel(item.quantity, item.unit)}`}
+                    {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
                   </Text>
                 </View>
               </TouchableOpacity>
