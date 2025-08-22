@@ -5,12 +5,14 @@ import { useShopping } from '../context/ShoppingContext';
 import SaveListModal from '../components/SaveListModal';
 import ListPreviewModal from '../components/ListPreviewModal';
 import { useTheme } from '../context/ThemeContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function SavedListsScreen({ navigation }) {
   const { savedLists, deleteList, saveList } = useSavedLists();
   const { replaceList } = useShopping();
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
+  const { symbol } = useCurrency();
 
   const [editing, setEditing] = useState(null);
   const [previewing, setPreviewing] = useState(null);
@@ -25,7 +27,7 @@ export default function SavedListsScreen({ navigation }) {
             <View key={list.id} style={styles.card}>
               <View style={styles.headerRow}>
                 <Text style={styles.title}>{list.name || 'Sin título'}</Text>
-                <Text style={styles.total}>{`Costo Total: S/${totalCost.toFixed(2)}`}</Text>
+                <Text style={styles.total}>{`Costo Total: ${symbol}${totalCost.toFixed(2)}`}</Text>
               </View>
               {list.note ? <Text style={styles.note}>{list.note}</Text> : null}
               <Text style={styles.count}>{list.items?.length || 0} artículos</Text>

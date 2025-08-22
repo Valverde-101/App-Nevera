@@ -12,6 +12,7 @@ import {
 import { useUnits } from '../context/UnitsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import CostPieChart from './CostPieChart';
@@ -20,6 +21,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
   const { getLabel } = useUnits();
   const { categories } = useCategories();
   const palette = useTheme();
+  const { symbol } = useCurrency();
   const styles = useMemo(() => createStyles(palette), [palette]);
   // subscribe to default food overrides so preview names update
   const { overrides } = useDefaultFoods();
@@ -96,7 +98,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                     </Text>
                     {item.totalPrice > 0 && (
                       <Text style={styles.priceBadge}>
-                        {`S/${item.totalPrice.toFixed(2)}`}
+                        {`${symbol}${item.totalPrice.toFixed(2)}`}
                       </Text>
                     )}
                   </View>
@@ -114,7 +116,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
               <TouchableOpacity style={styles.actionBtn} onPress={() => setDetailsVisible(true)}>
                 <Text style={styles.actionText}>Más detalles</Text>
               </TouchableOpacity>
-              <Text style={styles.totalText}>{`Costo Total: S/${totalCost.toFixed(2)}`}</Text>
+              <Text style={styles.totalText}>{`Costo Total: ${symbol}${totalCost.toFixed(2)}`}</Text>
             </View>
           </View>
         )}
@@ -141,7 +143,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                           <Text style={[styles.legendLabel, { flex: 1 }]}>
                             {categories[d.key]?.name || d.key}
                           </Text>
-                          <Text style={styles.legendValue}>{`S/${d.value.toFixed(2)}`}</Text>
+                          <Text style={styles.legendValue}>{`${symbol}${d.value.toFixed(2)}`}</Text>
                           <Text style={styles.legendPercent}>{`${d.percent.toFixed(0)}%`}</Text>
                         </View>
                       ))}

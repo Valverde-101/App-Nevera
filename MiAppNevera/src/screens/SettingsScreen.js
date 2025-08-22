@@ -32,6 +32,11 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.itemDesc}>Gestiona singular y plural de tus unidades.</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('CurrencySettings')}>
+          <Text style={styles.itemTitle}>Tipo de Moneda</Text>
+          <Text style={styles.itemDesc}>Selecciona la moneda para los costos.</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('LocationSettings')}>
           <Text style={styles.itemTitle}>Gestión de ubicación</Text>
           <Text style={styles.itemDesc}>Define dónde guardas tus alimentos.</Text>
