@@ -29,25 +29,21 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
         items.map(() => ({
           quantity: '1',
           unit: units[0]?.key || 'units',
-          unitPriceText: '',
-          totalPriceText: '',
         })),
       );
     }
   }, [visible, items, units]);
 
-  const updateItem = (index, changes) => {
-    setData(prev => prev.map((d, i) => (i === index ? { ...d, ...changes } : d)));
+  const updateField = (index, field, value) => {
+    setData(prev => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
   };
 
   const saveAll = () => {
     onSave(
       items.map((item, idx) => ({
         name: item.name,
-        quantity: parseFloat(data[idx]?.quantity) || 0,
+        quantity: data[idx]?.quantity || '1',
         unit: data[idx]?.unit || units[0]?.key || 'units',
-        unitPrice: parseFloat(data[idx]?.unitPriceText) || 0,
-        totalPrice: parseFloat(data[idx]?.totalPriceText) || 0,
       })),
     );
   };
@@ -84,8 +80,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
           >
             {items.map((item, idx) => {
               const gi = gradientForKey(themeName, item.name);
-              const entry = data[idx] || {};
-              const qty = parseFloat(entry.quantity) || 0;
+              const qty = parseFloat(data[idx]?.quantity) || 0;
               return (
                 <View key={idx} style={styles.card}>
                   <View style={styles.cardHeader}>
@@ -102,7 +97,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                       </Text>
                     </LinearGradient>
                     <Text style={styles.cardMeta}>
-                      {qty} {getLabel(qty, entry.unit)}
+                      {qty} {getLabel(qty, data[idx]?.unit)}
                     </Text>
                   </View>
 
@@ -110,29 +105,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                   <View style={styles.qtyRow}>
                     <TouchableOpacity
                       onPress={() =>
-                        setData(prev =>
-                          prev.map((d, i) => {
-                            if (i !== idx) return d;
-                            const nextQty = Math.max(0, (parseFloat(d.quantity) || 0) - 1);
-                            let unitPriceText = d.unitPriceText;
-                            let totalPriceText = d.totalPriceText;
-                            if (unitPriceText) {
-                              const u = parseFloat(unitPriceText) || 0;
-                              const tot = u * nextQty;
-                              totalPriceText = tot ? tot.toFixed(2) : '';
-                            } else if (totalPriceText) {
-                              const t = parseFloat(totalPriceText) || 0;
-                              const u = nextQty ? t / nextQty : 0;
-                              unitPriceText = u ? u.toFixed(2) : '';
-                            }
-                            return {
-                              ...d,
-                              quantity: String(nextQty),
-                              unitPriceText,
-                              totalPriceText,
-                            };
-                          }),
-                        )
+                        updateField(idx, 'quantity', String(Math.max(0, qty - 1)))
                       }
                       style={styles.qtyBtn}
                     >
@@ -141,59 +114,12 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                     <TextInput
                       style={styles.qtyInput}
                       keyboardType="numeric"
-                      value={String(entry.quantity)}
-                      onChangeText={t =>
-                        setData(prev =>
-                          prev.map((d, i) => {
-                            if (i !== idx) return d;
-                            const sanitized = t.replace(/[^0-9.]/g, '');
-                            const q = parseFloat(sanitized) || 0;
-                            let unitPriceText = d.unitPriceText;
-                            let totalPriceText = d.totalPriceText;
-                            if (unitPriceText) {
-                              const u = parseFloat(unitPriceText) || 0;
-                              const tot = u * q;
-                              totalPriceText = tot ? tot.toFixed(2) : '';
-                            } else if (totalPriceText) {
-                              const tot = parseFloat(totalPriceText) || 0;
-                              const u = q ? tot / q : 0;
-                              unitPriceText = u ? u.toFixed(2) : '';
-                            }
-                            return {
-                              ...d,
-                              quantity: sanitized,
-                              unitPriceText,
-                              totalPriceText,
-                            };
-                          }),
-                        )
-                      }
+                      value={String(data[idx]?.quantity)}
+                      onChangeText={t => updateField(idx, 'quantity', t)}
                     />
                     <TouchableOpacity
                       onPress={() =>
-                        setData(prev =>
-                          prev.map((d, i) => {
-                            if (i !== idx) return d;
-                            const nextQty = (parseFloat(d.quantity) || 0) + 1;
-                            let unitPriceText = d.unitPriceText;
-                            let totalPriceText = d.totalPriceText;
-                            if (unitPriceText) {
-                              const u = parseFloat(unitPriceText) || 0;
-                              const tot = u * nextQty;
-                              totalPriceText = tot ? tot.toFixed(2) : '';
-                            } else if (totalPriceText) {
-                              const t = parseFloat(totalPriceText) || 0;
-                              const u = nextQty ? t / nextQty : 0;
-                              unitPriceText = u ? u.toFixed(2) : '';
-                            }
-                            return {
-                              ...d,
-                              quantity: String(nextQty),
-                              unitPriceText,
-                              totalPriceText,
-                            };
-                          }),
-                        )
+                        updateField(idx, 'quantity', String(qty + 1))
                       }
                       style={styles.qtyBtn}
                     >
@@ -206,16 +132,16 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                     {units.map(opt => (
                       <Pressable
                         key={opt.key}
-                        onPress={() => updateItem(idx, { unit: opt.key })}
+                        onPress={() => updateField(idx, 'unit', opt.key)}
                         style={[
                           styles.chip,
-                          entry.unit === opt.key && styles.chipSelected,
+                          data[idx]?.unit === opt.key && styles.chipSelected,
                         ]}
                       >
                         <Text
                           style={[
                             styles.chipText,
-                            entry.unit === opt.key && styles.chipTextSelected,
+                            data[idx]?.unit === opt.key && styles.chipTextSelected,
                           ]}
                           numberOfLines={1}
                         >
@@ -223,47 +149,6 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                         </Text>
                       </Pressable>
                     ))}
-                  </View>
-
-                  <Text style={styles.labelBold}>Precio</Text>
-                  <View style={styles.priceRow}>
-                    <TextInput
-                      style={[styles.priceInput, { marginRight: 4 }]}
-                      keyboardType="decimal-pad"
-                      inputMode="decimal"
-                      placeholder="Costo unitario"
-                      placeholderTextColor={palette.textDim}
-                      value={entry.unitPriceText || ''}
-                      onChangeText={t => {
-                        const sanitized = t.replace(/[^0-9.]/g, '');
-                        const q = parseFloat(entry.quantity) || 0;
-                        const u = parseFloat(sanitized);
-                        const tot = !isNaN(u) && q ? u * q : 0;
-                        updateItem(idx, {
-                          unitPriceText: sanitized,
-                          totalPriceText: tot ? tot.toFixed(2) : '',
-                        });
-                      }}
-                    />
-                    <Text style={styles.priceDivider}>/</Text>
-                    <TextInput
-                      style={[styles.priceInput, { marginLeft: 4 }]}
-                      keyboardType="decimal-pad"
-                      inputMode="decimal"
-                      placeholder="Costo total"
-                      placeholderTextColor={palette.textDim}
-                      value={entry.totalPriceText || ''}
-                      onChangeText={t => {
-                        const sanitized = t.replace(/[^0-9.]/g, '');
-                        const q = parseFloat(entry.quantity) || 0;
-                        const tot = parseFloat(sanitized);
-                        const u = !isNaN(tot) && q ? tot / q : 0;
-                        updateItem(idx, {
-                          totalPriceText: sanitized,
-                          unitPriceText: u ? u.toFixed(2) : '',
-                        });
-                      }}
-                    />
                   </View>
                 </View>
               );
@@ -403,18 +288,5 @@ function createStyles(palette, themeName) {
     chipSelected: { backgroundColor: palette.surface3, borderColor: palette.accent },
     chipText: { color: palette.text },
     chipTextSelected: { color: palette.accent },
-    priceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-    priceInput: {
-      flex: 1,
-      textAlign: 'center',
-      backgroundColor: palette.surface2,
-      borderWidth: 1,
-      borderColor: palette.border,
-      borderRadius: 10,
-      paddingVertical: 8,
-      paddingHorizontal: 10,
-      color: palette.text,
-    },
-    priceDivider: { color: palette.text, paddingHorizontal: 4 },
   });
 }
