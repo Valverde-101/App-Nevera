@@ -134,8 +134,8 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
               <TouchableOpacity onPress={selectAll} style={[styles.actionBtn, { marginRight: 8 }]}>
                 <Text style={styles.actionTxt}>Seleccionar todo</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={deleteSelected} style={[styles.actionBtn, { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e', marginRight: 8 }]}>
-                <Text style={{ color: '#ff9f9f' }}>Eliminar</Text>
+              <TouchableOpacity onPress={deleteSelected} style={[styles.actionBtn, styles.actionBtnDanger, { marginRight: 8 }]}>
+                <Text style={styles.actionBtnDangerText}>Eliminar</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); }} style={styles.actionBtn}>
                 <Text style={styles.actionTxt}>Cancelar</Text>
@@ -557,6 +557,8 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 10,
   },
   actionTxt: { color: palette.text },
+  actionBtnDanger: { backgroundColor: palette.danger, borderColor: '#ad2c2c' },
+  actionBtnDangerText: { color: '#fff', fontWeight: '700' },
 
   // scrolling
   scroll: {
@@ -618,8 +620,8 @@ const createStyles = (palette) => StyleSheet.create({
   btnText: { color: palette.text },
   btnNeutral: { backgroundColor: palette.surface3 },
   btnNeutralText: { color: palette.text },
-  btnDanger: { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e' },
-  btnDangerText: { color: '#ff9f9f' },
+  btnDanger: { backgroundColor: palette.danger, borderColor: '#ad2c2c' },
+  btnDangerText: { color: '#fff', fontWeight: '700' },
   btnPrimary: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   btnPrimaryText: { color: '#1b1d22', fontWeight: '700' },
 
@@ -665,8 +667,8 @@ const createStyles = (palette) => StyleSheet.create({
   smallBtnText: { color: palette.text, fontSize: 14 },
   smallBtnAccent: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   smallBtnAccentText: { color: '#1b1d22', fontWeight: '700' },
-  smallBtnDanger: { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e', marginLeft: 8 },
-  smallBtnDangerText: { color: '#ff9f9f' },
+  smallBtnDanger: { backgroundColor: palette.danger, borderColor: '#ad2c2c', marginLeft: 8 },
+  smallBtnDangerText: { color: '#fff', fontWeight: '700' },
 
   // modal styles
   modalBackdrop: {
