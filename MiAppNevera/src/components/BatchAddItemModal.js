@@ -45,15 +45,14 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
             d.setDate(d.getDate() + info.expirationDays);
             exp = d.toISOString().split('T')[0];
           }
-          return {
-            location: locations[0]?.key || 'fridge',
-            quantity: '1',
-            unit: info?.defaultUnit || units[0]?.key || 'units',
-            regDate: today,
-            expDate: exp,
-            note: '',
-            price: info?.defaultPrice != null ? String(info.defaultPrice) : '',
-          };
+            return {
+              location: locations[0]?.key || 'fridge',
+              quantity: '1',
+              unit: info?.defaultUnit || units[0]?.key || 'units',
+              regDate: today,
+              expDate: exp,
+              note: '',
+            };
         }),
       );
     }
@@ -67,7 +66,6 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
     onSave(
       data.map((d, idx) => ({
         ...d,
-        price: parseFloat(d.price) || 0,
         index: items[idx].index,
         name: items[idx].name,
       })),
@@ -192,25 +190,6 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                   ))}
                 </View>
 
-                {/* Precio */}
-                <Text style={styles.labelBold}>Precio unitario</Text>
-                <TextInput
-                  style={styles.priceInput}
-                  value={data[idx]?.price}
-                  onChangeText={t => {
-                    let sanitized = t.replace(/[^0-9.]/g, '');
-                    const parts = sanitized.split('.');
-                    if (parts.length > 2) {
-                      sanitized = parts[0] + '.' + parts.slice(1).join('');
-                    }
-                    updateField(idx, 'price', sanitized);
-                  }}
-                  keyboardType="decimal-pad"
-                  inputMode="decimal"
-                  placeholder="Opcional"
-                  placeholderTextColor={palette.textDim}
-                />
-
                 {/* Fechas */}
                 <View style={{ marginTop: 6 }}>
                   <Text style={styles.labelBold}>Fecha de registro</Text>
@@ -240,8 +219,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                   placeholderTextColor={palette.textDim}
                 />
               </View>
-            );
-          })}
+            ))}
           </ScrollView>
 
         </View>
@@ -365,16 +343,6 @@ const createStyles = (palette, themeName) => StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-  },
-  priceInput: {
-    borderWidth: 1,
-    borderColor: palette.border,
-    backgroundColor: palette.surface2,
-    color: palette.text,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 4,
   },
   dateContainer: {
     borderWidth: 1,
