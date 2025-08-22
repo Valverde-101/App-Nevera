@@ -36,14 +36,9 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                 disabled={!onItemPress && !onItemLongPress}
               >
                 <View style={[styles.row, isSelected && styles.rowSelected]}>
-                  {item.totalPrice > 0 && (
-                    <Text style={styles.priceBadge}>
-                      {`S/${item.totalPrice.toFixed(2)}`}
-                    </Text>
-                  )}
                   {item.icon && <Image source={item.icon} style={styles.icon} />}
                   <Text style={styles.rowText} numberOfLines={2}>
-                    {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                    {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -92,5 +87,4 @@ const createStyles = palette =>
     },
     icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
     rowText: { color: palette.text },
-    priceBadge: { color: palette.accent, fontWeight: '700', marginRight: 8 },
   });
