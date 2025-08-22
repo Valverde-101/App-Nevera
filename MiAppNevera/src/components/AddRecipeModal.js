@@ -20,7 +20,7 @@ import {
   Platform,
 } from 'react-native';
 import FoodPickerModal from './FoodPickerModal';
-import { getFoodIcon } from '../foodIcons';
+import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
@@ -300,7 +300,9 @@ const save = () => {
                   onPress={() => openUnitPicker(idx)}
                 >
                   <Text style={styles.ingText}>
-                    {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} de ${ing.name}`}
+                    {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} de ${
+                      getFoodInfo(ing.name)?.name || ing.name
+                    }`}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
