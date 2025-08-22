@@ -235,8 +235,8 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
         foodName={item?.name}
         foodIcon={item?.icon}
         initialUnit={item?.unit}
-        onSave={({ quantity: q, unit: u }) => {
-          addShoppingItem(item?.name, q || 0, u);
+        onSave={({ quantity: q, unit: u, unitPrice, totalPrice }) => {
+          addShoppingItem(item?.name, q || 0, u, unitPrice, totalPrice);
           Alert.alert('Añadido', `${item?.name} añadido a la lista de compras`);
           setShoppingVisible(false);
         }}
