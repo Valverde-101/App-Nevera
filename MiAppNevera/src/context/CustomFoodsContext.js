@@ -32,7 +32,7 @@ export const CustomFoodsProvider = ({ children }) => {
   }, []);
 
   const addCustomFood = useCallback(
-    ({ name, category, icon, baseIcon, expirationDays, defaultUnit, defaultPrice }) => {
+    ({ name, category, icon, baseIcon, expirationDays }) => {
       const key = normalizeFoodName(name);
       const newFood = {
         name,
@@ -40,8 +40,6 @@ export const CustomFoodsProvider = ({ children }) => {
         icon: icon || null,
         baseIcon: baseIcon || null,
         expirationDays: expirationDays ?? null,
-        defaultUnit: defaultUnit || null,
-        defaultPrice: defaultPrice ?? null,
         key,
       };
       persist(prev => [...prev, newFood]);
@@ -50,7 +48,7 @@ export const CustomFoodsProvider = ({ children }) => {
   );
 
   const updateCustomFood = useCallback(
-    (key, { name, category, icon, baseIcon, expirationDays, defaultUnit, defaultPrice }) => {
+    (key, { name, category, icon, baseIcon, expirationDays }) => {
       const newKey = normalizeFoodName(name);
       persist(prev =>
         prev.map(f =>
@@ -61,8 +59,6 @@ export const CustomFoodsProvider = ({ children }) => {
                 icon: icon || null,
                 baseIcon: baseIcon || null,
                 expirationDays: expirationDays ?? null,
-                defaultUnit: defaultUnit || null,
-                defaultPrice: defaultPrice ?? null,
                 key: newKey,
               }
             : f,
