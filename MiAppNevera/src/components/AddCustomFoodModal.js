@@ -506,7 +506,13 @@ export default function AddCustomFoodModal({ visible, onClose }) {
         </TouchableOpacity>
 
         {/* Modales internos */}
-        <FoodPickerModal visible={pickerVisible} onSelect={selectDefault} onClose={() => setPickerVisible(false)} />
+        <FoodPickerModal
+          visible={pickerVisible}
+          onSelect={selectDefault}
+          onClose={() => setPickerVisible(false)}
+          showCreate={false}
+          showMenu={false}
+        />
         <ManageCustomFoodsModal visible={manageVisible} onClose={() => setManageVisible(false)} onEdit={startEdit} />
         <AddCategoryModal
           visible={catModalVisible}

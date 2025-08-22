@@ -36,6 +36,8 @@ export default function FoodPickerModal({
   onSelect,
   onClose,
   onMultiSelect,
+  showCreate = true,
+  showMenu = true,
 }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
@@ -61,6 +63,7 @@ export default function FoodPickerModal({
   const [hoverCat, setHoverCat] = useState(false);
   const [hoverGrid, setHoverGrid] = useState(false);
   const [hoverManage, setHoverManage] = useState(false);
+  const hiddenBg = themeName === 'dark' ? '#181b22' : '#d0d0d0';
 
   useEffect(() => {
     const names = Object.keys(categories);
@@ -159,19 +162,23 @@ export default function FoodPickerModal({
                       return !v;
                     })
                   }
-                  style={[styles.iconBtn, { marginRight: 8 }]}
+                  style={[styles.iconBtn, { marginRight: showCreate || showMenu ? 8 : 0 }]}
                 >
                   <Text style={styles.iconText}>🔍</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setAddVisible(true)}
-                  style={[styles.createBtn, { marginRight: 8 }]}
-                >
-                  <Text style={styles.createText}>Crear Nuevo</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
-                  <Text style={styles.iconText}>⋮</Text>
-                </TouchableOpacity>
+                {showCreate && (
+                  <TouchableOpacity
+                    onPress={() => setAddVisible(true)}
+                    style={[styles.createBtn, { marginRight: showMenu ? 8 : 0 }]}
+                  >
+                    <Text style={styles.createText}>Crear Nuevo</Text>
+                  </TouchableOpacity>
+                )}
+                {showMenu && (
+                  <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.iconBtn}>
+                    <Text style={styles.iconText}>⋮</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
 
@@ -303,23 +310,25 @@ export default function FoodPickerModal({
       </Modal>
 
       {/* Menú */}
-      <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
-        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
-          <View style={styles.menuBackdrop}>
-            <View style={styles.menuCard}>
-              <TouchableOpacity
-                onPress={() => {
-                  setMenuVisible(false);
-                  setManageVisible(true);
-                }}
-                style={styles.menuItem}
-              >
-                <Text style={{ color: palette.text }}>Administrar alimentos predeterminados</Text>
-              </TouchableOpacity>
+      {showMenu && (
+        <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+          <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+            <View style={styles.menuBackdrop}>
+              <View style={styles.menuCard}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setMenuVisible(false);
+                    setManageVisible(true);
+                  }}
+                  style={styles.menuItem}
+                >
+                  <Text style={{ color: palette.text }}>Administrar alimentos predeterminados</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+          </TouchableWithoutFeedback>
+        </Modal>
+      )}
 
       {/* Administrar predeterminados */}
       <Modal visible={manageVisible} animationType="slide" transparent>
@@ -331,6 +340,9 @@ export default function FoodPickerModal({
               </Text>
               <Text style={{ textAlign: 'center', color: palette.textDim }}>
                 Los alimentos sombreados no se mostrarán en la lista de agregar
+              </Text>
+              <Text style={{ textAlign: 'center', color: palette.textDim }}>
+                Mantener presionado el alimento para editar más detalles
               </Text>
             </View>
             <ScrollView
@@ -369,7 +381,7 @@ export default function FoodPickerModal({
                             style={{
                               borderRadius: 12,
                               padding: 6,
-                              backgroundColor: hidden ? palette.surface3 : palette.surface2,
+                              backgroundColor: hidden ? hiddenBg : palette.surface2,
                               borderWidth: 1,
                               borderColor: palette.border,
                             }}
