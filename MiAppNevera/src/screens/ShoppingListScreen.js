@@ -28,7 +28,7 @@ import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSavedLists } from '../context/SavedListsContext';
-import { getFoodIcon } from '../foodIcons';
+import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import CostPieChart from '../components/CostPieChart';
 
 export default function ShoppingListScreen() {
@@ -75,26 +75,42 @@ export default function ShoppingListScreen() {
   const [editIdx, setEditIdx] = useState(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
 
-  const onSelectFood = (name, icon) => {
-    setSelectedFood({ name, icon });
-    setPickerVisible(false);
-    setAddVisible(true);
-  };
+    const onSelectFood = (key, icon) => {
+      const info = getFoodInfo(key);
+      setSelectedFood({
+        key,
+        name: info?.name || key,
+        icon,
+        unit: info?.defaultUnit,
+        unitPrice: info?.defaultPrice,
+        totalPrice: info?.defaultPrice,
+      });
+      setPickerVisible(false);
+      setAddVisible(true);
+    };
 
-  const onMultiSelectFoods = names => {
-    const items = names.map(name => ({ name, icon: getFoodIcon(name) }));
-    setMultiItems(items);
-    setPickerVisible(false);
-    setMultiAddVisible(true);
-  };
+    const onMultiSelectFoods = keys => {
+      const items = keys.map(k => {
+        const info = getFoodInfo(k);
+        return {
+          name: k,
+          icon: getFoodIcon(k),
+          defaultUnit: info?.defaultUnit,
+          defaultPrice: info?.defaultPrice,
+        };
+      });
+      setMultiItems(items);
+      setPickerVisible(false);
+      setMultiAddVisible(true);
+    };
 
-  const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
-    if (selectedFood) {
-      addItem(selectedFood.name, quantity, unit, unitPrice, totalPrice);
-      setSelectedFood(null);
-      setAddVisible(false);
-    }
-  };
+    const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
+      if (selectedFood) {
+        addItem(selectedFood.key, quantity, unit, unitPrice, totalPrice);
+        setSelectedFood(null);
+        setAddVisible(false);
+      }
+    };
 
   const handleMultiAddSave = entries => {
     addItems(
@@ -398,10 +414,13 @@ export default function ShoppingListScreen() {
       />
       <AddShoppingItemModal
         visible={addVisible}
-        foodName={selectedFood?.name}
+        foodName={selectedFood?.key}
         foodIcon={selectedFood?.icon}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
+        initialUnit={selectedFood?.unit}
+        initialUnitPrice={selectedFood?.unitPrice}
+        initialTotalPrice={selectedFood?.totalPrice}
       />
       <AddShoppingItemModal
         visible={editIdx !== null}
