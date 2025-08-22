@@ -28,7 +28,7 @@ import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSavedLists } from '../context/SavedListsContext';
-import { getFoodIcon, getFoodInfo } from '../foodIcons';
+import { getFoodIcon } from '../foodIcons';
 import CostPieChart from '../components/CostPieChart';
 
 export default function ShoppingListScreen() {
@@ -75,48 +75,31 @@ export default function ShoppingListScreen() {
   const [editIdx, setEditIdx] = useState(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
 
-    const onSelectFood = (key, icon) => {
-      const info = getFoodInfo(key);
-      setSelectedFood({
-        key,
-        name: info?.name || key,
-        icon,
-        unit: info?.defaultUnit,
-        unitPrice: info?.defaultPrice,
-        totalPrice: info?.defaultPrice,
-      });
-      setPickerVisible(false);
-      setAddVisible(true);
-    };
+  const onSelectFood = (name, icon) => {
+    setSelectedFood({ name, icon });
+    setPickerVisible(false);
+    setAddVisible(true);
+  };
 
-    const onMultiSelectFoods = keys => {
-      const items = keys.map(k => {
-        const info = getFoodInfo(k);
-        return {
-          key: k,
-          name: info?.name || k,
-          icon: getFoodIcon(k),
-          defaultUnit: info?.defaultUnit,
-          defaultPrice: info?.defaultPrice,
-        };
-      });
-      setMultiItems(items);
-      setPickerVisible(false);
-      setMultiAddVisible(true);
-    };
+  const onMultiSelectFoods = names => {
+    const items = names.map(name => ({ name, icon: getFoodIcon(name) }));
+    setMultiItems(items);
+    setPickerVisible(false);
+    setMultiAddVisible(true);
+  };
 
-    const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
-      if (selectedFood) {
-        addItem(selectedFood.key, quantity, unit, unitPrice, totalPrice);
-        setSelectedFood(null);
-        setAddVisible(false);
-      }
-    };
+  const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
+    if (selectedFood) {
+      addItem(selectedFood.name, quantity, unit, unitPrice, totalPrice);
+      setSelectedFood(null);
+      setAddVisible(false);
+    }
+  };
 
   const handleMultiAddSave = entries => {
     addItems(
       entries.map(e => ({
-        name: e.key,
+        name: e.name,
         quantity: parseFloat(e.quantity) || 0,
         unit: e.unit,
         unitPrice: parseFloat(e.unitPrice) || 0,
@@ -134,8 +117,8 @@ export default function ShoppingListScreen() {
       (inventory[loc.key] || []).filter(item => (item.quantity ?? 0) === 0)
     );
     const newItems = zeroItems
-      .filter(it => !list.some(l => (l.key || l.name) === (it.key || it.name)))
-      .map(it => ({ name: it.key || it.name, quantity: 0, unit: it.unit })); // cantidad 0 según especificación
+      .filter(it => !list.some(l => l.name === it.name))
+      .map(it => ({ name: it.name, quantity: 0, unit: it.unit })); // cantidad 0 según especificación
     if (newItems.length) addItems(newItems);
     setAutoVisible(false);
   };
@@ -185,7 +168,7 @@ export default function ShoppingListScreen() {
       const arr = inventory[loc.key] || [];
       for (let i = arr.length - 1; i >= 0; i--) {
         const invItem = arr[i];
-        if (names.has(invItem.key || invItem.name) && (invItem.quantity ?? 0) === 0 && (!invItem.note || invItem.note.trim() === '')) {
+        if (names.has(invItem.name) && (invItem.quantity ?? 0) === 0 && (!invItem.note || invItem.note.trim() === '')) {
           removeInventoryItem(loc.key, i);
         }
       }
@@ -415,17 +398,14 @@ export default function ShoppingListScreen() {
       />
       <AddShoppingItemModal
         visible={addVisible}
-        foodName={selectedFood?.key}
+        foodName={selectedFood?.name}
         foodIcon={selectedFood?.icon}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
-        initialUnit={selectedFood?.unit}
-        initialUnitPrice={selectedFood?.unitPrice}
-        initialTotalPrice={selectedFood?.totalPrice}
       />
       <AddShoppingItemModal
         visible={editIdx !== null}
-        foodName={list[editIdx]?.key || list[editIdx]?.name}
+        foodName={list[editIdx]?.name}
         foodIcon={list[editIdx]?.icon}
         initialQuantity={list[editIdx]?.quantity}
         initialUnit={list[editIdx]?.unit}

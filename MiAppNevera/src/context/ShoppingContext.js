@@ -1,34 +1,26 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getFoodIcon, getFoodCategory, getFoodInfo} from '../foodIcons';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useCustomFoods } from './CustomFoodsContext';
-import { useDefaultFoods } from './DefaultFoodsContext';
 
 const ShoppingContext = createContext();
 
 export const ShoppingProvider = ({children}) => {
   const [list, setList] = useState([]);
   const { customFoods } = useCustomFoods();
-  const { overrides } = useDefaultFoods();
 
   useEffect(() => {
     (async () => {
       try {
         const stored = await AsyncStorage.getItem('shopping');
         if (stored) {
-          const parsed = JSON.parse(stored).map(item => {
-            const key = item.key || item.name;
-            const info = getFoodInfo(key);
-            return {
-              ...item,
-              key,
-              name: info?.name || key,
-              icon: item.icon || getFoodIcon(key),
-              foodCategory: item.foodCategory || getFoodCategory(key),
-              unitPrice: item.unitPrice || 0,
-              totalPrice: item.totalPrice || 0,
-            };
-          });
+          const parsed = JSON.parse(stored).map(item => ({
+            ...item,
+            icon: item.icon || getFoodIcon(item.name),
+            foodCategory: item.foodCategory || getFoodCategory(item.name),
+            unitPrice: item.unitPrice || 0,
+            totalPrice: item.totalPrice || 0,
+          }));
           setList(parsed);
         }
       } catch (e) {
@@ -37,68 +29,44 @@ export const ShoppingProvider = ({children}) => {
     })();
   }, [customFoods]);
 
-  useEffect(() => {
-    // update names when default overrides change
-    persist(prev =>
-      prev.map(item => {
-        const key = item.key || item.name;
-        const info = getFoodInfo(key);
-        return {
-          ...item,
-          key,
-          name: info?.name || key,
-          icon: getFoodIcon(key),
-        };
-      }),
-    );
-  }, [overrides, persist]);
-
   const persist = useCallback(updater => {
     setList(prev => {
       const data = typeof updater === 'function' ? updater(prev) : updater;
-      const raw = data.map(({ key, name, icon, foodCategory, ...rest }) => ({
-        ...rest,
-        name: key || name,
-      }));
-      AsyncStorage.setItem('shopping', JSON.stringify(raw)).catch(e => {
+      AsyncStorage.setItem('shopping', JSON.stringify(data)).catch(e => {
         console.error('Failed to save shopping list', e);
       });
       return data;
     });
   }, []);
 
-  const addItem = useCallback((key, quantity = 1, unit = 'units', unitPrice = 0, totalPrice = 0) => {
+  const addItem = useCallback((name, quantity = 1, unit = 'units', unitPrice = 0, totalPrice = 0) => {
     const uPrice = unitPrice || (quantity ? totalPrice / quantity : 0);
     const tPrice = totalPrice || uPrice * quantity;
-    const info = getFoodInfo(key);
     const newItem = {
-      key,
-      name: info?.name || key,
+      name,
       quantity,
       unit,
       unitPrice: uPrice,
       totalPrice: tPrice,
-      icon: getFoodIcon(key),
-      foodCategory: getFoodCategory(key),
+      icon: getFoodIcon(name),
+      foodCategory: getFoodCategory(name),
       purchased: false,
     };
     persist(prev => [...prev, newItem]);
   }, [persist]);
 
   const addItems = useCallback(items => {
-    const newItems = items.map(({name: key, quantity = 1, unit = 'units', unitPrice = 0, totalPrice = 0}) => {
+    const newItems = items.map(({name, quantity = 1, unit = 'units', unitPrice = 0, totalPrice = 0}) => {
       const uPrice = unitPrice || (quantity ? totalPrice / quantity : 0);
       const tPrice = totalPrice || uPrice * quantity;
-      const info = getFoodInfo(key);
       return {
-        key,
-        name: info?.name || key,
+        name,
         quantity,
         unit,
         unitPrice: uPrice,
         totalPrice: tPrice,
-        icon: getFoodIcon(key),
-        foodCategory: getFoodCategory(key),
+        icon: getFoodIcon(name),
+        foodCategory: getFoodCategory(name),
         purchased: false,
       };
     });
@@ -137,20 +105,14 @@ export const ShoppingProvider = ({children}) => {
 
   // Replace entire list (used when loading saved lists)
   const replaceList = useCallback(items => {
-    persist(() => items.map(it => {
-      const key = it.key || it.name;
-      const info = getFoodInfo(key);
-      return {
-        ...it,
-        key,
-        name: info?.name || key,
-        icon: it.icon || getFoodIcon(key),
-        foodCategory: it.foodCategory || getFoodCategory(key),
-        unitPrice: it.unitPrice || 0,
-        totalPrice: it.totalPrice || 0,
-        purchased: !!it.purchased,
-      };
-    }));
+    persist(() => items.map(it => ({
+      ...it,
+      icon: it.icon || getFoodIcon(it.name),
+      foodCategory: it.foodCategory || getFoodCategory(it.name),
+      unitPrice: it.unitPrice || 0,
+      totalPrice: it.totalPrice || 0,
+      purchased: !!it.purchased,
+    })));
   }, [persist]);
 
   const resetShopping = useCallback(() => {
