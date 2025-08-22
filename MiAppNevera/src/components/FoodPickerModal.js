@@ -62,7 +62,9 @@ export default function FoodPickerModal({
   // === Estados para "ocultar" scrollbars sin mover layout (web) ===
   const [hoverCat, setHoverCat] = useState(false);
   const [hoverGrid, setHoverGrid] = useState(false);
-  const [hoverManage, setHoverManage] = useState(false);
+  const [hoverManageCat, setHoverManageCat] = useState(false);
+  const [hoverManageGrid, setHoverManageGrid] = useState(false);
+  const [manageCategory, setManageCategory] = useState(baseCategoryNames[0] || '');
   const hiddenBg = themeName === 'dark' ? '#181b22' : '#d0d0d0';
 
   useEffect(() => {
@@ -80,6 +82,12 @@ export default function FoodPickerModal({
       setSearchVisible(false);
     }
   }, [visible]);
+
+  useEffect(() => {
+    if (manageVisible && baseCategoryNames.length) {
+      setManageCategory(baseCategoryNames[0]);
+    }
+  }, [manageVisible]);
 
   useEffect(() => {
     AsyncStorage.getItem('hiddenFoods').then(data => {
@@ -330,84 +338,102 @@ export default function FoodPickerModal({
         </Modal>
       )}
 
-      {/* Administrar predeterminados */}
-      <Modal visible={manageVisible} animationType="slide" transparent>
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.sheet, { padding: 12 }]}>
-            <View style={{ borderWidth: 1, borderColor: palette.border, backgroundColor: palette.surface2, padding: 10, marginBottom: 10, borderRadius: 10 }}>
-              <Text style={{ textAlign: 'center', color: palette.text }}>
-                Lista completa de todos los alimentos predeterminados
-              </Text>
-              <Text style={{ textAlign: 'center', color: palette.textDim }}>
-                Los alimentos sombreados no se mostrarán en la lista de agregar
-              </Text>
-              <Text style={{ textAlign: 'center', color: palette.textDim }}>
-                Mantener presionado el alimento para editar más detalles
-              </Text>
-            </View>
-            <ScrollView
-              onMouseEnter={() => setHoverManage(true)}
-              onMouseLeave={() => setHoverManage(false)}
-              style={[
-                { flex: 1 },
-                Platform.OS === 'web' ? webScrollBase : null,
-                Platform.OS === 'web' ? (hoverManage ? webScrollVisible : webScrollHidden) : null,
-              ]}
-              contentContainerStyle={{ paddingBottom: 10 }}
-              showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
-            >
-              {baseCategoryNames.map(cat => (
-                <View key={cat} style={{ marginBottom: 14 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '700', marginBottom: 6, color: palette.accent }}>
-                    {baseCategories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                    {baseCategories[cat].items.map(name => {
-                      const hidden = hiddenFoods.includes(name);
-                      return (
-                        <Pressable
-                          key={name}
-                          style={{ width: '25%', padding: 6, alignItems: 'center' }}
-                          onPress={() =>
-                            setHiddenFoods(prev =>
-                              prev.includes(name)
-                                ? prev.filter(n => n !== name)
-                                : [...prev, name],
-                            )
-                          }
-                          onLongPress={() => setEditKey(name)}
-                        >
-                          <View
-                            style={{
-                              borderRadius: 12,
-                              padding: 6,
-                              backgroundColor: hidden ? hiddenBg : palette.surface2,
-                              borderWidth: 1,
-                              borderColor: palette.border,
-                            }}
-                          >
-                            <Image
-                              source={foodIcons[name]}
-                              style={{ width: 44, height: 44, opacity: hidden ? 0.5 : 1 }}
-                              resizeMode="contain"
-                            />
+        {/* Administrar predeterminados */}
+        <Modal visible={manageVisible} animationType="slide" transparent>
+          <View style={styles.modalBackdrop}>
+            <View style={[styles.sheet, { padding: 12 }]}>
+              <View style={{ borderWidth: 1, borderColor: palette.border, backgroundColor: palette.surface2, padding: 10, marginBottom: 10, borderRadius: 10 }}>
+                <Text style={{ textAlign: 'center', color: palette.text }}>
+                  Lista completa de todos los alimentos predeterminados
+                </Text>
+                <Text style={{ textAlign: 'center', color: palette.textDim }}>
+                  Los alimentos sombreados no se mostrarán en la lista de agregar
+                </Text>
+                <Text style={{ textAlign: 'center', color: palette.textDim }}>
+                  Mantener presionado el alimento para editar más detalles
+                </Text>
+              </View>
+              <View style={styles.catBar}>
+                <ScrollView
+                  horizontal
+                  contentContainerStyle={styles.catRow}
+                  onMouseEnter={() => setHoverManageCat(true)}
+                  onMouseLeave={() => setHoverManageCat(false)}
+                  showsHorizontalScrollIndicator={Platform.OS === 'web' ? true : false}
+                  style={[
+                    Platform.OS === 'web' ? webScrollBase : null,
+                    Platform.OS === 'web' ? (hoverManageCat ? webScrollVisible : webScrollHidden) : null,
+                  ]}
+                >
+                  {baseCategoryNames.map(cat => {
+                    const active = manageCategory === cat;
+                    const g = gradientForKey(themeName, cat);
+                    return (
+                      <Pressable key={cat} onPress={() => setManageCategory(cat)} style={{ paddingHorizontal: 6 }}>
+                        <View style={[styles.catCard, active && styles.catCardActive, { width: catCardSize, height: catCardSize }]}>
+                          <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={[styles.catCardGrad, { flex: 1 }]}>
+                            <View style={styles.catIconBox}>
+                              {baseCategories[cat]?.icon && (
+                                <Image source={baseCategories[cat].icon} style={{ width: 44, height: 44 }} resizeMode="contain" />
+                              )}
+                            </View>
+                            <Text style={[styles.catTitle, active && styles.catTitleActive]} numberOfLines={1}>
+                              {baseCategories[cat]?.name || cat}
+                            </Text>
+                          </LinearGradient>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+              <ScrollView
+                onMouseEnter={() => setHoverManageGrid(true)}
+                onMouseLeave={() => setHoverManageGrid(false)}
+                style={[
+                  { flex: 1 },
+                  Platform.OS === 'web' ? webScrollBase : null,
+                  Platform.OS === 'web' ? (hoverManageGrid ? webScrollVisible : webScrollHidden) : null,
+                ]}
+                contentContainerStyle={{ flexDirection: 'row', flexWrap: 'wrap', padding: 8 }}
+                showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
+              >
+                {(baseCategories[manageCategory]?.items || []).map(name => {
+                  const hidden = hiddenFoods.includes(name);
+                  const g = gradientForKey(themeName, name);
+                  return (
+                    <Pressable
+                      key={name}
+                      style={{ width: '25%', padding: 6 }}
+                      onPress={() =>
+                        setHiddenFoods(prev =>
+                          prev.includes(name)
+                            ? prev.filter(n => n !== name)
+                            : [...prev, name],
+                        )
+                      }
+                      onLongPress={() => setEditKey(name)}
+                    >
+                      <View style={[styles.card, hidden && { opacity: 0.4 }]}>
+                        <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.cardGrad}>
+                          <View style={styles.foodIconBox}>
+                            <Image source={foodIcons[name]} style={{ width: 44, height: 44 }} resizeMode="contain" />
                           </View>
-                          <Text style={{ textAlign: 'center', marginTop: 5, color: palette.text }} numberOfLines={2}>
+                          <Text numberOfLines={2} style={styles.foodLabel}>
                             {getFoodInfo(name)?.name || name}
                           </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </View>
-              ))}
-            </ScrollView>
-            <TouchableOpacity onPress={() => setManageVisible(false)} style={[styles.bottomBtn, { alignSelf: 'center', backgroundColor: palette.accent, marginBottom: 10 }]}>
-              <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cerrar</Text>
-            </TouchableOpacity>
+                        </LinearGradient>
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+              <TouchableOpacity onPress={() => setManageVisible(false)} style={[styles.bottomBtn, { alignSelf: 'center', backgroundColor: palette.accent, marginBottom: 10 }]}>
+                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
       {/* Añadir personalizado */}
       <AddCustomFoodModal visible={addVisible} onClose={() => setAddVisible(false)} />
