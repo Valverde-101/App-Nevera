@@ -46,6 +46,11 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.itemTitle}>Datos de usuario</Text>
           <Text style={styles.itemDesc}>Respaldos, importación y eliminación total.</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Memberships')}>
+          <Text style={styles.itemTitle}>Membresías</Text>
+          <Text style={styles.itemDesc}>Accede a funciones extra mediante suscripción.</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

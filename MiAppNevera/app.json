@@ -13,6 +13,9 @@
       "package": "com.anonymous.miappnevera",
       "edgeToEdgeEnabled": true
     },
+    "plugins": [
+      "expo-in-app-purchases"
+    ],
     "extra": {
       "eas": {
         "projectId": "29bdbb1e-a7ff-4f47-a1c8-178ab45939ff"
