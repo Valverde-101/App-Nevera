@@ -16,6 +16,7 @@ import UnitSettingsScreen from './src/screens/UnitSettingsScreen';
 import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
 import ThemeSettingsScreen from './src/screens/ThemeSettingsScreen';
+import CurrencySettingsScreen from './src/screens/CurrencySettingsScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +24,7 @@ import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
 import { DefaultFoodsProvider } from './src/context/DefaultFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
+import { CurrencyProvider } from './src/context/CurrencyContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -41,12 +43,13 @@ function MainApp() {
       <CategoriesProvider>
         <DefaultFoodsProvider>
         <CustomFoodsProvider>
-          <UnitsProvider>
-            <LocationsProvider>
-              <InventoryProvider>
-                <SavedListsProvider>
-                  <ShoppingProvider>
-                    <RecipeProvider>
+          <CurrencyProvider>
+            <UnitsProvider>
+              <LocationsProvider>
+                <InventoryProvider>
+                  <SavedListsProvider>
+                    <ShoppingProvider>
+                      <RecipeProvider>
                   <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
                     <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
                     <Stack.Navigator>
@@ -91,6 +94,11 @@ function MainApp() {
                       options={{ title: 'Tipos de unidad' }}
                     />
                     <Stack.Screen
+                      name="CurrencySettings"
+                      component={CurrencySettingsScreen}
+                      options={{ title: 'Tipo de Moneda' }}
+                    />
+                    <Stack.Screen
                       name="LocationSettings"
                       component={LocationSettingsScreen}
                       options={{ title: 'Gestión de ubicación' }}
@@ -108,6 +116,7 @@ function MainApp() {
             </InventoryProvider>
             </LocationsProvider>
           </UnitsProvider>
+        </CurrencyProvider>
         </CustomFoodsProvider>
         </DefaultFoodsProvider>
       </CategoriesProvider>

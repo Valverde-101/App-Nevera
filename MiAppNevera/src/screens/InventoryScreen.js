@@ -28,6 +28,7 @@ import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { gradientForKey } from '../theme/gradients';
 
 // ===== Helpers =====
@@ -93,6 +94,7 @@ const createSelectorStyles = (palette) => StyleSheet.create({
 
 export default function InventoryScreen({ navigation }) {
   const palette = useTheme();
+  const { symbol } = useCurrency();
   const { themeName } = useThemeController();
   const { inventory, addItem, updateItem, removeItem, updateQuantity } = useInventory();
   const { addItems: addShoppingItems } = useShopping();
@@ -499,7 +501,7 @@ export default function InventoryScreen({ navigation }) {
                                 </TouchableOpacity>
                                 <View style={{ alignItems: 'center' }}>
                                   <Text style={{ color: palette.textDim, fontSize: 12 }}>
-                                    {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - S/${(item.price * item.quantity).toFixed(2)}`}
+                                    {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - ${symbol}${(item.price * item.quantity).toFixed(2)}`}
                                   </Text>
                                 </View>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
@@ -543,7 +545,7 @@ export default function InventoryScreen({ navigation }) {
                                 {label}
                               </Text>
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
-                                {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - S/${(item.price * item.quantity).toFixed(2)}`}
+                                {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - ${symbol}${(item.price * item.quantity).toFixed(2)}`}
                               </Text>
                             </LinearGradient>
                           </View>
