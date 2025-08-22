@@ -26,6 +26,7 @@ import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 
@@ -98,6 +99,8 @@ export default function InventoryScreen({ navigation }) {
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
+  // subscribe to default food overrides so inventory names update after refresh
+  const { overrides } = useDefaultFoods();
   const [storage, setStorage] = useState(locations[0]?.key || 'fridge');
 
   useEffect(() => {

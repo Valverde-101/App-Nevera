@@ -30,6 +30,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSavedLists } from '../context/SavedListsContext';
 import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import CostPieChart from '../components/CostPieChart';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -59,6 +60,8 @@ export default function ShoppingListScreen() {
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
+  // subscribe to default food overrides so shopping names update after refresh
+  const { overrides } = useDefaultFoods();
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
