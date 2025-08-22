@@ -87,3 +87,35 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
 El estado de inventario y lista de compras se guarda localmente usando `AsyncStorage`,
 permitiendo uso sin conexión. La misma base de código funciona en Android, iOS y web
 mediante `react-native-web` y Expo.
+
+
+LICENCIAS
+https://www.flaticon.es/packs/fruit-and-vegetable-5
+https://www.flaticon.es/packs/vegan-food-4
+https://www.flaticon.es/packs/food-and-drink-18
+https://www.flaticon.es/packs/beverages-14
+https://www.flaticon.es/packs/beverages-26
+https://www.flaticon.es/packs/food-260
+https://www.flaticon.es/packs/meat-23
+https://www.flaticon.es/packs/meat-7
+https://www.flaticon.es/packs/nuts-and-seeds-2
+https://www.flaticon.es/packs/autumn-167
+https://www.flaticon.es/packs/international-food-16
+https://www.flaticon.es/packs/food-75
+https://www.flaticon.es/packs/christmas-food-drinks-2
+https://www.flaticon.es/packs/sea-life-85
+https://www.flaticon.es/packs/food-177
+https://www.flaticon.es/packs/food-75
+https://www.flaticon.es/packs/dairy-products-11
+https://www.flaticon.es/packs/condiment
+https://www.flaticon.es/packs/seasoning
+https://www.flaticon.es/packs/all-about-sandwich-3
+https://www.flaticon.es/packs/bakery-150
+https://www.flaticon.es/packs/desserts-and-candies-8
+https://www.flaticon.es/packs/sweets-and-candies-58
+https://www.flaticon.es/packs/sweets-and-candies-49
+https://www.flaticon.es/packs/bakery-20
+https://www.flaticon.es/packs/sweets-5
+
+
+https://www.flaticon.es/packs/treatments-1
