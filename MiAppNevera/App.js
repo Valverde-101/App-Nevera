@@ -4,10 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Platform } from 'react-native';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
-import SavedListsScreen from './src/screens/SavedListsScreen';
 import { InventoryProvider } from './src/context/InventoryContext';
 import { ShoppingProvider } from './src/context/ShoppingContext';
-import { SavedListsProvider } from './src/context/SavedListsContext';
 import RecipeBookScreen from './src/screens/RecipeBookScreen';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
 import { RecipeProvider } from './src/context/RecipeContext';
@@ -42,9 +40,8 @@ function MainApp() {
         <UnitsProvider>
           <LocationsProvider>
             <InventoryProvider>
-              <SavedListsProvider>
-                <ShoppingProvider>
-                  <RecipeProvider>
+              <ShoppingProvider>
+                <RecipeProvider>
                   <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
                     <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
                     <Stack.Navigator>
@@ -57,11 +54,6 @@ function MainApp() {
                       name="Shopping"
                       component={ShoppingListScreen}
                       options={{ title: 'Compras' }}
-                    />
-                    <Stack.Screen
-                      name="SavedLists"
-                      component={SavedListsScreen}
-                      options={{ title: 'Listas guardadas' }}
                     />
                     <Stack.Screen
                       name="Recipes"
@@ -102,8 +94,7 @@ function MainApp() {
                   </NavigationContainer>
                 </RecipeProvider>
               </ShoppingProvider>
-            </SavedListsProvider>
-          </InventoryProvider>
+            </InventoryProvider>
           </LocationsProvider>
         </UnitsProvider>
       </CustomFoodsProvider>
