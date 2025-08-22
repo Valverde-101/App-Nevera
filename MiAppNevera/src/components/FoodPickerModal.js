@@ -29,7 +29,6 @@ import { useCategories } from '../context/CategoriesContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 
 export default function FoodPickerModal({
   visible,
@@ -52,7 +51,6 @@ export default function FoodPickerModal({
   const [manageVisible, setManageVisible] = useState(false);
   const [hiddenFoods, setHiddenFoods] = useState([]);
   const { customFoods } = useCustomFoods();
-  const { overrides } = useDefaultFoods();
   const [addVisible, setAddVisible] = useState(false);
   const [editKey, setEditKey] = useState(null);
 
@@ -106,22 +104,18 @@ export default function FoodPickerModal({
     customFoodMap[f.key] = f;
   });
 
-  const defaultFoods = useMemo(
-    () =>
-      (categories[currentCategory]?.items || [])
-        .filter(name => !hiddenFoods.includes(name))
-        .filter(name => {
-          const info = getFoodInfo(name);
-          return normalizeFoodName(info?.name || '').includes(
-            normalizeFoodName(search),
-          );
-        })
-        .map(name => {
-          const info = getFoodInfo(name);
-          return { key: name, label: info?.name || name, icon: foodIcons[name] };
-        }),
-    [categories, currentCategory, hiddenFoods, search, overrides],
-  );
+  const defaultFoods = (categories[currentCategory]?.items || [])
+    .filter(name => !hiddenFoods.includes(name))
+    .filter(name => {
+      const info = getFoodInfo(name);
+      return normalizeFoodName(info?.name || '').includes(
+        normalizeFoodName(search),
+      );
+    })
+    .map(name => {
+      const info = getFoodInfo(name);
+      return { key: name, label: info?.name || name, icon: foodIcons[name] };
+    });
 
   const customList = customFoods
     .filter(f => f.category === currentCategory)
