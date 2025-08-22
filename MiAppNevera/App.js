@@ -56,7 +56,7 @@ function MainApp() {
                     <Stack.Screen
                       name="Shopping"
                       component={ShoppingListScreen}
-                      options={{ title: 'Compras' }}
+                      options={{ title: 'Lista de compras' }}
                     />
                     <Stack.Screen
                       name="SavedLists"
