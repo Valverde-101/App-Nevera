@@ -39,11 +39,6 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                   {item.icon && <Image source={item.icon} style={styles.icon} />}
                   <Text style={styles.rowText} numberOfLines={2}>
                     {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
-                    {item.totalPrice > 0 && (
-                      <Text style={styles.priceText}>
-                        {` — $${item.unitPrice.toFixed(2)}/u ($${item.totalPrice.toFixed(2)})`}
-                      </Text>
-                    )}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -92,5 +87,4 @@ const createStyles = palette =>
     },
     icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
     rowText: { color: palette.text },
-    priceText: { color: palette.accent },
   });

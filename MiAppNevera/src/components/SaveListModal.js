@@ -32,8 +32,8 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
     }
   }, [visible, initialName, initialNote, items]);
 
-  const handleItemSave = ({ quantity, unit, unitPrice, totalPrice }) => {
-    setLocalItems(prev => prev.map((it, idx) => idx === editIdx ? { ...it, quantity, unit, unitPrice, totalPrice } : it));
+  const handleItemSave = ({ quantity, unit }) => {
+    setLocalItems(prev => prev.map((it, idx) => idx === editIdx ? { ...it, quantity, unit } : it));
     setEditIdx(null);
   };
 
@@ -75,7 +75,7 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
     setAddVisible(true);
   };
 
-  const handleAddSave = ({ quantity, unit, unitPrice, totalPrice }) => {
+  const handleAddSave = ({ quantity, unit }) => {
     if (adding) {
       setLocalItems(prev => [
         ...prev,
@@ -84,8 +84,6 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
           icon: adding.icon,
           quantity,
           unit,
-          unitPrice,
-          totalPrice,
           foodCategory: getFoodCategory(adding.name),
         },
       ]);
@@ -134,8 +132,6 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
           foodIcon={localItems[editIdx]?.icon}
           initialQuantity={localItems[editIdx]?.quantity}
           initialUnit={localItems[editIdx]?.unit}
-          initialUnitPrice={localItems[editIdx]?.unitPrice}
-          initialTotalPrice={localItems[editIdx]?.totalPrice}
           onSave={handleItemSave}
           onClose={() => setEditIdx(null)}
         />
