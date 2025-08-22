@@ -16,7 +16,7 @@ import { useRecipes } from '../context/RecipeContext';
 import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
 import AddRecipeModal from '../components/AddRecipeModal';
-import { getFoodIcon, getFoodCategory } from '../foodIcons';
+import { getFoodIcon, getFoodCategory, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
@@ -126,7 +126,9 @@ export default function RecipeDetailScreen({ route }) {
                 <View key={idx} style={styles.ingRow}>
                   {icon && <Image source={icon} style={styles.ingIcon} />}
                   <Text style={styles.ingText}>
-                    {ing.quantity} {getLabel(ing.quantity, ing.unit)} de {ing.name}
+                    {ing.quantity} {getLabel(ing.quantity, ing.unit)} de {
+                      getFoodInfo(ing.name)?.name || ing.name
+                    }
                   </Text>
                 </View>
               );
@@ -181,7 +183,9 @@ export default function RecipeDetailScreen({ route }) {
                           <Image source={ing.icon || getFoodIcon(ing.name)} style={styles.missIcon} />
                         )}
                         <Text style={styles.missText}>
-                          {ing.quantity} {getLabel(ing.quantity, ing.unit)} de {ing.name}
+                          {ing.quantity} {getLabel(ing.quantity, ing.unit)} de {
+                            getFoodInfo(ing.name)?.name || ing.name
+                          }
                         </Text>
                       </View>
                     ))}

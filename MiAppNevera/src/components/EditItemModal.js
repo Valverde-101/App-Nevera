@@ -27,6 +27,9 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
+import { getFoodInfo, getFoodCategory } from '../foodIcons';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
+import { useCategories } from '../context/CategoriesContext';
 
 export default function EditItemModal({ visible, item, onSave, onDelete, onClose }) {
   const palette = useTheme();
@@ -35,6 +38,8 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const { addItem: addShoppingItem } = useShopping();
   const { units } = useUnits();
   const { locations } = useLocations();
+  const { overrides } = useDefaultFoods();
+  const { categories } = useCategories();
 
   const [location, setLocation] = useState(locations[0]?.key || 'fridge');
   const [quantity, setQuantity] = useState(1);
@@ -42,7 +47,12 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const [regDate, setRegDate] = useState('');
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
-  const [price, setPrice] = useState('');
+  const [unitPrice, setUnitPrice] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [unitPriceText, setUnitPriceText] = useState('');
+  const [totalPriceText, setTotalPriceText] = useState('');
+  const [label, setLabel] = useState('');
+  const [foodCategory, setFoodCategory] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [shoppingVisible, setShoppingVisible] = useState(false);
 
@@ -63,9 +73,18 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
       setRegDate(item.registered || '');
       setExpDate(item.expiration || '');
       setNote(item.note || '');
-      setPrice(item.price != null ? String(item.price) : '');
+      const info = getFoodInfo(item.name);
+      setLabel(info?.name || item.name || '');
+      const catKey = getFoodCategory(item.name) || item.foodCategory || '';
+      setFoodCategory(categories[catKey]?.name || '');
+      const u = item.price || 0;
+      setUnitPrice(u);
+      setUnitPriceText(u ? String(u) : '');
+      const tot = u * (item.quantity ?? 0);
+      setTotalPrice(tot);
+      setTotalPriceText(tot ? tot.toFixed(2) : '');
     }
-  }, [visible, item, units, locations]);
+  }, [visible, item, units, locations, overrides, categories]);
 
   const g = gradientForKey(themeName, item?.name || 'item');
 
@@ -77,7 +96,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
       registered: regDate,
       expiration: expDate,
       note,
-      price: parseFloat(price) || 0,
+      price: unitPrice || 0,
     });
   };
 
@@ -110,9 +129,9 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                 {item?.icon && <Image source={item.icon} style={{ width: 64, height: 64 }} resizeMode="contain" />}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.foodName} numberOfLines={2}>{item?.name || 'Alimento'}</Text>
-                {!!item?.foodCategory && (
-                  <Text style={{ color: palette.textDim, fontSize: 12 }} numberOfLines={1}>{item.foodCategory}</Text>
+                <Text style={styles.foodName} numberOfLines={2}>{label || 'Alimento'}</Text>
+                {!!foodCategory && (
+                  <Text style={{ color: palette.textDim, fontSize: 12 }} numberOfLines={1}>{foodCategory}</Text>
                 )}
               </View>
             </LinearGradient>
@@ -146,7 +165,22 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             <Text style={styles.labelBold}>Cantidad</Text>
               <View style={styles.qtyRow}>
                 <TouchableOpacity
-                  onPress={() => { setQuantity(q => Math.max(0, (q || 0) - 1)); bumpQty(); }}
+                  onPress={() => {
+                    setQuantity(q => {
+                      const next = Math.max(0, (q || 0) - 1);
+                      if (unitPrice) {
+                        const tot = unitPrice * next;
+                        setTotalPrice(tot);
+                        setTotalPriceText(tot ? tot.toFixed(2) : '');
+                      } else if (totalPrice) {
+                        const u = next ? totalPrice / next : 0;
+                        setUnitPrice(u);
+                        setUnitPriceText(u ? u.toFixed(2) : '');
+                      }
+                      return next;
+                    });
+                    bumpQty();
+                  }}
                   style={styles.qtyBtn}
                 >
                   <Text style={styles.qtyBtnText}>−</Text>
@@ -159,13 +193,38 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                     value={String(quantity)}
                     onChangeText={(t) => {
                       const v = parseFloat(t.replace(/[^0-9.]/g, ''));
-                      setQuantity(Number.isFinite(v) ? v : 0);
+                      const q = Number.isFinite(v) ? v : 0;
+                      setQuantity(q);
+                      if (unitPrice) {
+                        const tot = unitPrice * q;
+                        setTotalPrice(tot);
+                        setTotalPriceText(tot ? tot.toFixed(2) : '');
+                      } else if (totalPrice) {
+                        const u = q ? totalPrice / q : 0;
+                        setUnitPrice(u);
+                        setUnitPriceText(u ? u.toFixed(2) : '');
+                      }
                     }}
                   />
                 </Animated.View>
 
                 <TouchableOpacity
-                  onPress={() => { setQuantity(q => (q || 0) + 1); bumpQty(); }}
+                  onPress={() => {
+                    setQuantity(q => {
+                      const next = (q || 0) + 1;
+                      if (unitPrice) {
+                        const tot = unitPrice * next;
+                        setTotalPrice(tot);
+                        setTotalPriceText(tot ? tot.toFixed(2) : '');
+                      } else if (totalPrice) {
+                        const u = totalPrice / next;
+                        setUnitPrice(u);
+                        setUnitPriceText(u ? u.toFixed(2) : '');
+                      }
+                      return next;
+                    });
+                    bumpQty();
+                  }}
                   style={styles.qtyBtn}
                 >
                   <Text style={styles.qtyBtnText}>＋</Text>
@@ -193,23 +252,56 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>Precio unitario</Text>
-            <TextInput
-              style={styles.priceInput}
-              value={price}
-              onChangeText={t => {
-                let sanitized = t.replace(/[^0-9.]/g, '');
-                const parts = sanitized.split('.');
-                if (parts.length > 2) {
-                  sanitized = parts[0] + '.' + parts.slice(1).join('');
-                }
-                setPrice(sanitized);
-              }}
-              keyboardType="decimal-pad"
-              inputMode="decimal"
-              placeholder="Opcional"
-              placeholderTextColor={palette.textDim}
-            />
+            <Text style={styles.labelBold}>Precio</Text>
+            <View style={styles.priceRow}>
+              <TextInput
+                style={[styles.priceInput, { marginRight: 4 }]}
+                keyboardType="decimal-pad"
+                inputMode="decimal"
+                placeholder="Costo unitario"
+                placeholderTextColor={palette.textDim}
+                value={unitPriceText}
+                onChangeText={(t) => {
+                  const sanitized = t.replace(/[^0-9.]/g, '');
+                  setUnitPriceText(sanitized);
+                  const u = parseFloat(sanitized);
+                  if (!isNaN(u)) {
+                    setUnitPrice(u);
+                    const tot = u * (quantity || 0);
+                    setTotalPrice(tot);
+                    setTotalPriceText(tot ? tot.toFixed(2) : '');
+                  } else {
+                    setUnitPrice(0);
+                    setTotalPrice(0);
+                    setTotalPriceText('');
+                  }
+                }}
+              />
+              <Text style={styles.priceDivider}>/</Text>
+              <TextInput
+                style={[styles.priceInput, { marginLeft: 4 }]}
+                keyboardType="decimal-pad"
+                inputMode="decimal"
+                placeholder="Costo total"
+                placeholderTextColor={palette.textDim}
+                value={totalPriceText}
+                onChangeText={(t) => {
+                  const sanitized = t.replace(/[^0-9.]/g, '');
+                  setTotalPriceText(sanitized);
+                  const tot = parseFloat(sanitized);
+                  if (!isNaN(tot)) {
+                    setTotalPrice(tot);
+                    const u = (quantity || 0) ? tot / (quantity || 0) : 0;
+                    setUnitPrice(u);
+                    setUnitPriceText(u ? u.toFixed(2) : '');
+                  } else {
+                    setTotalPrice(0);
+                    setUnitPrice(0);
+                    setUnitPriceText('');
+                  }
+                }}
+              />
+            </View>
 
             {/* Fechas (inputs gris) */}
             <View style={{ marginTop: 6 }}>
@@ -256,8 +348,10 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
         visible={shoppingVisible}
         foodName={item?.name}
         foodIcon={item?.icon}
+        initialQuantity={item?.quantity}
         initialUnit={item?.unit}
         initialUnitPrice={item?.price}
+        initialTotalPrice={item?.price ? item.price * (item.quantity ?? 0) : 0}
         onSave={({ quantity: q, unit: u, unitPrice, totalPrice }) => {
           addShoppingItem(item?.name, q || 0, u, unitPrice, totalPrice);
           Alert.alert('Añadido', `${item?.name} añadido a la lista de compras`);
@@ -395,16 +489,19 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
+  priceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
   priceInput: {
+    flex: 1,
+    textAlign: 'center',
+    backgroundColor: palette.surface2,
     borderWidth: 1,
     borderColor: palette.border,
-    backgroundColor: palette.surface2,
-    color: palette.text,
     borderRadius: 10,
-    paddingHorizontal: 10,
     paddingVertical: 8,
-    marginBottom: 4,
+    paddingHorizontal: 10,
+    color: palette.text,
   },
+  priceDivider: { color: palette.text, paddingHorizontal: 4 },
 
   // Estilos para DatePicker (gris, consistente)
   dateContainer: {
