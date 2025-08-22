@@ -302,15 +302,16 @@ export default function ShoppingListScreen() {
                       )}
                       {item.icon && <Image source={item.icon} style={styles.icon} />}
                       <View style={{ flex: 1 }}>
-                        <Text
-                          style={[
-                            styles.rowText,
-                            purchased && { textDecorationLine: 'line-through', color: palette.textDim },
-                          ]}
-                          numberOfLines={2}
-                        >
-                          {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
-                        </Text>
+                      <Text
+                        style={[
+                          styles.rowText,
+                          purchased && { textDecorationLine: 'line-through', color: palette.textDim },
+                        ]}
+                        numberOfLines={2}
+                      >
+                        <Text style={purchased ? {} : { color: palette.foodName }}>{item.name}</Text>
+                        {` — ${item.quantity} ${getLabel(item.quantity, item.unit)}`}
+                      </Text>
                       </View>
                     </View>
                   </TouchableOpacity>

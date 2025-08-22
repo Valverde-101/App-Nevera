@@ -233,7 +233,7 @@ const createStyles = (palette) =>
     },
     foodName: {
       flex: 1,
-      color: palette.accent,
+      color: palette.foodName,
       fontSize: 18,
       fontWeight: '400',
     },

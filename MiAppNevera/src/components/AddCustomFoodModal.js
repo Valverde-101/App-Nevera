@@ -179,7 +179,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                       {(f.icon || getFoodIcon(f.baseIcon || f.name)) && (
                         <Image source={f.icon ? { uri: f.icon } : getFoodIcon(f.baseIcon || f.name)} style={styles.icon} />
                       )}
-                      <Text style={[styles.rowText, { flex: 1 }]}>{f.name}</Text>
+                      <Text style={[styles.rowText, { flex: 1, color: palette.foodName }]}>{f.name}</Text>
                       {selectMode ? (
                         <TouchableOpacity onPress={() => toggleSelect(f.key)} style={[styles.smallBtn, isSelected && styles.smallBtnAccent]}>
                           <Text style={isSelected ? styles.smallBtnAccentText : styles.smallBtnText}>
@@ -223,7 +223,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                                   style={[styles.icon, { width: 28, height: 28 }]}
                                 />
                               )}
-                              <Text style={styles.rowText}>{item.name}</Text>
+                              <Text style={[styles.rowText, { color: palette.foodName }]}>{item.name}</Text>
                             </View>
                           ))}
                         </ScrollView>
@@ -236,7 +236,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                             style={[styles.icon, { width: 40, height: 40, marginBottom: 10 }]}
                           />
                         )}
-                        <Text style={styles.modalBody}>¿Eliminar {foodToDelete.name}?</Text>
+                        <Text style={styles.modalBody}>¿Eliminar <Text style={{ color: palette.foodName }}>{foodToDelete.name}</Text>?</Text>
                       </>
                     )}
                     <View style={styles.modalRow}>
