@@ -26,6 +26,7 @@ import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 
@@ -98,6 +99,8 @@ export default function InventoryScreen({ navigation }) {
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
+  // subscribe to default food overrides so inventory names update after refresh
+  const { overrides } = useDefaultFoods();
   const [storage, setStorage] = useState(locations[0]?.key || 'fridge');
 
   useEffect(() => {
@@ -273,7 +276,16 @@ export default function InventoryScreen({ navigation }) {
     const qty = parseFloat(data.quantity) || 0;
     const hasNote = data.note && data.note.trim() !== '';
     if (qty !== 0 || hasNote)
-      addItem(data.location, selectedFood.key, qty, data.unit, data.registered, data.expiration, data.note);
+      addItem(
+        data.location,
+        selectedFood.key,
+        qty,
+        data.unit,
+        data.registered,
+        data.expiration,
+        data.note,
+        data.price,
+      );
     setAddVisible(false);
   };
 
@@ -286,11 +298,12 @@ export default function InventoryScreen({ navigation }) {
       }
     });
     for (let i = 0; i < entries.length; i++) {
-      const { location, quantity, unit, regDate, expDate, note } = entries[i];
+      const { location, quantity, unit, regDate, expDate, note, price } = entries[i];
       const item = multiItems[i];
       const qty = parseFloat(quantity) || 0;
       const hasNote = note && note.trim() !== '';
-      if (qty !== 0 || hasNote) addItem(location, item.name, qty, unit, regDate, expDate, note);
+      if (qty !== 0 || hasNote)
+        addItem(location, item.name, qty, unit, regDate, expDate, note, price);
     }
     setMultiAddVisible(false); setMultiItems([]);
   };
@@ -328,7 +341,18 @@ export default function InventoryScreen({ navigation }) {
     if (transferType === 'move') {
       selectedItems.slice().sort((a, b) => a.location === b.location ? b.index - a.index : a.location.localeCompare(b.location)).forEach(sel => removeItem(sel.location, sel.index));
     }
-    items.forEach(item => addItem(target, item.name, item.quantity, item.unit, item.registered, item.expiration, item.note));
+    items.forEach(item =>
+      addItem(
+        target,
+        item.name,
+        item.quantity,
+        item.unit,
+        item.registered,
+        item.expiration,
+        item.note,
+        item.price,
+      ),
+    );
     clearSelection(); setTransferType(null);
   };
 
@@ -437,6 +461,7 @@ export default function InventoryScreen({ navigation }) {
                     const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                     const meta = getExpiryMeta(palette, daysLeft);
                     const g = gradientForKey(themeName, item.name || key);
+                    const label = getFoodInfo(item.name)?.name || item.name;
 
                     return (
                       <TouchableOpacity
@@ -454,7 +479,7 @@ export default function InventoryScreen({ navigation }) {
                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
                               {/* Nombre + badge pegado a la izquierda */}
                               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
-                                <Text style={{ color: palette.foodName, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{item.name}</Text>
+                                <Text style={{ color: palette.foodName, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{label}</Text>
                                 {meta && (
                                   <View style={{ marginLeft: 10, backgroundColor: meta.bg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
                                     <Text style={{ color: meta.text, fontSize: 12, fontWeight: '700' }}>{meta.label}</Text>
@@ -470,6 +495,11 @@ export default function InventoryScreen({ navigation }) {
                                   <Text style={{ color: palette.textDim, fontSize: 12 }}>
                                     {item.quantity} {getLabel(item.quantity, item.unit)}
                                   </Text>
+                                  {item.price > 0 && (
+                                    <Text style={{ color: palette.accent, fontSize: 12, fontWeight: '700' }}>
+                                      {`S/${(item.price * item.quantity).toFixed(2)}`}
+                                    </Text>
+                                  )}
                                 </View>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>→</Text>
@@ -489,6 +519,7 @@ export default function InventoryScreen({ navigation }) {
                       const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                       const meta = getExpiryMeta(palette, daysLeft);
                       const g = gradientForKey(themeName, item.name || key);
+                      const label = getFoodInfo(item.name)?.name || item.name;
 
                       return (
                         <TouchableOpacity
@@ -508,11 +539,16 @@ export default function InventoryScreen({ navigation }) {
                                 {item.icon && (<Image source={item.icon} style={{ width: 54, height: 54 }} resizeMode="contain" />)}
                               </View>
                               <Text style={{ textAlign: 'center', color: palette.foodName, fontSize: 12, fontWeight: '400' }} numberOfLines={2}>
-                                {item.name}
+                                {label}
                               </Text>
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
                                 {item.quantity} {getLabel(item.quantity, item.unit)}
                               </Text>
+                              {item.price > 0 && (
+                                <Text style={{ textAlign: 'center', color: palette.accent, fontSize: 11, fontWeight: '700' }}>
+                                  {`S/${(item.price * item.quantity).toFixed(2)}`}
+                                </Text>
+                              )}
                             </LinearGradient>
                           </View>
                         </TouchableOpacity>
@@ -710,7 +746,7 @@ export default function InventoryScreen({ navigation }) {
                         />
                       )}
                       <Text style={{ color: palette.text }}>
-                        {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                        {getFoodInfo(item.name)?.name || item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                       </Text>
                     </View>
                   ))}

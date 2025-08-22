@@ -20,6 +20,7 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
 import { getFoodInfo } from '../foodIcons';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 
@@ -30,12 +31,15 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   const today = new Date().toISOString().split('T')[0];
   const { units } = useUnits();
   const { locations } = useLocations();
+  // subscribe to default food overrides so edits persist after refresh
+  const { overrides } = useDefaultFoods();
   const [location, setLocation] = useState(initialLocation);
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
   const [regDate, setRegDate] = useState(today);
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
+  const [price, setPrice] = useState('');
   const [label, setLabel] = useState(foodName);
   const { addItem: addShoppingItem } = useShopping();
 
@@ -64,8 +68,9 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
         }
         setNote('');
         setLabel(info?.name || foodName);
+        setPrice(info?.defaultPrice != null ? String(info.defaultPrice) : '');
       }
-    }, [visible, initialLocation, today, units, locations, foodName]);
+    }, [visible, initialLocation, today, units, locations, foodName, overrides]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 
@@ -171,6 +176,30 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
               ))}
             </View>
 
+            {/* Precio */}
+            <Text style={styles.labelBold}>Precio unitario</Text>
+            <TextInput
+              style={styles.priceInput}
+              value={price}
+              onChangeText={t => {
+                let sanitized = t.replace(/[^0-9.]/g, '');
+                const parts = sanitized.split('.');
+                if (parts.length > 2) {
+                  sanitized = parts[0] + '.' + parts.slice(1).join('');
+                }
+                setPrice(sanitized);
+              }}
+              keyboardType="decimal-pad"
+              inputMode="decimal"
+              placeholder="Opcional"
+              placeholderTextColor={palette.textDim}
+            />
+            {parseFloat(price) > 0 && quantity > 0 && (
+              <Text style={styles.totalPriceText}>
+                {`Total: S/${(parseFloat(price) * quantity).toFixed(2)}`}
+              </Text>
+            )}
+
             {/* Fechas (con inputs gris) */}
             <View style={{ marginTop: 6 }}>
               <Text style={styles.labelBold}>Fecha de registro</Text>
@@ -213,6 +242,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 registered: regDate,
                 expiration: expDate,
                 note,
+                price: parseFloat(price) || 0,
               })
             }
             style={styles.saveFab}
@@ -327,6 +357,17 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
+  priceInput: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 4,
+  },
+  totalPriceText: { color: palette.accent, fontWeight: '700', marginBottom: 8 },
 
   // Estilos sugeridos para DatePicker (si el componente los acepta)
   dateContainer: {
