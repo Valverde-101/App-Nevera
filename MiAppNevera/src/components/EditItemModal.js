@@ -42,6 +42,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const [regDate, setRegDate] = useState('');
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
+  const [price, setPrice] = useState('');
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [shoppingVisible, setShoppingVisible] = useState(false);
 
@@ -62,6 +63,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
       setRegDate(item.registered || '');
       setExpDate(item.expiration || '');
       setNote(item.note || '');
+      setPrice(item.price != null ? String(item.price) : '');
     }
   }, [visible, item, units, locations]);
 
@@ -75,6 +77,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
       registered: regDate,
       expiration: expDate,
       note,
+      price: parseFloat(price) || 0,
     });
   };
 
@@ -136,11 +139,11 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                       {opt.name}
                     </Text>
                   </Pressable>
-                ))}
-              </View>
+              ))}
+            </View>
 
-              {/* Cantidad */}
-              <Text style={styles.labelBold}>Cantidad</Text>
+            {/* Cantidad */}
+            <Text style={styles.labelBold}>Cantidad</Text>
               <View style={styles.qtyRow}>
                 <TouchableOpacity
                   onPress={() => { setQuantity(q => Math.max(0, (q || 0) - 1)); bumpQty(); }}
@@ -186,11 +189,30 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                       {opt.plural}
                     </Text>
                   </Pressable>
-                ))}
-              </View>
+              ))}
+            </View>
 
-              {/* Fechas (inputs gris) */}
-              <View style={{ marginTop: 6 }}>
+            {/* Precio */}
+            <Text style={styles.labelBold}>Precio unitario</Text>
+            <TextInput
+              style={styles.priceInput}
+              value={price}
+              onChangeText={t => {
+                let sanitized = t.replace(/[^0-9.]/g, '');
+                const parts = sanitized.split('.');
+                if (parts.length > 2) {
+                  sanitized = parts[0] + '.' + parts.slice(1).join('');
+                }
+                setPrice(sanitized);
+              }}
+              keyboardType="decimal-pad"
+              inputMode="decimal"
+              placeholder="Opcional"
+              placeholderTextColor={palette.textDim}
+            />
+
+            {/* Fechas (inputs gris) */}
+            <View style={{ marginTop: 6 }}>
                 <Text style={styles.labelBold}>Fecha de registro</Text>
                 <DatePicker
                   value={regDate}
@@ -235,6 +257,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
         foodName={item?.name}
         foodIcon={item?.icon}
         initialUnit={item?.unit}
+        initialUnitPrice={item?.price}
         onSave={({ quantity: q, unit: u, unitPrice, totalPrice }) => {
           addShoppingItem(item?.name, q || 0, u, unitPrice, totalPrice);
           Alert.alert('Añadido', `${item?.name} añadido a la lista de compras`);
@@ -371,6 +394,16 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
+  },
+  priceInput: {
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 4,
   },
 
   // Estilos para DatePicker (gris, consistente)
