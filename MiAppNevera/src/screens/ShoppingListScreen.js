@@ -15,6 +15,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import Svg, { Path, Circle, Text as SvgText } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import { useShopping } from '../context/ShoppingContext';
 import { useInventory } from '../context/InventoryContext';
@@ -29,6 +30,44 @@ import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
 import { useSavedLists } from '../context/SavedListsContext';
 import { getFoodIcon } from '../foodIcons';
+
+const PieChart = ({ data, size = 180, innerRadius = 60, background }) => {
+  const radius = size / 2;
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  let acc = 0;
+  return (
+    <Svg width={size} height={size}>
+      {data.map(d => {
+        const start = (acc / total) * 2 * Math.PI;
+        const end = ((acc + d.value) / total) * 2 * Math.PI;
+        const large = end - start > Math.PI ? 1 : 0;
+        const x1 = radius + radius * Math.sin(start);
+        const y1 = radius - radius * Math.cos(start);
+        const x2 = radius + radius * Math.sin(end);
+        const y2 = radius - radius * Math.cos(end);
+        const path = `M${radius} ${radius} L${x1} ${y1} A${radius} ${radius} 0 ${large} 1 ${x2} ${y2} Z`;
+        const mid = (start + end) / 2;
+        const tx = radius + (radius * 0.6) * Math.sin(mid);
+        const ty = radius - (radius * 0.6) * Math.cos(mid);
+        const pct = total ? (d.value / total) * 100 : 0;
+        acc += d.value;
+        return (
+          <React.Fragment key={d.key}>
+            <Path d={path} fill={d.color} />
+            {pct >= 5 && (
+              <SvgText x={tx} y={ty} fill="#fff" fontSize={12} textAnchor="middle">
+                {`${pct.toFixed(0)}%`}
+              </SvgText>
+            )}
+          </React.Fragment>
+        );
+      })}
+      {innerRadius > 0 && (
+        <Circle cx={radius} cy={radius} r={innerRadius} fill={background || '#fff'} />
+      )}
+    </Svg>
+  );
+};
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -47,6 +86,7 @@ export default function ShoppingListScreen() {
     list,
     addItem,
     addItems,
+    editItem,
     togglePurchased,
     removeItems,
     markPurchased,
@@ -70,6 +110,8 @@ export default function ShoppingListScreen() {
   const [autoVisible, setAutoVisible] = useState(false);
   const [saveVisible, setSaveVisible] = useState(false);
   const [clearVisible, setClearVisible] = useState(false);
+  const [editIdx, setEditIdx] = useState(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
 
   const onSelectFood = (name, icon) => {
     setSelectedFood({ name, icon });
@@ -84,9 +126,9 @@ export default function ShoppingListScreen() {
     setMultiAddVisible(true);
   };
 
-  const onSave = ({ quantity, unit }) => {
+  const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
     if (selectedFood) {
-      addItem(selectedFood.name, quantity, unit);
+      addItem(selectedFood.name, quantity, unit, unitPrice, totalPrice);
       setSelectedFood(null);
       setAddVisible(false);
     }
@@ -98,6 +140,8 @@ export default function ShoppingListScreen() {
         name: e.name,
         quantity: parseFloat(e.quantity) || 0,
         unit: e.unit,
+        unitPrice: parseFloat(e.unitPrice) || 0,
+        totalPrice: parseFloat(e.totalPrice) || 0,
       })),
     );
     setMultiAddVisible(false);
@@ -202,6 +246,42 @@ export default function ShoppingListScreen() {
     return g;
   }, [list]);
 
+  const totalCost = useMemo(
+    () => list.reduce((sum, it) => sum + (it.totalPrice || 0), 0),
+    [list],
+  );
+
+  const costByCategory = useMemo(() => {
+    const totals = {};
+    list.forEach(it => {
+      const cat = it.foodCategory || 'otros';
+      const price = it.totalPrice || 0;
+      if (price > 0) totals[cat] = (totals[cat] || 0) + price;
+    });
+    return totals;
+  }, [list]);
+
+  const chartData = useMemo(() => {
+    const paletteColors = [
+      '#4e79a7',
+      '#f28e2b',
+      '#e15759',
+      '#76b7b2',
+      '#59a14f',
+      '#edc949',
+      '#af7aa1',
+      '#ff9da7',
+      '#9c755f',
+      '#bab0ab',
+    ];
+    return Object.entries(costByCategory).map(([key, value], idx) => ({
+      key,
+      value,
+      color: paletteColors[idx % paletteColors.length],
+      percent: totalCost ? (value / totalCost) * 100 : 0,
+    }));
+  }, [costByCategory, totalCost]);
+
   const empty = list.length === 0;
 
   return (
@@ -233,6 +313,14 @@ export default function ShoppingListScreen() {
             <TouchableOpacity style={styles.actionBtn} onPress={selectAll}>
               <Text style={styles.actionText}>Seleccionar todo</Text>
             </TouchableOpacity>
+            {selected.length === 1 && (
+              <TouchableOpacity
+                style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
+                onPress={() => setEditIdx(selected[0])}
+              >
+                <Text style={[styles.actionText, { color: palette.accent }]}>Editar</Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
               onPress={() => setBatchVisible(true)}
@@ -263,61 +351,79 @@ export default function ShoppingListScreen() {
             </TouchableOpacity>
           </View>
         ) : (
-          Object.entries(grouped).map(([cat, items]) => (
-            <View key={cat} style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>
-                  {categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </Text>
-              </View>
-              {items.map(({ item, index }) => {
-                const isSel = selectMode && selected.includes(index);
-                const purchased = !!item.purchased;
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => (selectMode ? toggleSelect(index) : togglePurchased(index))}
-                    onLongPress={() => {
-                      if (!selectMode) {
-                        setSelectMode(true);
-                        setSelected([index]);
-                      } else {
-                        toggleSelect(index);
-                      }
-                    }}
-                  >
-                    <View
-                      style={[
-                        styles.row,
-                        purchased && styles.rowPurchased,
-                        isSel && styles.rowSelected,
-                      ]}
+          <>
+            {Object.entries(grouped).map(([cat, items]) => (
+              <View key={cat} style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>
+                    {categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </Text>
+                </View>
+                {items.map(({ item, index }) => {
+                  const isSel = selectMode && selected.includes(index);
+                  const purchased = !!item.purchased;
+                  return (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => (selectMode ? toggleSelect(index) : togglePurchased(index))}
+                      onLongPress={() => {
+                        if (!selectMode) {
+                          setSelectMode(true);
+                          setSelected([index]);
+                        } else {
+                          toggleSelect(index);
+                        }
+                      }}
                     >
-                      {selectMode && (
-                        <View style={[styles.check, isSel && styles.checkOn]}>
-                          <Text style={{ color: isSel ? '#1b1d22' : palette.textDim }}>
-                            {isSel ? '✓' : ''}
+                      <View
+                        style={[
+                          styles.row,
+                          purchased && styles.rowPurchased,
+                          isSel && styles.rowSelected,
+                        ]}
+                      >
+                        {selectMode && (
+                          <View style={[styles.check, isSel && styles.checkOn]}>
+                            <Text style={{ color: isSel ? '#1b1d22' : palette.textDim }}>
+                              {isSel ? '✓' : ''}
+                            </Text>
+                          </View>
+                        )}
+                        {item.icon && <Image source={item.icon} style={styles.icon} />}
+                        <View style={{ flex: 1 }}>
+                          <Text
+                            style={[
+                              styles.rowText,
+                              purchased && { textDecorationLine: 'line-through', color: palette.textDim },
+                            ]}
+                            numberOfLines={2}
+                          >
+                            {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                           </Text>
                         </View>
-                      )}
-                      {item.icon && <Image source={item.icon} style={styles.icon} />}
-                      <View style={{ flex: 1 }}>
-                        <Text
-                          style={[
-                            styles.rowText,
-                            purchased && { textDecorationLine: 'line-through', color: palette.textDim },
-                          ]}
-                          numberOfLines={2}
-                        >
-                          {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
-                        </Text>
+                        {item.totalPrice > 0 && (
+                          <Text style={styles.priceBadge}>
+                            {`S/${item.totalPrice.toFixed(2)}`}
+                          </Text>
+                        )}
                       </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            ))}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>Detalles de lista de compra</Text>
+              </View>
+              <View style={styles.detailsRow}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => setDetailsVisible(true)}>
+                  <Text style={styles.actionText}>Más detalles</Text>
+                </TouchableOpacity>
+                <Text style={styles.totalText}>{`Costo Total: S/${totalCost.toFixed(2)}`}</Text>
+              </View>
             </View>
-          ))
+          </>
         )}
       </ScrollView>
 
@@ -334,6 +440,22 @@ export default function ShoppingListScreen() {
         foodIcon={selectedFood?.icon}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
+      />
+      <AddShoppingItemModal
+        visible={editIdx !== null}
+        foodName={list[editIdx]?.name}
+        foodIcon={list[editIdx]?.icon}
+        initialQuantity={list[editIdx]?.quantity}
+        initialUnit={list[editIdx]?.unit}
+        initialUnitPrice={list[editIdx]?.unitPrice}
+        initialTotalPrice={list[editIdx]?.totalPrice}
+        onSave={({ quantity, unit, unitPrice, totalPrice }) => {
+          editItem(editIdx, quantity, unit, unitPrice, totalPrice);
+          setEditIdx(null);
+          setSelected([]);
+          setSelectMode(false);
+        }}
+        onClose={() => setEditIdx(null)}
       />
       <BatchAddShoppingModal
         visible={multiAddVisible}
@@ -353,6 +475,42 @@ export default function ShoppingListScreen() {
         onSave={handleSaveCurrent}
         onClose={() => setSaveVisible(false)}
       />
+
+      <Modal
+        visible={detailsVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setDetailsVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setDetailsVisible(false)}>
+          <View style={styles.modalBackdrop}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.card, { alignItems: 'center' }]}> 
+                <Text style={[styles.cardTitle, { marginBottom: 16 }]}>Distribución de costos</Text>
+                {totalCost > 0 ? (
+                  <>
+                    <PieChart data={chartData} size={200} innerRadius={50} background={palette.surface} />
+                    <View style={{ marginTop: 16, alignSelf: 'stretch' }}>
+                      {chartData.map(d => (
+                        <View key={d.key} style={styles.legendRow}>
+                          <View style={[styles.legendColor, { backgroundColor: d.color }]} />
+                          <Text style={[styles.legendLabel, { flex: 1 }]}> 
+                            {categories[d.key]?.name || d.key}
+                          </Text>
+                          <Text style={styles.legendValue}>{`S/${d.value.toFixed(2)}`}</Text>
+                          <Text style={styles.legendPercent}>{`${d.percent.toFixed(0)}%`}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                ) : (
+                  <Text style={{ color: palette.textDim }}>Sin datos de costo</Text>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
       {/* Confirmar eliminación */}
       <Modal
@@ -521,6 +679,21 @@ const createStyles = (palette) => StyleSheet.create({
   checkOn: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
   rowText: { color: palette.text },
+  priceBadge: { color: palette.accent, fontWeight: '700', marginLeft: 8 },
+
+  detailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  totalText: { color: palette.text, fontWeight: '700' },
+  legendRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6 },
+  legendColor: { width: 12, height: 12, borderRadius: 2, marginRight: 8 },
+  legendLabel: { color: palette.text },
+  legendValue: { color: palette.text, marginLeft: 8 },
+  legendPercent: { color: palette.textDim, marginLeft: 8 },
 
   emptyWrap: {
     alignItems: 'center',
