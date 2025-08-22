@@ -491,9 +491,9 @@ export default function InventoryScreen({ navigation }) {
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, -1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>←</Text>
                                 </TouchableOpacity>
-                                <View style={{ width: 80, alignItems: 'center' }}>
+                                <View style={{ alignItems: 'center' }}>
                                   <Text style={{ color: palette.textDim, fontSize: 12 }}>
-                                    {item.quantity} {getLabel(item.quantity, item.unit)}
+                                    {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - S/${(item.price * item.quantity).toFixed(2)}`}
                                   </Text>
                                 </View>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
@@ -537,7 +537,7 @@ export default function InventoryScreen({ navigation }) {
                                 {label}
                               </Text>
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
-                                {item.quantity} {getLabel(item.quantity, item.unit)}
+                                {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - S/${(item.price * item.quantity).toFixed(2)}`}
                               </Text>
                             </LinearGradient>
                           </View>
