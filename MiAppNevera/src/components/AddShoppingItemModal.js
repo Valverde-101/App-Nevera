@@ -25,8 +25,6 @@ export default function AddShoppingItemModal({
   onClose,
   initialQuantity,
   initialUnit,
-  initialUnitPrice,
-  initialTotalPrice,
 }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
@@ -34,8 +32,6 @@ export default function AddShoppingItemModal({
   const { units } = useUnits();
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
-  const [unitPrice, setUnitPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
   const qtyScale = useRef(new Animated.Value(1)).current;
 
   const bumpQty = () => {
@@ -57,10 +53,8 @@ export default function AddShoppingItemModal({
     if (visible) {
       setQuantity(initialQuantity ?? 1);
       setUnit(initialUnit || units[0]?.key || 'units');
-      setUnitPrice(initialUnitPrice ?? 0);
-      setTotalPrice(initialTotalPrice ?? 0);
     }
-  }, [visible, initialQuantity, initialUnit, initialUnitPrice, initialTotalPrice, units]);
+  }, [visible, initialQuantity, initialUnit, units]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 
@@ -103,12 +97,7 @@ export default function AddShoppingItemModal({
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
-                  setQuantity((q) => {
-                    const next = Math.max(0, (q || 0) - 1);
-                    if (unitPrice) setTotalPrice(Number((unitPrice * next).toFixed(2)));
-                    else if (totalPrice) setUnitPrice(next ? Number((totalPrice / next).toFixed(2)) : 0);
-                    return next;
-                  });
+                  setQuantity((q) => Math.max(0, (q || 0) - 1));
                   bumpQty();
                 }}
                 style={styles.qtyBtn}
@@ -123,22 +112,14 @@ export default function AddShoppingItemModal({
                   value={String(quantity)}
                   onChangeText={(t) => {
                     const v = parseFloat(t.replace(/[^0-9.]/g, ''));
-                    const q = Number.isFinite(v) ? v : 0;
-                    setQuantity(q);
-                    if (unitPrice) setTotalPrice(Number((unitPrice * q).toFixed(2)));
-                    else if (totalPrice) setUnitPrice(q ? Number((totalPrice / q).toFixed(2)) : 0);
+                    setQuantity(Number.isFinite(v) ? v : 0);
                   }}
                 />
               </Animated.View>
 
               <TouchableOpacity
                 onPress={() => {
-                  setQuantity((q) => {
-                    const next = (q || 0) + 1;
-                    if (unitPrice) setTotalPrice(Number((unitPrice * next).toFixed(2)));
-                    else if (totalPrice) setUnitPrice(Number((totalPrice / next).toFixed(2)));
-                    return next;
-                  });
+                  setQuantity((q) => (q || 0) + 1);
                   bumpQty();
                 }}
                 style={styles.qtyBtn}
@@ -171,37 +152,6 @@ export default function AddShoppingItemModal({
                 </Pressable>
               ))}
             </View>
-
-            <Text style={styles.labelBold}>Precio</Text>
-            <View style={styles.priceRow}>
-              <TextInput
-                style={[styles.priceInput, { marginRight: 4 }]}
-                keyboardType="numeric"
-                placeholder="Costo unitario"
-                placeholderTextColor={palette.textDim}
-                value={unitPrice ? String(unitPrice) : ''}
-                onChangeText={(t) => {
-                  const v = parseFloat(t.replace(/[^0-9.]/g, ''));
-                  const u = Number.isFinite(v) ? v : 0;
-                  setUnitPrice(u);
-                  setTotalPrice(Number((u * (quantity || 0)).toFixed(2)));
-                }}
-              />
-              <Text style={styles.priceDivider}>/</Text>
-              <TextInput
-                style={[styles.priceInput, { marginLeft: 4 }]}
-                keyboardType="numeric"
-                placeholder="Costo total"
-                placeholderTextColor={palette.textDim}
-                value={totalPrice ? String(totalPrice) : ''}
-                onChangeText={(t) => {
-                  const v = parseFloat(t.replace(/[^0-9.]/g, ''));
-                  const tot = Number.isFinite(v) ? v : 0;
-                  setTotalPrice(tot);
-                  setUnitPrice((quantity || 0) ? Number((tot / (quantity || 0)).toFixed(2)) : 0);
-                }}
-              />
-            </View>
           </ScrollView>
 
           <View style={styles.footerRow}>
@@ -210,14 +160,7 @@ export default function AddShoppingItemModal({
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.footerBtn, styles.footerPrimary]}
-              onPress={() =>
-                onSave({
-                  quantity: quantity || 0,
-                  unit,
-                  unitPrice: unitPrice || 0,
-                  totalPrice: totalPrice || 0,
-                })
-              }
+              onPress={() => onSave({ quantity: quantity || 0, unit })}
             >
               <Text
                 style={[styles.footerBtnText, styles.footerPrimaryText]}
@@ -349,19 +292,6 @@ const createStyles = (palette) =>
       paddingHorizontal: 10,
       color: palette.text,
     },
-    priceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-    priceInput: {
-      flex: 1,
-      textAlign: 'center',
-      backgroundColor: palette.surface2,
-      borderWidth: 1,
-      borderColor: palette.border,
-      borderRadius: 10,
-      paddingVertical: 8,
-      paddingHorizontal: 10,
-      color: palette.text,
-    },
-    priceDivider: { color: palette.text, paddingHorizontal: 4 },
     footerRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
