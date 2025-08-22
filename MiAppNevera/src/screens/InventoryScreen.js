@@ -26,6 +26,7 @@ import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 
@@ -98,6 +99,8 @@ export default function InventoryScreen({ navigation }) {
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
+  // subscribe to default food overrides so inventory names update after refresh
+  const { overrides } = useDefaultFoods();
   const [storage, setStorage] = useState(locations[0]?.key || 'fridge');
 
   useEffect(() => {
@@ -437,6 +440,7 @@ export default function InventoryScreen({ navigation }) {
                     const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                     const meta = getExpiryMeta(palette, daysLeft);
                     const g = gradientForKey(themeName, item.name || key);
+                    const label = getFoodInfo(item.name)?.name || item.name;
 
                     return (
                       <TouchableOpacity
@@ -454,7 +458,7 @@ export default function InventoryScreen({ navigation }) {
                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
                               {/* Nombre + badge pegado a la izquierda */}
                               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
-                                <Text style={{ color: palette.foodName, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{item.name}</Text>
+                                <Text style={{ color: palette.foodName, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{label}</Text>
                                 {meta && (
                                   <View style={{ marginLeft: 10, backgroundColor: meta.bg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
                                     <Text style={{ color: meta.text, fontSize: 12, fontWeight: '700' }}>{meta.label}</Text>
@@ -489,6 +493,7 @@ export default function InventoryScreen({ navigation }) {
                       const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                       const meta = getExpiryMeta(palette, daysLeft);
                       const g = gradientForKey(themeName, item.name || key);
+                      const label = getFoodInfo(item.name)?.name || item.name;
 
                       return (
                         <TouchableOpacity
@@ -508,7 +513,7 @@ export default function InventoryScreen({ navigation }) {
                                 {item.icon && (<Image source={item.icon} style={{ width: 54, height: 54 }} resizeMode="contain" />)}
                               </View>
                               <Text style={{ textAlign: 'center', color: palette.foodName, fontSize: 12, fontWeight: '400' }} numberOfLines={2}>
-                                {item.name}
+                                {label}
                               </Text>
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
                                 {item.quantity} {getLabel(item.quantity, item.unit)}
@@ -710,7 +715,7 @@ export default function InventoryScreen({ navigation }) {
                         />
                       )}
                       <Text style={{ color: palette.text }}>
-                        {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                        {getFoodInfo(item.name)?.name || item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                       </Text>
                     </View>
                   ))}
