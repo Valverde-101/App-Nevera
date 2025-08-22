@@ -1,15 +1,13 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getFoodIcon, getFoodCategory, getFoodInfo} from '../foodIcons';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useCustomFoods } from './CustomFoodsContext';
-import { useDefaultFoods } from './DefaultFoodsContext';
 
 const ShoppingContext = createContext();
 
 export const ShoppingProvider = ({children}) => {
   const [list, setList] = useState([]);
   const { customFoods } = useCustomFoods();
-  const { overrides } = useDefaultFoods();
 
   useEffect(() => {
     (async () => {
@@ -30,20 +28,6 @@ export const ShoppingProvider = ({children}) => {
       }
     })();
   }, [customFoods]);
-
-  useEffect(() => {
-    // update names when default overrides change
-    setList(prev =>
-      prev.map(item => {
-        const info = getFoodInfo(item.name);
-        return {
-          ...item,
-          name: info?.name || item.name,
-          icon: getFoodIcon(item.name),
-        };
-      }),
-    );
-  }, [overrides]);
 
   const persist = useCallback(updater => {
     setList(prev => {
