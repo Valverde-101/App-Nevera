@@ -22,7 +22,7 @@ import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
-import { getFoodIcon } from '../foodIcons';
+import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
@@ -255,14 +255,25 @@ export default function InventoryScreen({ navigation }) {
     groupOrder = ['all'];
   }
 
-  const onSelectFood = (name, icon) => { setSelectedFood({ name, icon }); setPickerVisible(false); setAddVisible(true); };
-  const onMultiSelectFoods = names => { const items = names.map(name => ({ name, icon: getFoodIcon(name) })); setMultiItems(items); setPickerVisible(false); setMultiAddVisible(true); };
+  const onSelectFood = (key, icon) => {
+    const info = getFoodInfo(key);
+    setSelectedFood({ key, name: info?.name || key, icon });
+    setPickerVisible(false);
+    setAddVisible(true);
+  };
+  const onMultiSelectFoods = keys => {
+    const items = keys.map(k => ({ name: k, icon: getFoodIcon(k) }));
+    setMultiItems(items);
+    setPickerVisible(false);
+    setMultiAddVisible(true);
+  };
 
   const onSave = data => {
-    cleanZeroItems(selectedFood.name);
+    cleanZeroItems(selectedFood.key);
     const qty = parseFloat(data.quantity) || 0;
     const hasNote = data.note && data.note.trim() !== '';
-    if (qty !== 0 || hasNote) addItem(data.location, selectedFood.name, qty, data.unit, data.registered, data.expiration, data.note);
+    if (qty !== 0 || hasNote)
+      addItem(data.location, selectedFood.key, qty, data.unit, data.registered, data.expiration, data.note);
     setAddVisible(false);
   };
 
@@ -659,7 +670,7 @@ export default function InventoryScreen({ navigation }) {
 
       {/* Modales de negocio */}
       <FoodPickerModal visible={pickerVisible} onSelect={onSelectFood} onMultiSelect={onMultiSelectFoods} onClose={() => setPickerVisible(false)} />
-      <AddItemModal visible={addVisible} foodName={selectedFood?.name} foodIcon={selectedFood?.icon} initialLocation={storage} onSave={onSave} onClose={() => setAddVisible(false)} />
+        <AddItemModal visible={addVisible} foodName={selectedFood?.key} foodIcon={selectedFood?.icon} initialLocation={storage} onSave={onSave} onClose={() => setAddVisible(false)} />
       <BatchAddItemModal visible={multiAddVisible} items={multiItems} onSave={handleBatchAddSave} onClose={() => setMultiAddVisible(false)} />
       <EditItemModal
         visible={!!editingItem}

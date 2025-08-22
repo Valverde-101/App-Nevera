@@ -36,6 +36,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   const [regDate, setRegDate] = useState(today);
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
+  const [label, setLabel] = useState(foodName);
   const { addItem: addShoppingItem } = useShopping();
 
   // Animación suave al cambiar cantidad
@@ -51,19 +52,20 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
     if (visible) {
       setLocation(initialLocation);
       setQuantity(1);
-      setUnit(units[0]?.key || 'units');
-      setRegDate(today);
-      const info = getFoodInfo(foodName);
-      if (info?.expirationDays != null) {
-        const d = new Date();
-        d.setDate(d.getDate() + info.expirationDays);
-        setExpDate(d.toISOString().split('T')[0]);
-      } else {
-        setExpDate('');
+        const info = getFoodInfo(foodName);
+        setUnit(info?.defaultUnit || units[0]?.key || 'units');
+        setRegDate(today);
+        if (info?.expirationDays != null) {
+          const d = new Date();
+          d.setDate(d.getDate() + info.expirationDays);
+          setExpDate(d.toISOString().split('T')[0]);
+        } else {
+          setExpDate('');
+        }
+        setNote('');
+        setLabel(info?.name || foodName);
       }
-      setNote('');
-    }
-  }, [visible, initialLocation, today, units, locations, foodName]);
+    }, [visible, initialLocation, today, units, locations, foodName]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 
@@ -92,7 +94,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             <View style={styles.foodIconBox}>
               {foodIcon && <Image source={foodIcon} style={{ width: 64, height: 64 }} resizeMode="contain" />}
             </View>
-            <Text style={styles.foodName} numberOfLines={2}>{foodName}</Text>
+              <Text style={styles.foodName} numberOfLines={2}>{label}</Text>
           </LinearGradient>
 
           <ScrollView
