@@ -135,6 +135,7 @@ export default function InventoryScreen({ navigation }) {
           paddingVertical: 10,
           borderRadius: 10,
         },
+        priceBadge: { color: palette.accent, fontWeight: '700', marginLeft: 8 },
       }),
     [palette],
   );
@@ -485,6 +486,9 @@ export default function InventoryScreen({ navigation }) {
                                     <Text style={{ color: meta.text, fontSize: 12, fontWeight: '700' }}>{meta.label}</Text>
                                   </View>
                                 )}
+                                {item.price > 0 && (
+                                  <Text style={styles.priceBadge}>{`S/${(item.price * item.quantity).toFixed(2)}`}</Text>
+                                )}
                               </View>
                               {/* Controles de cantidad a la derecha */}
                               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -539,6 +543,11 @@ export default function InventoryScreen({ navigation }) {
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
                                 {item.quantity} {getLabel(item.quantity, item.unit)}
                               </Text>
+                              {item.price > 0 && (
+                                <Text style={[styles.priceBadge, { marginLeft: 0, textAlign: 'center', marginTop: 2 }]}>
+                                  {`S/${(item.price * item.quantity).toFixed(2)}`}
+                                </Text>
+                              )}
                             </LinearGradient>
                           </View>
                         </TouchableOpacity>
