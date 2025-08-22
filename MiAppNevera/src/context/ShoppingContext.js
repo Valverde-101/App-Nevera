@@ -18,6 +18,8 @@ export const ShoppingProvider = ({children}) => {
             ...item,
             icon: item.icon || getFoodIcon(item.name),
             foodCategory: item.foodCategory || getFoodCategory(item.name),
+            unitPrice: item.unitPrice || 0,
+            totalPrice: item.totalPrice || 0,
           }));
           setList(parsed);
         }
@@ -37,11 +39,15 @@ export const ShoppingProvider = ({children}) => {
     });
   }, []);
 
-  const addItem = useCallback((name, quantity = 1, unit = 'units') => {
+  const addItem = useCallback((name, quantity = 1, unit = 'units', unitPrice = 0, totalPrice = 0) => {
+    const uPrice = unitPrice || (quantity ? totalPrice / quantity : 0);
+    const tPrice = totalPrice || uPrice * quantity;
     const newItem = {
       name,
       quantity,
       unit,
+      unitPrice: uPrice,
+      totalPrice: tPrice,
       icon: getFoodIcon(name),
       foodCategory: getFoodCategory(name),
       purchased: false,
@@ -50,14 +56,20 @@ export const ShoppingProvider = ({children}) => {
   }, [persist]);
 
   const addItems = useCallback(items => {
-    const newItems = items.map(({name, quantity = 1, unit = 'units'}) => ({
-      name,
-      quantity,
-      unit,
-      icon: getFoodIcon(name),
-      foodCategory: getFoodCategory(name),
-      purchased: false,
-    }));
+    const newItems = items.map(({name, quantity = 1, unit = 'units', unitPrice = 0, totalPrice = 0}) => {
+      const uPrice = unitPrice || (quantity ? totalPrice / quantity : 0);
+      const tPrice = totalPrice || uPrice * quantity;
+      return {
+        name,
+        quantity,
+        unit,
+        unitPrice: uPrice,
+        totalPrice: tPrice,
+        icon: getFoodIcon(name),
+        foodCategory: getFoodCategory(name),
+        purchased: false,
+      };
+    });
     persist(prev => [...prev, ...newItems]);
   }, [persist]);
 
@@ -89,6 +101,8 @@ export const ShoppingProvider = ({children}) => {
       ...it,
       icon: it.icon || getFoodIcon(it.name),
       foodCategory: it.foodCategory || getFoodCategory(it.name),
+      unitPrice: it.unitPrice || 0,
+      totalPrice: it.totalPrice || 0,
       purchased: !!it.purchased,
     })));
   }, [persist]);
