@@ -276,7 +276,16 @@ export default function InventoryScreen({ navigation }) {
     const qty = parseFloat(data.quantity) || 0;
     const hasNote = data.note && data.note.trim() !== '';
     if (qty !== 0 || hasNote)
-      addItem(data.location, selectedFood.key, qty, data.unit, data.registered, data.expiration, data.note);
+      addItem(
+        data.location,
+        selectedFood.key,
+        qty,
+        data.unit,
+        data.registered,
+        data.expiration,
+        data.note,
+        data.price,
+      );
     setAddVisible(false);
   };
 
@@ -289,11 +298,12 @@ export default function InventoryScreen({ navigation }) {
       }
     });
     for (let i = 0; i < entries.length; i++) {
-      const { location, quantity, unit, regDate, expDate, note } = entries[i];
+      const { location, quantity, unit, regDate, expDate, note, price } = entries[i];
       const item = multiItems[i];
       const qty = parseFloat(quantity) || 0;
       const hasNote = note && note.trim() !== '';
-      if (qty !== 0 || hasNote) addItem(location, item.name, qty, unit, regDate, expDate, note);
+      if (qty !== 0 || hasNote)
+        addItem(location, item.name, qty, unit, regDate, expDate, note, price);
     }
     setMultiAddVisible(false); setMultiItems([]);
   };
@@ -331,7 +341,18 @@ export default function InventoryScreen({ navigation }) {
     if (transferType === 'move') {
       selectedItems.slice().sort((a, b) => a.location === b.location ? b.index - a.index : a.location.localeCompare(b.location)).forEach(sel => removeItem(sel.location, sel.index));
     }
-    items.forEach(item => addItem(target, item.name, item.quantity, item.unit, item.registered, item.expiration, item.note));
+    items.forEach(item =>
+      addItem(
+        target,
+        item.name,
+        item.quantity,
+        item.unit,
+        item.registered,
+        item.expiration,
+        item.note,
+        item.price,
+      ),
+    );
     clearSelection(); setTransferType(null);
   };
 

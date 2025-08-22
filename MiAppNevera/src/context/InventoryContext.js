@@ -97,6 +97,7 @@ export const InventoryProvider = ({children}) => {
     registered = '',
     expiration = '',
     note = '',
+    price = 0,
   ) => {
     const icon = getFoodIcon(name);
     const foodCategory = getFoodCategory(name);
@@ -108,6 +109,7 @@ export const InventoryProvider = ({children}) => {
       registered,
       expiration,
       note,
+      price,
       foodCategory,
     };
     persist(prev => ({
@@ -119,7 +121,7 @@ export const InventoryProvider = ({children}) => {
   const updateItem = useCallback((
     oldCategory,
     index,
-    {location, quantity, unit, registered, expiration, note},
+    {location, quantity, unit, registered, expiration, note, price},
   ) => {
     persist(prev => {
       const item = prev[oldCategory][index];
@@ -130,6 +132,7 @@ export const InventoryProvider = ({children}) => {
         registered,
         expiration,
         note,
+        price,
       };
       const newCategory = location;
       if (newCategory === oldCategory) {
