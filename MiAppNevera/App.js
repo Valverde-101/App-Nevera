@@ -20,6 +20,7 @@ import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
 import { CustomFoodsProvider } from './src/context/CustomFoodsContext';
+import { DefaultFoodsProvider } from './src/context/DefaultFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
 
@@ -37,14 +38,15 @@ function MainApp() {
     }
   }, []);
   return (
-    <CategoriesProvider>
-      <CustomFoodsProvider>
-        <UnitsProvider>
-          <LocationsProvider>
-            <InventoryProvider>
-              <SavedListsProvider>
-                <ShoppingProvider>
-                  <RecipeProvider>
+      <CategoriesProvider>
+        <DefaultFoodsProvider>
+        <CustomFoodsProvider>
+          <UnitsProvider>
+            <LocationsProvider>
+              <InventoryProvider>
+                <SavedListsProvider>
+                  <ShoppingProvider>
+                    <RecipeProvider>
                   <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
                     <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
                     <Stack.Navigator>
@@ -103,11 +105,12 @@ function MainApp() {
                 </RecipeProvider>
               </ShoppingProvider>
             </SavedListsProvider>
-          </InventoryProvider>
-          </LocationsProvider>
-        </UnitsProvider>
-      </CustomFoodsProvider>
-    </CategoriesProvider>
+            </InventoryProvider>
+            </LocationsProvider>
+          </UnitsProvider>
+        </CustomFoodsProvider>
+        </DefaultFoodsProvider>
+      </CategoriesProvider>
   );
 }
 
