@@ -17,7 +17,6 @@ import { useUnits } from '../context/UnitsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 import { getFoodInfo } from '../foodIcons';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 
 export default function AddShoppingItemModal({
   visible,
@@ -34,8 +33,6 @@ export default function AddShoppingItemModal({
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { units } = useUnits();
-  // subscribe to default food overrides so edits persist
-  const { overrides } = useDefaultFoods();
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
   const [unitPrice, setUnitPrice] = useState(0);
@@ -73,7 +70,7 @@ export default function AddShoppingItemModal({
         setUnitPriceText(u ? String(u) : '');
         setTotalPriceText(t ? String(t) : '');
       }
-    }, [visible, initialQuantity, initialUnit, initialUnitPrice, initialTotalPrice, units, foodName, overrides]);
+    }, [visible, initialQuantity, initialUnit, initialUnitPrice, initialTotalPrice, units, foodName]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 

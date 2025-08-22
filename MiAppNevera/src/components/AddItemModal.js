@@ -20,7 +20,6 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
 import { getFoodInfo } from '../foodIcons';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 
@@ -31,8 +30,6 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   const today = new Date().toISOString().split('T')[0];
   const { units } = useUnits();
   const { locations } = useLocations();
-  // subscribe to default food overrides so edits persist after refresh
-  const { overrides } = useDefaultFoods();
   const [location, setLocation] = useState(initialLocation);
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
@@ -68,7 +65,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
         setNote('');
         setLabel(info?.name || foodName);
       }
-    }, [visible, initialLocation, today, units, locations, foodName, overrides]);
+    }, [visible, initialLocation, today, units, locations, foodName]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 

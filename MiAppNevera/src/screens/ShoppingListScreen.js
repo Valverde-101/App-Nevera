@@ -30,7 +30,6 @@ import { useTheme } from '../context/ThemeContext';
 import { useSavedLists } from '../context/SavedListsContext';
 import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import CostPieChart from '../components/CostPieChart';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -60,8 +59,6 @@ export default function ShoppingListScreen() {
   const { getLabel } = useUnits();
   const { locations } = useLocations();
   const { categories } = useCategories();
-  // subscribe to default food overrides so shopping names update after refresh
-  const { overrides } = useDefaultFoods();
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
@@ -343,7 +340,6 @@ export default function ShoppingListScreen() {
                 {items.map(({ item, index }) => {
                   const isSel = selectMode && selected.includes(index);
                   const purchased = !!item.purchased;
-                  const label = getFoodInfo(item.name)?.name || item.name;
                   return (
                     <TouchableOpacity
                       key={index}
@@ -380,7 +376,7 @@ export default function ShoppingListScreen() {
                             ]}
                             numberOfLines={2}
                           >
-                            {label} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                            {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                           </Text>
                         </View>
                         {item.totalPrice > 0 && (

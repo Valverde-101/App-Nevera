@@ -18,7 +18,6 @@ import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
 import { getFoodInfo } from '../foodIcons';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 
@@ -30,8 +29,6 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
   const today = new Date().toISOString().split('T')[0];
   const { units, getLabel } = useUnits();
   const { locations } = useLocations();
-  // subscribe to default food overrides so batch defaults update after refresh
-  const { overrides } = useDefaultFoods();
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
         }),
       );
     }
-  }, [visible, items, today, units, locations, overrides]);
+  }, [visible, items, today, units, locations]);
 
   const updateField = (index, field, value) => {
     setData(prev => prev.map((d, i) => (i === index ? { ...d, [field]: value } : d)));
@@ -101,20 +98,17 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
             contentContainerStyle={{ padding: 16, paddingBottom: 90 }}
             showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
           >
-            {items.map((item, idx) => {
-              const info = getFoodInfo(item.name);
-              const label = info?.name || item.name;
-              return (
-                <View key={idx} style={styles.card}>
-                  <View style={styles.cardHeader}>
-                    <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.cardRibbon}>
-                    {item.icon && <Image source={item.icon} style={styles.ribbonIcon} />}
-                    <Text style={styles.ribbonTitle} numberOfLines={1} ellipsizeMode="tail">{label}</Text>
-                  </LinearGradient>
-                  <Text style={styles.cardMeta}>
-                      {data[idx]?.quantity || 0} {getLabel(parseFloat(data[idx]?.quantity) || 0, data[idx]?.unit)}
-                    </Text>
-                  </View>
+            {items.map((item, idx) => (
+              <View key={idx} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.cardRibbon}>
+                  {item.icon && <Image source={item.icon} style={styles.ribbonIcon} />}
+                  <Text style={styles.ribbonTitle} numberOfLines={1} ellipsizeMode="tail">{item.name}</Text>
+                </LinearGradient>
+                <Text style={styles.cardMeta}>
+                    {data[idx]?.quantity || 0} {getLabel(parseFloat(data[idx]?.quantity) || 0, data[idx]?.unit)}
+                  </Text>
+                </View>
 
                 {/* Ubicación */}
                 <Text style={styles.labelBold}>Ubicación</Text>

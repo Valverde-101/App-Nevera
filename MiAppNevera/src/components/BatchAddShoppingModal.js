@@ -16,15 +16,12 @@ import { useUnits } from '../context/UnitsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 import { getFoodInfo } from '../foodIcons';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 
 export default function BatchAddShoppingModal({ visible, items = [], onSave, onClose }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette, themeName), [palette, themeName]);
   const { units, getLabel } = useUnits();
-  // subscribe to default food overrides so batch names update after refresh
-  const { overrides } = useDefaultFoods();
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -38,7 +35,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
         })),
       );
     }
-  }, [visible, items, units, overrides]);
+  }, [visible, items, units]);
 
   const updateItem = (index, changes) => {
     setData(prev => prev.map((d, i) => (i === index ? { ...d, ...changes } : d)));

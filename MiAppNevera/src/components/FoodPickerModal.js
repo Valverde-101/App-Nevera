@@ -26,7 +26,6 @@ import AddCustomFoodModal from './AddCustomFoodModal';
 import EditDefaultFoodModal from './EditDefaultFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
-import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
@@ -41,8 +40,6 @@ export default function FoodPickerModal({
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { categories } = useCategories();
-  // subscribe to default food overrides so default names update after refresh
-  const { overrides } = useDefaultFoods();
   const categoryNames = Object.keys(categories);
   const baseCategoryNames = Object.keys(baseCategories);
   const [currentCategory, setCurrentCategory] = useState(categoryNames[0] || '');
