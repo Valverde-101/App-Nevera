@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useUnits } from '../context/UnitsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
+import { getFoodInfo } from '../foodIcons';
 
 export default function AddShoppingItemModal({
   visible,
@@ -38,6 +39,7 @@ export default function AddShoppingItemModal({
   const [totalPrice, setTotalPrice] = useState(0);
   const [unitPriceText, setUnitPriceText] = useState('');
   const [totalPriceText, setTotalPriceText] = useState('');
+  const [label, setLabel] = useState(foodName);
   const qtyScale = useRef(new Animated.Value(1)).current;
 
   const bumpQty = () => {
@@ -56,17 +58,19 @@ export default function AddShoppingItemModal({
   };
 
   useEffect(() => {
-    if (visible) {
-      setQuantity(initialQuantity ?? 1);
-      setUnit(initialUnit || units[0]?.key || 'units');
-      const u = initialUnitPrice ?? 0;
-      const t = initialTotalPrice ?? 0;
-      setUnitPrice(u);
-      setTotalPrice(t);
-      setUnitPriceText(u ? String(u) : '');
-      setTotalPriceText(t ? String(t) : '');
-    }
-  }, [visible, initialQuantity, initialUnit, initialUnitPrice, initialTotalPrice, units]);
+      if (visible) {
+        const info = getFoodInfo(foodName);
+        setLabel(info?.name || foodName);
+        setQuantity(initialQuantity ?? 1);
+        setUnit(initialUnit || units[0]?.key || 'units');
+        const u = initialUnitPrice ?? 0;
+        const t = initialTotalPrice ?? 0;
+        setUnitPrice(u);
+        setTotalPrice(t);
+        setUnitPriceText(u ? String(u) : '');
+        setTotalPriceText(t ? String(t) : '');
+      }
+    }, [visible, initialQuantity, initialUnit, initialUnitPrice, initialTotalPrice, units, foodName]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 
@@ -96,9 +100,9 @@ export default function AddShoppingItemModal({
                 />
               )}
             </View>
-            <Text style={styles.foodName} numberOfLines={2}>
-              {foodName}
-            </Text>
+              <Text style={styles.foodName} numberOfLines={2}>
+                {label}
+              </Text>
           </LinearGradient>
 
           <ScrollView
