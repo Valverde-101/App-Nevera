@@ -20,15 +20,11 @@ import { useShopping } from '../context/ShoppingContext';
 import { useInventory } from '../context/InventoryContext';
 import FoodPickerModal from '../components/FoodPickerModal';
 import AddShoppingItemModal from '../components/AddShoppingItemModal';
-import SaveListModal from '../components/SaveListModal';
-import BatchAddShoppingModal from '../components/BatchAddShoppingModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useTheme } from '../context/ThemeContext';
-import { useSavedLists } from '../context/SavedListsContext';
-import { getFoodIcon } from '../foodIcons';
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -50,9 +46,7 @@ export default function ShoppingListScreen() {
     togglePurchased,
     removeItems,
     markPurchased,
-    resetShopping,
   } = useShopping();
-  const { saveList } = useSavedLists();
   const { inventory, addItem: addInventoryItem, removeItem: removeInventoryItem } = useInventory();
   const { getLabel } = useUnits();
   const { locations } = useLocations();
@@ -61,27 +55,16 @@ export default function ShoppingListScreen() {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
   const [selectedFood, setSelectedFood] = useState(null);
-  const [multiItems, setMultiItems] = useState([]);
-  const [multiAddVisible, setMultiAddVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
   const [batchVisible, setBatchVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [autoVisible, setAutoVisible] = useState(false);
-  const [saveVisible, setSaveVisible] = useState(false);
-  const [clearVisible, setClearVisible] = useState(false);
 
   const onSelectFood = (name, icon) => {
     setSelectedFood({ name, icon });
     setPickerVisible(false);
     setAddVisible(true);
-  };
-
-  const onMultiSelectFoods = names => {
-    const items = names.map(name => ({ name, icon: getFoodIcon(name) }));
-    setMultiItems(items);
-    setPickerVisible(false);
-    setMultiAddVisible(true);
   };
 
   const onSave = ({ quantity, unit }) => {
@@ -90,18 +73,6 @@ export default function ShoppingListScreen() {
       setSelectedFood(null);
       setAddVisible(false);
     }
-  };
-
-  const handleMultiAddSave = entries => {
-    addItems(
-      entries.map(e => ({
-        name: e.name,
-        quantity: parseFloat(e.quantity) || 0,
-        unit: e.unit,
-      })),
-    );
-    setMultiAddVisible(false);
-    setMultiItems([]);
   };
 
   // AutoAdd: añade a la lista todos los alimentos del inventario con cantidad 0 (placeholders)
@@ -142,16 +113,6 @@ export default function ShoppingListScreen() {
     setSelected([]);
     setSelectMode(false);
     setConfirmVisible(false);
-  };
-
-  const handleSaveCurrent = ({ name, note, items }) => {
-    saveList(name, note, items);
-    setSaveVisible(false);
-  };
-
-  const clearAll = () => {
-    resetShopping();
-    setClearVisible(false);
   };
 
   // Guardado por lotes (igual que antes)
@@ -213,37 +174,20 @@ export default function ShoppingListScreen() {
             <TouchableOpacity style={styles.actionBtn} onPress={() => setPickerVisible(true)}>
               <Text style={styles.actionText}>＋ Añadir</Text>
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
-                <Text style={styles.iconEmoji}>⚡</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setSaveVisible(true)}>
-                <Text style={styles.iconEmoji}>💾</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setClearVisible(true)}>
-                <Text style={styles.iconEmoji}>🗑️</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => navigation.navigate('SavedLists')}>
-                <Text style={styles.iconEmoji}>📁</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
+              <Text style={styles.iconEmoji}>⚡</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionBtn} onPress={selectAll}>
               <Text style={styles.actionText}>Seleccionar todo</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
-              onPress={() => setBatchVisible(true)}
-            >
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]} onPress={() => setBatchVisible(true)}>
               <Text style={[styles.actionText, { color: palette.accent }]}>Guardar</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionBtn, { backgroundColor: palette.danger, borderColor: '#ad2c2c' }]}
-              onPress={() => setConfirmVisible(true)}
-            >
-              <Text style={[styles.actionText, { color: '#fff' }]}>Eliminar</Text>
+            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#2a1d1d', borderColor: '#5a2e2e' }]} onPress={() => setConfirmVisible(true)}>
+              <Text style={[styles.actionText, { color: '#ff9f9f' }]}>Eliminar</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -325,7 +269,6 @@ export default function ShoppingListScreen() {
       <FoodPickerModal
         visible={pickerVisible}
         onSelect={onSelectFood}
-        onMultiSelect={onMultiSelectFoods}
         onClose={() => setPickerVisible(false)}
       />
       <AddShoppingItemModal
@@ -335,23 +278,11 @@ export default function ShoppingListScreen() {
         onSave={onSave}
         onClose={() => setAddVisible(false)}
       />
-      <BatchAddShoppingModal
-        visible={multiAddVisible}
-        items={multiItems}
-        onSave={handleMultiAddSave}
-        onClose={() => setMultiAddVisible(false)}
-      />
       <BatchAddItemModal
         visible={batchVisible}
         items={selected.map(idx => ({ ...list[idx], index: idx }))}
         onSave={handleBatchSave}
         onClose={() => setBatchVisible(false)}
-      />
-      <SaveListModal
-        visible={saveVisible}
-        items={list}
-        onSave={handleSaveCurrent}
-        onClose={() => setSaveVisible(false)}
       />
 
       {/* Confirmar eliminación */}
@@ -374,33 +305,6 @@ export default function ShoppingListScreen() {
                     <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={deleteSelected} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-
-      {/* Clear all modal */}
-      <Modal
-        visible={clearVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setClearVisible(false)}
-      >
-        <TouchableWithoutFeedback onPress={() => setClearVisible(false)}>
-          <View style={styles.modalBackdrop}>
-            <TouchableWithoutFeedback>
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Limpiar lista</Text>
-                <Text style={styles.cardBody}>¿Eliminar todos los alimentos de la lista de compras?</Text>
-                <View style={styles.cardActions}>
-                  <TouchableOpacity onPress={() => setClearVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>Cancelar</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={clearAll} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
                     <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
@@ -520,7 +424,7 @@ const createStyles = (palette) => StyleSheet.create({
   },
   checkOn: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
-  rowText: { color: palette.textStrong },
+  rowText: { color: palette.text },
 
   emptyWrap: {
     alignItems: 'center',

@@ -118,24 +118,6 @@ export default function InventoryScreen({ navigation }) {
   const numColumns = Math.max(1, Math.floor(screenWidth / 120));
   const itemWidth = `${100 / numColumns}%`;
 
-  const currentLoc = locations.find(l => l.key === storage);
-  const isEmpty = (inventory[storage]?.length || 0) === 0;
-  const styles = useMemo(
-    () =>
-      StyleSheet.create({
-        emptyWrap: { alignItems: 'center', justifyContent: 'center', paddingVertical: 50 },
-        emptyBtn: {
-          backgroundColor: palette.accent,
-          borderColor: '#e2b06c',
-          borderWidth: 1,
-          paddingHorizontal: 14,
-          paddingVertical: 10,
-          borderRadius: 10,
-        },
-      }),
-    [palette],
-  );
-
   const cleanZeroItems = name => {
     locations.forEach(loc => {
       for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
@@ -393,17 +375,7 @@ export default function InventoryScreen({ navigation }) {
           onScrollBeginDrag={showScrollbar}
           onMomentumScrollBegin={showScrollbar}
         >
-          {isEmpty ? (
-            <View style={styles.emptyWrap}>
-              <Text style={{ color: palette.textDim, marginBottom: 8 }}>
-                {`Su "${currentLoc?.name}" se encuentra vacío`}
-              </Text>
-              <TouchableOpacity onPress={() => setPickerVisible(true)} style={styles.emptyBtn}>
-                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Añadir alimento</Text>
-              </TouchableOpacity>
-            </View>
-          ) : (
-            groupOrder.map(cat => {
+          {groupOrder.map(cat => {
             const items = grouped[cat];
             if (!items || items.length === 0) return null;
             return (
@@ -511,8 +483,7 @@ export default function InventoryScreen({ navigation }) {
                 )}
               </View>
             );
-          })
-          )}
+          })}
         </Animated.ScrollView>
 
         {/* Scrollbar overlay */}

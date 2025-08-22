@@ -267,7 +267,7 @@ const createStyles = (palette) => StyleSheet.create({
 
   ingRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 8 },
   ingIcon: { width: 20, height: 20, marginRight: 6 },
-  ingText: { color: palette.textStrong },
+  ingText: { color: palette.text },
 
   iconBtn: {
     backgroundColor: palette.surface2,
