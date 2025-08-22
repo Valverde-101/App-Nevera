@@ -7,7 +7,7 @@ export default function HomeScreen({ navigation }) {
       <Button title="Nevera" onPress={() => navigation.navigate('Fridge')} />
       <Button title="Congelador" onPress={() => navigation.navigate('Freezer')} />
       <Button title="Despensa" onPress={() => navigation.navigate('Pantry')} />
-      <Button title="Compras" onPress={() => navigation.navigate('Shopping')} />
+      <Button title="Lista de compras" onPress={() => navigation.navigate('Shopping')} />
     </View>
   );
 }

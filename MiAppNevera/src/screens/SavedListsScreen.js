@@ -19,36 +19,42 @@ export default function SavedListsScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        {savedLists.map(list => (
-          <View key={list.id} style={styles.card}>
-            <Text style={styles.title}>{list.name || 'Sin título'}</Text>
-            {list.note ? <Text style={styles.note}>{list.note}</Text> : null}
-            <Text style={styles.count}>{list.items?.length || 0} artículos</Text>
-            <View style={styles.actions}>
-              <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: palette.accent }]}
-                onPress={() => {
-                  replaceList(list.items || []);
-                  navigation.navigate('Shopping');
-                }}
-              >
-                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cargar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => setPreviewing(list)}>
-                <Text style={styles.actionText}>Previsualizar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => setEditing(list)}>
-                <Text style={styles.actionText}>Editar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: palette.danger }]}
-                onPress={() => setConfirmDel(list.id)}
-              >
-                <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
-              </TouchableOpacity>
+        {savedLists.map(list => {
+          const totalCost = list.items?.reduce((sum, it) => sum + (it.totalPrice || 0), 0) || 0;
+          return (
+            <View key={list.id} style={styles.card}>
+              <View style={styles.headerRow}>
+                <Text style={styles.title}>{list.name || 'Sin título'}</Text>
+                <Text style={styles.total}>{`Costo Total: S/${totalCost.toFixed(2)}`}</Text>
+              </View>
+              {list.note ? <Text style={styles.note}>{list.note}</Text> : null}
+              <Text style={styles.count}>{list.items?.length || 0} artículos</Text>
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  style={[styles.actionBtn, { backgroundColor: palette.accent }]}
+                  onPress={() => {
+                    replaceList(list.items || []);
+                    navigation.navigate('Shopping');
+                  }}
+                >
+                  <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cargar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => setPreviewing(list)}>
+                  <Text style={styles.actionText}>Previsualizar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => setEditing(list)}>
+                  <Text style={styles.actionText}>Editar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionBtn, { backgroundColor: palette.danger }]}
+                  onPress={() => setConfirmDel(list.id)}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
 
       <SaveListModal
@@ -112,7 +118,14 @@ const createStyles = palette =>
       padding: 12,
       marginBottom: 12,
     },
-    title: { color: palette.text, fontWeight: '700', fontSize: 16 },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    title: { color: palette.text, fontWeight: '700', fontSize: 16, flex: 1, marginRight: 8 },
+    total: { color: palette.accent, fontWeight: '700' },
     note: { color: palette.textDim, marginVertical: 4 },
     count: { color: palette.textDim, marginBottom: 8 },
     actions: { flexDirection: 'row', justifyContent: 'space-between' },
