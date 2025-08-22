@@ -17,17 +17,7 @@ export default function CategoryScreen({ route }) {
   const [pickerVisible, setPickerVisible] = useState(false);
 
   const onSelectFood = name => {
-    const info = getFoodInfo(name);
-    addItem(
-      category,
-      name,
-      quantity || 0,
-      info?.defaultUnit || 'units',
-      '',
-      '',
-      '',
-      info?.defaultPrice || 0,
-    );
+    addItem(category, name, quantity || 0);
     setQuantity(1);
     setPickerVisible(false);
   };
