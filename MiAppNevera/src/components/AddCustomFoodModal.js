@@ -25,6 +25,7 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
 import { useTheme } from '../context/ThemeContext';
+import { useUnits } from '../context/UnitsContext';
 
 // ========================
 // Gestor de personalizados
@@ -57,10 +58,10 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 
   const selectAll = () => setSelected(customFoods.map(f => f.key));
 
-  const isFoodInUse = name => {
-    const inInventory = Object.values(inventory).some(items => items.some(it => it.name === name));
-    const inShopping = shoppingList.some(it => it.name === name);
-    const inRecipes = recipes.some(rec => rec.ingredients.some(ing => ing.name === name));
+  const isFoodInUse = key => {
+    const inInventory = Object.values(inventory).some(items => items.some(it => (it.key || it.name) === key));
+    const inShopping = shoppingList.some(it => (it.key || it.name) === key);
+    const inRecipes = recipes.some(rec => rec.ingredients.some(ing => ing.name === key));
     return inInventory || inShopping || inRecipes;
   };
 
@@ -73,7 +74,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 
   const deleteSelected = () => {
     const foods = customFoods.filter(f => selected.includes(f.key));
-    const inUse = foods.filter(f => isFoodInUse(f.name));
+    const inUse = foods.filter(f => isFoodInUse(f.key));
     if (inUse.length) {
       setWarning('Algunos ingredientes seleccionados están en uso y no se pueden eliminar.');
       return;
@@ -82,7 +83,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   };
 
   const handleDeleteFood = food => {
-    if (isFoodInUse(food.name)) {
+    if (isFoodInUse(food.key)) {
       setWarning(`No se puede eliminar, ${food.name} está en uso.`);
     } else {
       setFoodToDelete(food);
@@ -310,12 +311,15 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { addCustomFood, updateCustomFood } = useCustomFoods();
   const { categories, addCategory } = useCategories();
+  const { units } = useUnits();
   const categoryNames = Object.keys(categories);
   const [name, setName] = useState('');
   const [category, setCategory] = useState(categoryNames[0]);
   const [iconUri, setIconUri] = useState(null);
   const [baseIcon, setBaseIcon] = useState(null);
   const [expirationDays, setExpirationDays] = useState('');
+  const [defaultUnit, setDefaultUnit] = useState(units[0]?.key || 'units');
+  const [defaultPrice, setDefaultPrice] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
   const [manageVisible, setManageVisible] = useState(false);
   const [editingKey, setEditingKey] = useState(null);
@@ -346,6 +350,8 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     setIconUri(food.icon);
     setBaseIcon(food.baseIcon);
     setExpirationDays(food.expirationDays != null ? String(food.expirationDays) : '');
+    setDefaultUnit(food.defaultUnit || units[0]?.key || 'units');
+    setDefaultPrice(food.defaultPrice != null ? String(food.defaultPrice) : '');
     setEditingKey(food.key);
     setManageVisible(false);
   };
@@ -357,6 +363,8 @@ export default function AddCustomFoodModal({ visible, onClose }) {
     setIconUri(null);
     setBaseIcon(null);
     setExpirationDays('');
+    setDefaultUnit(units[0]?.key || 'units');
+    setDefaultPrice('');
     setEditingKey(null);
   };
 
@@ -370,6 +378,8 @@ export default function AddCustomFoodModal({ visible, onClose }) {
       icon: iconUri,
       baseIcon,
       expirationDays: isNaN(days) ? null : days,
+      defaultUnit,
+      defaultPrice: defaultPrice === '' ? null : Number(defaultPrice),
     };
     if (editingKey) {
       updateCustomFood(editingKey, data);
@@ -434,7 +444,40 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             style={styles.input}
             keyboardType="numeric"
             value={expirationDays}
-            onChangeText={setExpirationDays}
+            onChangeText={t => setExpirationDays(t.replace(/[^0-9]/g, ''))}
+            placeholder="Opcional"
+            placeholderTextColor={palette.textDim}
+          />
+
+          <Text style={styles.label}>Unidad por defecto</Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+            {units.map(u => (
+              <TouchableOpacity
+                key={u.key}
+                onPress={() => setDefaultUnit(u.key)}
+                style={[styles.chip, defaultUnit === u.key && styles.chipOn]}
+              >
+                <Text style={[styles.chipTxt, defaultUnit === u.key && styles.chipTxtOn]}>
+                  {u.singular}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.label}>Precio unitario por defecto</Text>
+          <TextInput
+            style={styles.input}
+            value={defaultPrice}
+            onChangeText={t => {
+              let sanitized = t.replace(/[^0-9.]/g, '');
+              const parts = sanitized.split('.');
+              if (parts.length > 2) {
+                sanitized = parts[0] + '.' + parts.slice(1).join('');
+              }
+              setDefaultPrice(sanitized);
+            }}
+            keyboardType="decimal-pad"
+            inputMode="decimal"
             placeholder="Opcional"
             placeholderTextColor={palette.textDim}
           />
