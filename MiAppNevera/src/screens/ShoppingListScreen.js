@@ -84,9 +84,9 @@ export default function ShoppingListScreen() {
     setMultiAddVisible(true);
   };
 
-  const onSave = ({ quantity, unit }) => {
+  const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
     if (selectedFood) {
-      addItem(selectedFood.name, quantity, unit);
+      addItem(selectedFood.name, quantity, unit, unitPrice, totalPrice);
       setSelectedFood(null);
       setAddVisible(false);
     }
@@ -309,9 +309,14 @@ export default function ShoppingListScreen() {
                           ]}
                           numberOfLines={2}
                         >
-                          {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
+                          {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
                         </Text>
                       </View>
+                      {item.totalPrice > 0 && (
+                        <Text style={styles.priceBadge}>
+                          {`S/${item.totalPrice.toFixed(2)}`}
+                        </Text>
+                      )}
                     </View>
                   </TouchableOpacity>
                 );
@@ -521,6 +526,7 @@ const createStyles = (palette) => StyleSheet.create({
   checkOn: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
   rowText: { color: palette.text },
+  priceBadge: { color: palette.accent, fontWeight: '700', marginLeft: 8 },
 
   emptyWrap: {
     alignItems: 'center',
