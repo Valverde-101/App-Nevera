@@ -23,8 +23,10 @@ import foodIcons, {
   normalizeFoodName,
 } from '../foodIcons';
 import AddCustomFoodModal from './AddCustomFoodModal';
+import EditDefaultFoodModal from './EditDefaultFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
+import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
@@ -50,7 +52,9 @@ export default function FoodPickerModal({
   const [manageVisible, setManageVisible] = useState(false);
   const [hiddenFoods, setHiddenFoods] = useState([]);
   const { customFoods } = useCustomFoods();
+  const { overrides } = useDefaultFoods();
   const [addVisible, setAddVisible] = useState(false);
+  const [editKey, setEditKey] = useState(null);
 
   // === Estados para "ocultar" scrollbars sin mover layout (web) ===
   const [hoverCat, setHoverCat] = useState(false);
@@ -83,6 +87,9 @@ export default function FoodPickerModal({
     AsyncStorage.setItem('hiddenFoods', JSON.stringify(hiddenFoods));
   }, [hiddenFoods]);
 
+  // Re-render when default food overrides change
+  useEffect(() => {}, [overrides]);
+
   const toggleSelect = key => {
     setSelected(prev =>
       prev.includes(key) ? prev.filter(n => n !== key) : [...prev, key],
@@ -91,8 +98,7 @@ export default function FoodPickerModal({
 
   const handleSave = () => {
     if (onMultiSelect && selected.length) {
-      const names = selected.map(k => customFoodMap[k]?.name || getFoodInfo(k)?.name || k);
-      onMultiSelect(names);
+      onMultiSelect(selected);
     }
     setSelectMode(false);
     setSelected([]);
@@ -250,7 +256,7 @@ export default function FoodPickerModal({
                     onPress={() =>
                       selectMode
                         ? toggleSelect(food.key)
-                        : onSelect(food.label, food.icon)
+                        : onSelect(food.key, food.icon)
                     }
                     onLongPress={() => {
                       if (!selectMode) {
@@ -359,6 +365,7 @@ export default function FoodPickerModal({
                                 : [...prev, name],
                             )
                           }
+                          onLongPress={() => setEditKey(name)}
                         >
                           <View
                             style={{
@@ -394,6 +401,11 @@ export default function FoodPickerModal({
 
       {/* Añadir personalizado */}
       <AddCustomFoodModal visible={addVisible} onClose={() => setAddVisible(false)} />
+      <EditDefaultFoodModal
+        visible={!!editKey}
+        foodKey={editKey}
+        onClose={() => setEditKey(null)}
+      />
     </>
   );
 }

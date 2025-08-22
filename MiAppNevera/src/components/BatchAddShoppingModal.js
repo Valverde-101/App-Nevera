@@ -26,11 +26,11 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
   useEffect(() => {
     if (visible) {
       setData(
-        items.map(() => ({
+        items.map(item => ({
           quantity: '1',
-          unit: units[0]?.key || 'units',
-          unitPriceText: '',
-          totalPriceText: '',
+          unit: item.defaultUnit || units[0]?.key || 'units',
+          unitPriceText: item.defaultPrice ? String(item.defaultPrice) : '',
+          totalPriceText: item.defaultPrice ? String(item.defaultPrice) : '',
         })),
       );
     }
@@ -43,7 +43,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
   const saveAll = () => {
     onSave(
       items.map((item, idx) => ({
-        name: item.name,
+        name: item.key || item.name,
         quantity: parseFloat(data[idx]?.quantity) || 0,
         unit: data[idx]?.unit || units[0]?.key || 'units',
         unitPrice: parseFloat(data[idx]?.unitPriceText) || 0,
@@ -82,29 +82,30 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
             contentContainerStyle={{ padding: 16, paddingBottom: 90 }}
             showsVerticalScrollIndicator={Platform.OS === 'web'}
           >
-            {items.map((item, idx) => {
-              const gi = gradientForKey(themeName, item.name);
-              const entry = data[idx] || {};
-              const qty = parseFloat(entry.quantity) || 0;
-              return (
-                <View key={idx} style={styles.card}>
-                  <View style={styles.cardHeader}>
-                    <LinearGradient
-                      colors={gi.colors}
-                      locations={gi.locations}
-                      start={gi.start}
-                      end={gi.end}
-                      style={styles.cardRibbon}
-                    >
-                      {item.icon && <Image source={item.icon} style={styles.ribbonIcon} />}
-                      <Text style={styles.ribbonTitle} numberOfLines={1} ellipsizeMode="tail">
-                        {item.name}
+              {items.map((item, idx) => {
+                const gi = gradientForKey(themeName, item.key || item.name);
+                const entry = data[idx] || {};
+                const qty = parseFloat(entry.quantity) || 0;
+                const label = item.name;
+                return (
+                  <View key={idx} style={styles.card}>
+                    <View style={styles.cardHeader}>
+                      <LinearGradient
+                        colors={gi.colors}
+                        locations={gi.locations}
+                        start={gi.start}
+                        end={gi.end}
+                        style={styles.cardRibbon}
+                      >
+                        {item.icon && <Image source={item.icon} style={styles.ribbonIcon} />}
+                        <Text style={styles.ribbonTitle} numberOfLines={1} ellipsizeMode="tail">
+                          {label}
+                        </Text>
+                      </LinearGradient>
+                      <Text style={styles.cardMeta}>
+                        {qty} {getLabel(qty, entry.unit)}
                       </Text>
-                    </LinearGradient>
-                    <Text style={styles.cardMeta}>
-                      {qty} {getLabel(qty, entry.unit)}
-                    </Text>
-                  </View>
+                    </View>
 
                   <Text style={styles.labelBold}>Cantidad</Text>
                   <View style={styles.qtyRow}>
