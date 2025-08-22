@@ -47,7 +47,6 @@ export default function ShoppingListScreen() {
     list,
     addItem,
     addItems,
-    editItem,
     togglePurchased,
     removeItems,
     markPurchased,
@@ -71,7 +70,6 @@ export default function ShoppingListScreen() {
   const [autoVisible, setAutoVisible] = useState(false);
   const [saveVisible, setSaveVisible] = useState(false);
   const [clearVisible, setClearVisible] = useState(false);
-  const [editIdx, setEditIdx] = useState(null);
 
   const onSelectFood = (name, icon) => {
     setSelectedFood({ name, icon });
@@ -86,9 +84,9 @@ export default function ShoppingListScreen() {
     setMultiAddVisible(true);
   };
 
-  const onSave = ({ quantity, unit, unitPrice, totalPrice }) => {
+  const onSave = ({ quantity, unit }) => {
     if (selectedFood) {
-      addItem(selectedFood.name, quantity, unit, unitPrice, totalPrice);
+      addItem(selectedFood.name, quantity, unit);
       setSelectedFood(null);
       setAddVisible(false);
     }
@@ -100,8 +98,6 @@ export default function ShoppingListScreen() {
         name: e.name,
         quantity: parseFloat(e.quantity) || 0,
         unit: e.unit,
-        unitPrice: parseFloat(e.unitPrice) || 0,
-        totalPrice: parseFloat(e.totalPrice) || 0,
       })),
     );
     setMultiAddVisible(false);
@@ -237,14 +233,6 @@ export default function ShoppingListScreen() {
             <TouchableOpacity style={styles.actionBtn} onPress={selectAll}>
               <Text style={styles.actionText}>Seleccionar todo</Text>
             </TouchableOpacity>
-            {selected.length === 1 && (
-              <TouchableOpacity
-                style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
-                onPress={() => setEditIdx(selected[0])}
-              >
-                <Text style={[styles.actionText, { color: palette.accent }]}>Editar</Text>
-              </TouchableOpacity>
-            )}
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
               onPress={() => setBatchVisible(true)}
@@ -321,14 +309,9 @@ export default function ShoppingListScreen() {
                           ]}
                           numberOfLines={2}
                         >
-                          {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                          {item.name} — {item.quantity} {getLabel(item.quantity, item.unit)}
                         </Text>
                       </View>
-                      {item.totalPrice > 0 && (
-                        <Text style={styles.priceBadge}>
-                          {`S/${item.totalPrice.toFixed(2)}`}
-                        </Text>
-                      )}
                     </View>
                   </TouchableOpacity>
                 );
@@ -351,22 +334,6 @@ export default function ShoppingListScreen() {
         foodIcon={selectedFood?.icon}
         onSave={onSave}
         onClose={() => setAddVisible(false)}
-      />
-      <AddShoppingItemModal
-        visible={editIdx !== null}
-        foodName={list[editIdx]?.name}
-        foodIcon={list[editIdx]?.icon}
-        initialQuantity={list[editIdx]?.quantity}
-        initialUnit={list[editIdx]?.unit}
-        initialUnitPrice={list[editIdx]?.unitPrice}
-        initialTotalPrice={list[editIdx]?.totalPrice}
-        onSave={({ quantity, unit, unitPrice, totalPrice }) => {
-          editItem(editIdx, quantity, unit, unitPrice, totalPrice);
-          setEditIdx(null);
-          setSelected([]);
-          setSelectMode(false);
-        }}
-        onClose={() => setEditIdx(null)}
       />
       <BatchAddShoppingModal
         visible={multiAddVisible}
@@ -554,7 +521,6 @@ const createStyles = (palette) => StyleSheet.create({
   checkOn: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
   icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
   rowText: { color: palette.text },
-  priceBadge: { color: palette.accent, fontWeight: '700', marginLeft: 8 },
 
   emptyWrap: {
     alignItems: 'center',
