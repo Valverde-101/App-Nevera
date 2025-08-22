@@ -39,10 +39,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   const [regDate, setRegDate] = useState(today);
   const [expDate, setExpDate] = useState('');
   const [note, setNote] = useState('');
-  const [unitPrice, setUnitPrice] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [unitPriceText, setUnitPriceText] = useState('');
-  const [totalPriceText, setTotalPriceText] = useState('');
+  const [price, setPrice] = useState('');
   const [label, setLabel] = useState(foodName);
   const { addItem: addShoppingItem } = useShopping();
 
@@ -59,26 +56,21 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
     if (visible) {
       setLocation(initialLocation);
       setQuantity(1);
-      const info = getFoodInfo(foodName);
-      setUnit(info?.defaultUnit || units[0]?.key || 'units');
-      setRegDate(today);
-      if (info?.expirationDays != null) {
-        const d = new Date();
-        d.setDate(d.getDate() + info.expirationDays);
-        setExpDate(d.toISOString().split('T')[0]);
-      } else {
-        setExpDate('');
+        const info = getFoodInfo(foodName);
+        setUnit(info?.defaultUnit || units[0]?.key || 'units');
+        setRegDate(today);
+        if (info?.expirationDays != null) {
+          const d = new Date();
+          d.setDate(d.getDate() + info.expirationDays);
+          setExpDate(d.toISOString().split('T')[0]);
+        } else {
+          setExpDate('');
+        }
+        setNote('');
+        setLabel(info?.name || foodName);
+        setPrice(info?.defaultPrice != null ? String(info.defaultPrice) : '');
       }
-      setNote('');
-      setLabel(info?.name || foodName);
-      const defaultPrice = info?.defaultPrice || 0;
-      setUnitPrice(defaultPrice);
-      setUnitPriceText(defaultPrice ? String(defaultPrice) : '');
-      const tot = defaultPrice * 1;
-      setTotalPrice(tot);
-      setTotalPriceText(tot ? tot.toFixed(2) : '');
-    }
-  }, [visible, initialLocation, today, units, locations, foodName, overrides]);
+    }, [visible, initialLocation, today, units, locations, foodName, overrides]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 
@@ -138,22 +130,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             <Text style={styles.labelBold}>Cantidad</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
-                onPress={() => {
-                  setQuantity(q => {
-                    const next = Math.max(0, (q || 0) - 1);
-                    if (unitPrice) {
-                      const tot = unitPrice * next;
-                      setTotalPrice(tot);
-                      setTotalPriceText(tot ? tot.toFixed(2) : '');
-                    } else if (totalPrice) {
-                      const u = next ? totalPrice / next : 0;
-                      setUnitPrice(u);
-                      setUnitPriceText(u ? u.toFixed(2) : '');
-                    }
-                    return next;
-                  });
-                  bumpQty();
-                }}
+                onPress={() => { setQuantity(q => Math.max(0, (q || 0) - 1)); bumpQty(); }}
                 style={styles.qtyBtn}
               >
                 <Text style={styles.qtyBtnText}>−</Text>
@@ -166,38 +143,13 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                   value={String(quantity)}
                   onChangeText={(t) => {
                     const v = parseFloat(t.replace(/[^0-9.]/g, ''));
-                    const q = Number.isFinite(v) ? v : 0;
-                    setQuantity(q);
-                    if (unitPrice) {
-                      const tot = unitPrice * q;
-                      setTotalPrice(tot);
-                      setTotalPriceText(tot ? tot.toFixed(2) : '');
-                    } else if (totalPrice) {
-                      const u = q ? totalPrice / q : 0;
-                      setUnitPrice(u);
-                      setUnitPriceText(u ? u.toFixed(2) : '');
-                    }
+                    setQuantity(Number.isFinite(v) ? v : 0);
                   }}
                 />
               </Animated.View>
 
               <TouchableOpacity
-                onPress={() => {
-                  setQuantity(q => {
-                    const next = (q || 0) + 1;
-                    if (unitPrice) {
-                      const tot = unitPrice * next;
-                      setTotalPrice(tot);
-                      setTotalPriceText(tot ? tot.toFixed(2) : '');
-                    } else if (totalPrice) {
-                      const u = totalPrice / next;
-                      setUnitPrice(u);
-                      setUnitPriceText(u ? u.toFixed(2) : '');
-                    }
-                    return next;
-                  });
-                  bumpQty();
-                }}
+                onPress={() => { setQuantity(q => (q || 0) + 1); bumpQty(); }}
                 style={styles.qtyBtn}
               >
                 <Text style={styles.qtyBtnText}>＋</Text>
@@ -225,56 +177,23 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>Precio</Text>
-            <View style={styles.priceRow}>
-              <TextInput
-                style={[styles.priceInput, { marginRight: 4 }]}
-                keyboardType="decimal-pad"
-                inputMode="decimal"
-                placeholder="Costo unitario"
-                placeholderTextColor={palette.textDim}
-                value={unitPriceText}
-                onChangeText={(t) => {
-                  const sanitized = t.replace(/[^0-9.]/g, '');
-                  setUnitPriceText(sanitized);
-                  const u = parseFloat(sanitized);
-                  if (!isNaN(u)) {
-                    setUnitPrice(u);
-                    const tot = u * (quantity || 0);
-                    setTotalPrice(tot);
-                    setTotalPriceText(tot ? tot.toFixed(2) : '');
-                  } else {
-                    setUnitPrice(0);
-                    setTotalPrice(0);
-                    setTotalPriceText('');
-                  }
-                }}
-              />
-              <Text style={styles.priceDivider}>/</Text>
-              <TextInput
-                style={[styles.priceInput, { marginLeft: 4 }]}
-                keyboardType="decimal-pad"
-                inputMode="decimal"
-                placeholder="Costo total"
-                placeholderTextColor={palette.textDim}
-                value={totalPriceText}
-                onChangeText={(t) => {
-                  const sanitized = t.replace(/[^0-9.]/g, '');
-                  setTotalPriceText(sanitized);
-                  const tot = parseFloat(sanitized);
-                  if (!isNaN(tot)) {
-                    setTotalPrice(tot);
-                    const u = (quantity || 0) ? tot / (quantity || 0) : 0;
-                    setUnitPrice(u);
-                    setUnitPriceText(u ? u.toFixed(2) : '');
-                  } else {
-                    setTotalPrice(0);
-                    setUnitPrice(0);
-                    setUnitPriceText('');
-                  }
-                }}
-              />
-            </View>
+            <Text style={styles.labelBold}>Precio unitario</Text>
+            <TextInput
+              style={styles.priceInput}
+              value={price}
+              onChangeText={t => {
+                let sanitized = t.replace(/[^0-9.]/g, '');
+                const parts = sanitized.split('.');
+                if (parts.length > 2) {
+                  sanitized = parts[0] + '.' + parts.slice(1).join('');
+                }
+                setPrice(sanitized);
+              }}
+              keyboardType="decimal-pad"
+              inputMode="decimal"
+              placeholder="Opcional"
+              placeholderTextColor={palette.textDim}
+            />
 
             {/* Fechas (con inputs gris) */}
             <View style={{ marginTop: 6 }}>
@@ -318,7 +237,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 registered: regDate,
                 expiration: expDate,
                 note,
-                price: unitPrice || 0,
+                price: parseFloat(price) || 0,
               })
             }
             style={styles.saveFab}
@@ -433,19 +352,16 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
   },
-  priceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
   priceInput: {
-    flex: 1,
-    textAlign: 'center',
-    backgroundColor: palette.surface2,
     borderWidth: 1,
     borderColor: palette.border,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    backgroundColor: palette.surface2,
     color: palette.text,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 4,
   },
-  priceDivider: { color: palette.text, paddingHorizontal: 4 },
 
   // Estilos sugeridos para DatePicker (si el componente los acepta)
   dateContainer: {
