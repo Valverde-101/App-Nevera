@@ -8,10 +8,11 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useUnits } from '../context/UnitsContext';
-import { getFoodInfo } from '../foodIcons';
+import { getFoodInfo, getFoodIcon } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 
 export default function EditDefaultFoodModal({ visible, foodKey, onClose }) {
@@ -50,6 +51,9 @@ export default function EditDefaultFoodModal({ visible, foodKey, onClose }) {
         <View style={styles.sheet}>
           <Text style={styles.title}>Editar alimento</Text>
           <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}>
+            {foodKey && (
+              <Image source={getFoodIcon(foodKey)} style={styles.editIcon} />
+            )}
             <Text style={styles.label}>Nombre</Text>
             <TextInput value={name} onChangeText={setName} style={styles.input} />
             <Text style={styles.label}>Días de caducidad</Text>
@@ -172,4 +176,10 @@ const createStyles = palette =>
     btnTxt: { color: palette.text },
     btnPrimary: { backgroundColor: palette.accent, borderColor: '#e2b06c' },
     btnPrimaryTxt: { color: '#1b1d22', fontWeight: '700' },
+    editIcon: {
+      width: 80,
+      height: 80,
+      alignSelf: 'center',
+      marginBottom: 16,
+    },
   });
