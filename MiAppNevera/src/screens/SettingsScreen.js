@@ -42,14 +42,19 @@ export default function SettingsScreen({ navigation }) {
           <Text style={styles.itemDesc}>Define dónde guardas tus alimentos.</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('UserData')}>
-          <Text style={styles.itemTitle}>Datos de usuario</Text>
-          <Text style={styles.itemDesc}>Respaldos, importación y eliminación total.</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </View>
-  );
-}
+          <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('UserData')}>
+            <Text style={styles.itemTitle}>Datos de usuario</Text>
+            <Text style={styles.itemDesc}>Respaldos, importación y eliminación total.</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('Memberships')}>
+            <Text style={styles.itemTitle}>Membresías</Text>
+            <Text style={styles.itemDesc}>Acceso a funciones extra.</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </View>
+    );
+  }
 
 const createStyles = (palette) => StyleSheet.create({
   container: { flex: 1, backgroundColor: palette.bg },
