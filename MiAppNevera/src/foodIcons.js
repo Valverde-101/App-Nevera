@@ -1115,7 +1115,6 @@ export const categories = {
 };
 
 let customFoodsMap = {};
-let defaultOverridesMap = {};
 
 export function setCustomFoodsMap(list) {
   customFoodsMap = {};
@@ -1128,30 +1127,7 @@ export function setCustomFoodsMap(list) {
         baseIcon: item.baseIcon ? normalizeFoodName(item.baseIcon) : null,
         expirationDays:
           item.expirationDays != null ? Number(item.expirationDays) : null,
-        defaultUnit: item.defaultUnit || null,
-        defaultPrice: item.defaultPrice != null ? Number(item.defaultPrice) : null,
       };
-    });
-  }
-}
-
-export function setDefaultFoodsMap(list) {
-  defaultOverridesMap = {};
-  if (Array.isArray(list)) {
-    list.forEach(item => {
-      if (!item || !item.key) return;
-      const override = {
-        name: item.name,
-        expirationDays:
-          item.expirationDays != null ? Number(item.expirationDays) : null,
-        defaultUnit: item.defaultUnit || null,
-        defaultPrice:
-          item.defaultPrice != null ? Number(item.defaultPrice) : null,
-      };
-      defaultOverridesMap[item.key] = override;
-      if (foodData[item.key]) {
-        foodData[item.key] = { ...foodData[item.key], ...override };
-      }
     });
   }
 }
@@ -1171,11 +1147,7 @@ export function getFoodInfo(name) {
         : undefined;
     return { ...info, icon };
   }
-  const base = foodData[key] || {};
-  if (defaultOverridesMap[key]) {
-    return { ...base, ...defaultOverridesMap[key], key };
-  }
-  return base.name ? { ...base, key } : undefined;
+  return foodData[key];
 }
 
 export function getFoodIcon(name) {
