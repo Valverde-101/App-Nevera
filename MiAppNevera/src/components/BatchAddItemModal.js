@@ -219,8 +219,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                   placeholderTextColor={palette.textDim}
                 />
               </View>
-            );
-          })}
+            ))}
           </ScrollView>
 
         </View>
