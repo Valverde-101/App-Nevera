@@ -42,14 +42,14 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
             d.setDate(d.getDate() + info.expirationDays);
             exp = d.toISOString().split('T')[0];
           }
-          return {
-            location: locations[0]?.key || 'fridge',
-            quantity: '1',
-            unit: units[0]?.key || 'units',
-            regDate: today,
-            expDate: exp,
-            note: '',
-          };
+            return {
+              location: locations[0]?.key || 'fridge',
+              quantity: '1',
+              unit: info?.defaultUnit || units[0]?.key || 'units',
+              regDate: today,
+              expDate: exp,
+              note: '',
+            };
         }),
       );
     }
