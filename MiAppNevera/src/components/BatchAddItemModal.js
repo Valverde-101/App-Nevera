@@ -325,7 +325,7 @@ const createStyles = (palette, themeName) => StyleSheet.create({
     borderColor: palette.frame || palette.border,
   },
   ribbonIcon: { width: 32, height: 32, marginRight: 10, resizeMode: 'contain' },
-  ribbonTitle: { color: palette.foodName, fontWeight: '800', fontSize: 18 },
+  ribbonTitle: { color: palette.text, fontWeight: '800', fontSize: 18 },
 
   // labels / inputs (mismos que AddItemModal)
   labelBold: { color: palette.text, fontWeight: '700', marginBottom: 6, marginTop: 10 },
