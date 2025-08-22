@@ -443,7 +443,7 @@ export default function InventoryScreen({ navigation }) {
                             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', paddingRight: 6 }}>
                               {/* Nombre + badge pegado a la izquierda */}
                               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', minWidth: 0 }}>
-                                <Text style={{ color: palette.accent, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{item.name}</Text>
+                                <Text style={{ color: palette.foodName, fontSize: 15, fontWeight: '400', flexShrink: 1 }} numberOfLines={2}>{item.name}</Text>
                                 {meta && (
                                   <View style={{ marginLeft: 10, backgroundColor: meta.bg, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 }}>
                                     <Text style={{ color: meta.text, fontSize: 12, fontWeight: '700' }}>{meta.label}</Text>
@@ -496,7 +496,7 @@ export default function InventoryScreen({ navigation }) {
                               <View style={{ backgroundColor: palette.surface2, borderRadius: 12, padding: 6, alignItems: 'center', marginBottom: 6, borderWidth: 1, borderColor: palette.frame }}>
                                 {item.icon && (<Image source={item.icon} style={{ width: 54, height: 54 }} resizeMode="contain" />)}
                               </View>
-                              <Text style={{ textAlign: 'center', color: palette.accent, fontSize: 12, fontWeight: '400' }} numberOfLines={2}>
+                              <Text style={{ textAlign: 'center', color: palette.foodName, fontSize: 12, fontWeight: '400' }} numberOfLines={2}>
                                 {item.name}
                               </Text>
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
@@ -679,9 +679,28 @@ export default function InventoryScreen({ navigation }) {
                 </Text>
                 <ScrollView style={{ marginBottom: 10 }}>
                   {getSelectedFullItems().map((item, idx) => (
-                    <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: palette.border, backgroundColor: palette.surface2, padding: 6, marginBottom: 6, borderRadius: 8 }}>
-                      {item.icon && <Image source={item.icon} style={{ width: 30, height: 30, marginRight: 10 }} />}
-                      <Text style={{ color: palette.text }}>{item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}</Text>
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        borderWidth: 1,
+                        borderColor: palette.border,
+                        backgroundColor: palette.surface2,
+                        padding: 6,
+                        marginBottom: 6,
+                        borderRadius: 8,
+                      }}
+                    >
+                      {item.icon && (
+                        <Image
+                          source={item.icon}
+                          style={{ width: 30, height: 30, marginRight: 10 }}
+                        />
+                      )}
+                      <Text style={{ color: palette.text }}>
+                        {item.name} - {item.quantity} {getLabel(item.quantity, item.unit)}
+                      </Text>
                     </View>
                   ))}
                 </ScrollView>
