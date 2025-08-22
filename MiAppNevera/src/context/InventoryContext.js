@@ -1,8 +1,7 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
-import {getFoodIcon, getFoodCategory, getFoodInfo} from '../foodIcons';
-import { useDefaultFoods } from './DefaultFoodsContext';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useLocations } from './LocationsContext';
 import { useCustomFoods } from './CustomFoodsContext';
 
@@ -11,7 +10,6 @@ const InventoryContext = createContext();
 export const InventoryProvider = ({children}) => {
   const { locations } = useLocations();
   const { customFoods } = useCustomFoods();
-  const { overrides } = useDefaultFoods();
 
   const buildEmpty = useCallback(() => {
     const obj = {};
@@ -26,17 +24,11 @@ export const InventoryProvider = ({children}) => {
   function attachIcons(data) {
     const withIcons = {};
     Object.keys(data).forEach(cat => {
-      withIcons[cat] = data[cat].map(item => {
-        const key = item.name;
-        const info = getFoodInfo(key);
-        return {
-          ...item,
-          key,
-          name: info?.name || key,
-          icon: getFoodIcon(key),
-          foodCategory: getFoodCategory(key),
-        };
-      });
+      withIcons[cat] = data[cat].map(item => ({
+        ...item,
+        icon: getFoodIcon(item.name),
+        foodCategory: getFoodCategory(item.name),
+      }));
     });
     return withIcons;
   }
@@ -58,26 +50,6 @@ export const InventoryProvider = ({children}) => {
   }, [locations, customFoods]);
 
   useEffect(() => {
-    // refresh names/icons when default overrides change
-    persist(prev => {
-      const updated = {};
-      Object.keys(prev).forEach(cat => {
-        updated[cat] = prev[cat].map(item => {
-          const key = item.key || item.name;
-          const info = getFoodInfo(key);
-          return {
-            ...item,
-            key,
-            name: info?.name || key,
-            icon: getFoodIcon(key),
-          };
-        });
-      });
-      return updated;
-    });
-  }, [overrides, persist]);
-
-  useEffect(() => {
     setInventory(prev => {
       const updated = {};
       locations.forEach(loc => {
@@ -90,14 +62,7 @@ export const InventoryProvider = ({children}) => {
   const persist = useCallback(updater => {
     setInventory(prev => {
       const data = typeof updater === 'function' ? updater(prev) : updater;
-      const raw = {};
-      Object.keys(data).forEach(cat => {
-        raw[cat] = data[cat].map(({ key, name, icon, foodCategory, ...rest }) => ({
-          ...rest,
-          name: key || name,
-        }));
-      });
-      AsyncStorage.setItem('inventory', JSON.stringify(raw)).catch(e => {
+      AsyncStorage.setItem('inventory', JSON.stringify(data)).catch(e => {
         console.error('Failed to save inventory', e);
       });
       return data;
@@ -106,19 +71,17 @@ export const InventoryProvider = ({children}) => {
 
   const addItem = useCallback((
     category,
-    key,
+    name,
     quantity = 1,
     unit = 'units',
     registered = '',
     expiration = '',
     note = '',
   ) => {
-    const info = getFoodInfo(key);
-    const icon = getFoodIcon(key);
-    const foodCategory = getFoodCategory(key);
+    const icon = getFoodIcon(name);
+    const foodCategory = getFoodCategory(name);
     const newItem = {
-      key,
-      name: info?.name || key,
+      name,
       quantity,
       unit,
       icon,

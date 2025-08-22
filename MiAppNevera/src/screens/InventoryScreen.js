@@ -22,7 +22,7 @@ import FoodPickerModal from '../components/FoodPickerModal';
 import AddItemModal from '../components/AddItemModal';
 import EditItemModal from '../components/EditItemModal';
 import BatchAddItemModal from '../components/BatchAddItemModal';
-import { getFoodIcon, getFoodInfo } from '../foodIcons';
+import { getFoodIcon } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
@@ -136,11 +136,11 @@ export default function InventoryScreen({ navigation }) {
     [palette],
   );
 
-  const cleanZeroItems = key => {
+  const cleanZeroItems = name => {
     locations.forEach(loc => {
       for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
         const invItem = inventory[loc.key][i];
-        if ((invItem.key || invItem.name) === key && invItem.quantity === 0 && (!invItem.note || invItem.note.trim() === '')) {
+        if (invItem.name === name && invItem.quantity === 0 && (!invItem.note || invItem.note.trim() === '')) {
           removeItem(loc.key, i);
         }
       }
@@ -255,34 +255,23 @@ export default function InventoryScreen({ navigation }) {
     groupOrder = ['all'];
   }
 
-  const onSelectFood = (key, icon) => {
-    const info = getFoodInfo(key);
-    setSelectedFood({ key, name: info?.name || key, icon });
-    setPickerVisible(false);
-    setAddVisible(true);
-  };
-  const onMultiSelectFoods = keys => {
-    const items = keys.map(k => ({ key: k, name: getFoodInfo(k)?.name || k, icon: getFoodIcon(k) }));
-    setMultiItems(items);
-    setPickerVisible(false);
-    setMultiAddVisible(true);
-  };
+  const onSelectFood = (name, icon) => { setSelectedFood({ name, icon }); setPickerVisible(false); setAddVisible(true); };
+  const onMultiSelectFoods = names => { const items = names.map(name => ({ name, icon: getFoodIcon(name) })); setMultiItems(items); setPickerVisible(false); setMultiAddVisible(true); };
 
   const onSave = data => {
-    cleanZeroItems(selectedFood.key);
+    cleanZeroItems(selectedFood.name);
     const qty = parseFloat(data.quantity) || 0;
     const hasNote = data.note && data.note.trim() !== '';
-    if (qty !== 0 || hasNote)
-      addItem(data.location, selectedFood.key, qty, data.unit, data.registered, data.expiration, data.note);
+    if (qty !== 0 || hasNote) addItem(data.location, selectedFood.name, qty, data.unit, data.registered, data.expiration, data.note);
     setAddVisible(false);
   };
 
   const handleBatchAddSave = entries => {
-    const keys = new Set(multiItems.map(it => it.key));
+    const names = new Set(multiItems.map(it => it.name));
     locations.forEach(loc => {
       for (let i = inventory[loc.key].length - 1; i >= 0; i--) {
         const invItem = inventory[loc.key][i];
-        if (keys.has(invItem.key || invItem.name) && invItem.quantity === 0 && (!invItem.note || invItem.note.trim() === '')) removeItem(loc.key, i);
+        if (names.has(invItem.name) && invItem.quantity === 0 && (!invItem.note || invItem.note.trim() === '')) removeItem(loc.key, i);
       }
     });
     for (let i = 0; i < entries.length; i++) {
@@ -290,7 +279,7 @@ export default function InventoryScreen({ navigation }) {
       const item = multiItems[i];
       const qty = parseFloat(quantity) || 0;
       const hasNote = note && note.trim() !== '';
-      if (qty !== 0 || hasNote) addItem(location, item.key, qty, unit, regDate, expDate, note);
+      if (qty !== 0 || hasNote) addItem(location, item.name, qty, unit, regDate, expDate, note);
     }
     setMultiAddVisible(false); setMultiItems([]);
   };
@@ -328,12 +317,12 @@ export default function InventoryScreen({ navigation }) {
     if (transferType === 'move') {
       selectedItems.slice().sort((a, b) => a.location === b.location ? b.index - a.index : a.location.localeCompare(b.location)).forEach(sel => removeItem(sel.location, sel.index));
     }
-    items.forEach(item => addItem(target, item.key || item.name, item.quantity, item.unit, item.registered, item.expiration, item.note));
+    items.forEach(item => addItem(target, item.name, item.quantity, item.unit, item.registered, item.expiration, item.note));
     clearSelection(); setTransferType(null);
   };
 
   const handleAddToShopping = () => {
-    const items = getSelectedFullItems().map(it => ({ name: it.key || it.name, quantity: it.quantity, unit: it.unit }));
+    const items = getSelectedFullItems().map(it => ({ name: it.name, quantity: it.quantity, unit: it.unit }));
     addShoppingItems(items);
     clearSelection();
     setShoppingVisible(false);
@@ -436,7 +425,7 @@ export default function InventoryScreen({ navigation }) {
                     const selected = selectedItems.some(it => it.key === key);
                     const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                     const meta = getExpiryMeta(palette, daysLeft);
-                    const g = gradientForKey(themeName, item.key || item.name || key);
+                    const g = gradientForKey(themeName, item.name || key);
 
                     return (
                       <TouchableOpacity
@@ -488,7 +477,7 @@ export default function InventoryScreen({ navigation }) {
                       const selected = selectedItems.some(it => it.key === key);
                       const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                       const meta = getExpiryMeta(palette, daysLeft);
-                      const g = gradientForKey(themeName, item.key || item.name || key);
+                      const g = gradientForKey(themeName, item.name || key);
 
                       return (
                         <TouchableOpacity
@@ -670,7 +659,7 @@ export default function InventoryScreen({ navigation }) {
 
       {/* Modales de negocio */}
       <FoodPickerModal visible={pickerVisible} onSelect={onSelectFood} onMultiSelect={onMultiSelectFoods} onClose={() => setPickerVisible(false)} />
-        <AddItemModal visible={addVisible} foodName={selectedFood?.key} foodIcon={selectedFood?.icon} initialLocation={storage} onSave={onSave} onClose={() => setAddVisible(false)} />
+      <AddItemModal visible={addVisible} foodName={selectedFood?.name} foodIcon={selectedFood?.icon} initialLocation={storage} onSave={onSave} onClose={() => setAddVisible(false)} />
       <BatchAddItemModal visible={multiAddVisible} items={multiItems} onSave={handleBatchAddSave} onClose={() => setMultiAddVisible(false)} />
       <EditItemModal
         visible={!!editingItem}
