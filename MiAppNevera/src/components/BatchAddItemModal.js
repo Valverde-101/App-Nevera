@@ -35,21 +35,21 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
     if (visible) {
       setData(
         items.map(item => {
-          const info = getFoodInfo(item.key || item.name);
+          const info = getFoodInfo(item.name);
           let exp = '';
           if (info?.expirationDays != null) {
             const d = new Date();
             d.setDate(d.getDate() + info.expirationDays);
             exp = d.toISOString().split('T')[0];
           }
-            return {
-              location: locations[0]?.key || 'fridge',
-              quantity: '1',
-              unit: info?.defaultUnit || units[0]?.key || 'units',
-              regDate: today,
-              expDate: exp,
-              note: '',
-            };
+          return {
+            location: locations[0]?.key || 'fridge',
+            quantity: '1',
+            unit: units[0]?.key || 'units',
+            regDate: today,
+            expDate: exp,
+            note: '',
+          };
         }),
       );
     }
@@ -64,7 +64,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
       data.map((d, idx) => ({
         ...d,
         index: items[idx].index,
-        name: items[idx].key || items[idx].name,
+        name: items[idx].name,
       })),
     );
   };
