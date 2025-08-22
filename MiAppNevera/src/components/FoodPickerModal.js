@@ -23,7 +23,6 @@ import foodIcons, {
   normalizeFoodName,
 } from '../foodIcons';
 import AddCustomFoodModal from './AddCustomFoodModal';
-import EditDefaultFoodModal from './EditDefaultFoodModal';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -52,7 +51,6 @@ export default function FoodPickerModal({
   const [hiddenFoods, setHiddenFoods] = useState([]);
   const { customFoods } = useCustomFoods();
   const [addVisible, setAddVisible] = useState(false);
-  const [editKey, setEditKey] = useState(null);
 
   // === Estados para "ocultar" scrollbars sin mover layout (web) ===
   const [hoverCat, setHoverCat] = useState(false);
@@ -93,7 +91,8 @@ export default function FoodPickerModal({
 
   const handleSave = () => {
     if (onMultiSelect && selected.length) {
-      onMultiSelect(selected);
+      const names = selected.map(k => customFoodMap[k]?.name || getFoodInfo(k)?.name || k);
+      onMultiSelect(names);
     }
     setSelectMode(false);
     setSelected([]);
@@ -251,7 +250,7 @@ export default function FoodPickerModal({
                     onPress={() =>
                       selectMode
                         ? toggleSelect(food.key)
-                        : onSelect(food.key, food.icon)
+                        : onSelect(food.label, food.icon)
                     }
                     onLongPress={() => {
                       if (!selectMode) {
@@ -360,7 +359,6 @@ export default function FoodPickerModal({
                                 : [...prev, name],
                             )
                           }
-                          onLongPress={() => setEditKey(name)}
                         >
                           <View
                             style={{
@@ -396,11 +394,6 @@ export default function FoodPickerModal({
 
       {/* Añadir personalizado */}
       <AddCustomFoodModal visible={addVisible} onClose={() => setAddVisible(false)} />
-      <EditDefaultFoodModal
-        visible={!!editKey}
-        foodKey={editKey}
-        onClose={() => setEditKey(null)}
-      />
     </>
   );
 }
