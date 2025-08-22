@@ -601,7 +601,7 @@ const createStyles = (palette) => StyleSheet.create({
     paddingHorizontal: 10,
   },
   rowSelected: { backgroundColor: palette.selected },
-    rowText: { color: palette.textStrong },
+  rowText: { color: palette.text },
   rowSub: { color: palette.textDim, fontSize: 12 },
   icon: { width: 30, height: 30, marginRight: 10, resizeMode: 'contain' },
   smallBtn: {
