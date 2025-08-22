@@ -1116,7 +1116,6 @@ export const categories = {
 
 let customFoodsMap = {};
 let defaultOverridesMap = {};
-let overrideNameMap = {};
 
 export function setCustomFoodsMap(list) {
   customFoodsMap = {};
@@ -1138,7 +1137,6 @@ export function setCustomFoodsMap(list) {
 
 export function setDefaultFoodsMap(list) {
   defaultOverridesMap = {};
-  overrideNameMap = {};
   if (Array.isArray(list)) {
     list.forEach(item => {
       if (!item || !item.key) return;
@@ -1150,9 +1148,6 @@ export function setDefaultFoodsMap(list) {
         defaultPrice:
           item.defaultPrice != null ? Number(item.defaultPrice) : null,
       };
-      if (item.name) {
-        overrideNameMap[normalizeFoodName(item.name)] = item.key;
-      }
     });
   }
 }
@@ -1162,8 +1157,7 @@ export function normalizeFoodName(name) {
 }
 
 export function getFoodInfo(name) {
-  const norm = normalizeFoodName(name);
-  const key = overrideNameMap[norm] || norm;
+  const key = normalizeFoodName(name);
   if (customFoodsMap[key]) {
     const info = customFoodsMap[key];
     const icon = info.icon
@@ -1186,12 +1180,11 @@ export function getFoodIcon(name) {
 
 export function getFoodCategory(name) {
   const normalized = normalizeFoodName(name);
-  const key = overrideNameMap[normalized] || normalized;
-  if (customFoodsMap[key]) {
-    return customFoodsMap[key].category || null;
+  if (customFoodsMap[normalized]) {
+    return customFoodsMap[normalized].category || null;
   }
   for (const [cat, data] of Object.entries(categories)) {
-    if (data.items.includes(key)) {
+    if (data.items.includes(normalized)) {
       return cat;
     }
   }
