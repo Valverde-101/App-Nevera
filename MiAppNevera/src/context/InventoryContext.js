@@ -1,8 +1,7 @@
 import React, {createContext, useContext, useEffect, useState, useCallback, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import foods from '../../assets/foods.json';
-import {getFoodIcon, getFoodCategory, getFoodInfo} from '../foodIcons';
-import { useDefaultFoods } from './DefaultFoodsContext';
+import {getFoodIcon, getFoodCategory} from '../foodIcons';
 import { useLocations } from './LocationsContext';
 import { useCustomFoods } from './CustomFoodsContext';
 
@@ -11,7 +10,6 @@ const InventoryContext = createContext();
 export const InventoryProvider = ({children}) => {
   const { locations } = useLocations();
   const { customFoods } = useCustomFoods();
-  const { overrides } = useDefaultFoods();
 
   const buildEmpty = useCallback(() => {
     const obj = {};
@@ -50,24 +48,6 @@ export const InventoryProvider = ({children}) => {
       }
     })();
   }, [locations, customFoods]);
-
-  useEffect(() => {
-    // refresh names/icons when default overrides change
-    setInventory(prev => {
-      const updated = {};
-      Object.keys(prev).forEach(cat => {
-        updated[cat] = prev[cat].map(item => {
-          const info = getFoodInfo(item.name);
-          return {
-            ...item,
-            name: info?.name || item.name,
-            icon: getFoodIcon(item.name),
-          };
-        });
-      });
-      return updated;
-    });
-  }, [overrides]);
 
   useEffect(() => {
     setInventory(prev => {

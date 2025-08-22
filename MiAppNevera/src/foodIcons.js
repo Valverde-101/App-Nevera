@@ -1115,7 +1115,6 @@ export const categories = {
 };
 
 let customFoodsMap = {};
-let defaultOverridesMap = {};
 
 export function setCustomFoodsMap(list) {
   customFoodsMap = {};
@@ -1128,23 +1127,6 @@ export function setCustomFoodsMap(list) {
         baseIcon: item.baseIcon ? normalizeFoodName(item.baseIcon) : null,
         expirationDays:
           item.expirationDays != null ? Number(item.expirationDays) : null,
-      };
-    });
-  }
-}
-
-export function setDefaultFoodsMap(list) {
-  defaultOverridesMap = {};
-  if (Array.isArray(list)) {
-    list.forEach(item => {
-      if (!item || !item.key) return;
-      defaultOverridesMap[item.key] = {
-        name: item.name,
-        expirationDays:
-          item.expirationDays != null ? Number(item.expirationDays) : null,
-        defaultUnit: item.defaultUnit || null,
-        defaultPrice:
-          item.defaultPrice != null ? Number(item.defaultPrice) : null,
       };
     });
   }
@@ -1164,9 +1146,6 @@ export function getFoodInfo(name) {
         ? getFoodIcon(info.baseIcon)
         : undefined;
     return { ...info, icon };
-  }
-  if (defaultOverridesMap[key]) {
-    return { ...foodData[key], ...defaultOverridesMap[key], key };
   }
   return foodData[key];
 }
