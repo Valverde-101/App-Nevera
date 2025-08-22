@@ -250,7 +250,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             <View style={{ alignItems: 'center', marginBottom: 10 }}>
               {item?.icon && <Image source={item.icon} style={{ width: 64, height: 64, marginBottom: 10 }} />}
               <Text style={{ color: palette.text, textAlign: 'center' }}>
-                ¿Seguro que deseas eliminar <Text style={{ color: palette.accent }}>{item?.name}</Text>?
+                ¿Seguro que deseas eliminar <Text style={{ color: palette.foodName }}>{item?.name}</Text>?
               </Text>
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -317,7 +317,7 @@ const createStyles = (palette) => StyleSheet.create({
     borderWidth: 1, borderColor: palette.frame,
     marginRight: 12,
   },
-  foodName: { color: palette.accent, fontSize: 18, fontWeight: '400', marginBottom: 2 },
+  foodName: { color: palette.foodName, fontSize: 18, fontWeight: '400', marginBottom: 2 },
 
   // ScrollView (Web): barra sutil DORADA + gutter estable
   scroll: {

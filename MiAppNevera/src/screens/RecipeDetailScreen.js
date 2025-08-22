@@ -125,9 +125,9 @@ export default function RecipeDetailScreen({ route }) {
               return (
                 <View key={idx} style={styles.ingRow}>
                   {icon && <Image source={icon} style={styles.ingIcon} />}
-                  <Text style={styles.ingText}>
-                    {ing.quantity} {getLabel(ing.quantity, ing.unit)} de {ing.name}
-                  </Text>
+                    <Text style={styles.ingText}>
+                      {ing.quantity} {getLabel(ing.quantity, ing.unit)} de <Text style={{ color: palette.foodName }}>{ing.name}</Text>
+                    </Text>
                 </View>
               );
             })}
@@ -175,16 +175,16 @@ export default function RecipeDetailScreen({ route }) {
                 <Text style={styles.modalBody}>¿Quieres añadir los siguientes ingredientes faltantes a la lista de compras?</Text>
                 <View style={{ maxHeight: 220 }}>
                   <ScrollView>
-                    {missing.map((ing, idx) => (
-                      <View key={idx} style={styles.missRow}>
-                        {(ing.icon || getFoodIcon(ing.name)) && (
-                          <Image source={ing.icon || getFoodIcon(ing.name)} style={styles.missIcon} />
-                        )}
-                        <Text style={styles.missText}>
-                          {ing.quantity} {getLabel(ing.quantity, ing.unit)} de {ing.name}
-                        </Text>
-                      </View>
-                    ))}
+                      {missing.map((ing, idx) => (
+                        <View key={idx} style={styles.missRow}>
+                          {(ing.icon || getFoodIcon(ing.name)) && (
+                            <Image source={ing.icon || getFoodIcon(ing.name)} style={styles.missIcon} />
+                          )}
+                          <Text style={styles.missText}>
+                            {ing.quantity} {getLabel(ing.quantity, ing.unit)} de <Text style={{ color: palette.foodName }}>{ing.name}</Text>
+                          </Text>
+                        </View>
+                      ))}
                   </ScrollView>
                 </View>
                 <Text style={[styles.modalBody, { marginTop: 8 }]}>¿O deseas añadir <Text style={{ color: palette.accent, fontWeight: '700' }}>todos</Text> los ingredientes?</Text>

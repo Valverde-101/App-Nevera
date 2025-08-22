@@ -513,7 +513,7 @@ const createStyles = (palette) => StyleSheet.create({
     borderWidth: 1, borderColor: palette.frame,
     marginBottom: 6,
   },
-  foodLabel: { textAlign: 'center', color: palette.accent, fontSize: 12, fontWeight: '400' },
+  foodLabel: { textAlign: 'center', color: palette.foodName, fontSize: 12, fontWeight: '400' },
 
   bottomBar: {
     position: 'absolute',

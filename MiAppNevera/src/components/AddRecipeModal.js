@@ -300,7 +300,8 @@ const save = () => {
                   onPress={() => openUnitPicker(idx)}
                 >
                   <Text style={styles.ingText}>
-                    {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} de ${ing.name}`}
+                    {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} de `}
+                    <Text style={{ color: palette.foodName }}>{ing.name}</Text>
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
