@@ -25,6 +25,8 @@ export default function AddShoppingItemModal({
   onClose,
   initialQuantity,
   initialUnit,
+  initialUnitPrice,
+  initialTotalPrice,
 }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
@@ -32,6 +34,10 @@ export default function AddShoppingItemModal({
   const { units } = useUnits();
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
+  const [unitPrice, setUnitPrice] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [unitPriceText, setUnitPriceText] = useState('');
+  const [totalPriceText, setTotalPriceText] = useState('');
   const qtyScale = useRef(new Animated.Value(1)).current;
 
   const bumpQty = () => {
@@ -53,8 +59,14 @@ export default function AddShoppingItemModal({
     if (visible) {
       setQuantity(initialQuantity ?? 1);
       setUnit(initialUnit || units[0]?.key || 'units');
+      const u = initialUnitPrice ?? 0;
+      const t = initialTotalPrice ?? 0;
+      setUnitPrice(u);
+      setTotalPrice(t);
+      setUnitPriceText(u ? String(u) : '');
+      setTotalPriceText(t ? String(t) : '');
     }
-  }, [visible, initialQuantity, initialUnit, units]);
+  }, [visible, initialQuantity, initialUnit, initialUnitPrice, initialTotalPrice, units]);
 
   const g = gradientForKey(themeName, foodName || 'item');
 
@@ -97,7 +109,19 @@ export default function AddShoppingItemModal({
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
-                  setQuantity((q) => Math.max(0, (q || 0) - 1));
+                  setQuantity((q) => {
+                    const next = Math.max(0, (q || 0) - 1);
+                    if (unitPrice) {
+                      const tot = unitPrice * next;
+                      setTotalPrice(tot);
+                      setTotalPriceText(tot ? tot.toFixed(2) : '');
+                    } else if (totalPrice) {
+                      const u = next ? totalPrice / next : 0;
+                      setUnitPrice(u);
+                      setUnitPriceText(u ? u.toFixed(2) : '');
+                    }
+                    return next;
+                  });
                   bumpQty();
                 }}
                 style={styles.qtyBtn}
@@ -112,14 +136,36 @@ export default function AddShoppingItemModal({
                   value={String(quantity)}
                   onChangeText={(t) => {
                     const v = parseFloat(t.replace(/[^0-9.]/g, ''));
-                    setQuantity(Number.isFinite(v) ? v : 0);
+                    const q = Number.isFinite(v) ? v : 0;
+                    setQuantity(q);
+                    if (unitPrice) {
+                      const tot = unitPrice * q;
+                      setTotalPrice(tot);
+                      setTotalPriceText(tot ? tot.toFixed(2) : '');
+                    } else if (totalPrice) {
+                      const u = q ? totalPrice / q : 0;
+                      setUnitPrice(u);
+                      setUnitPriceText(u ? u.toFixed(2) : '');
+                    }
                   }}
                 />
               </Animated.View>
 
               <TouchableOpacity
                 onPress={() => {
-                  setQuantity((q) => (q || 0) + 1);
+                  setQuantity((q) => {
+                    const next = (q || 0) + 1;
+                    if (unitPrice) {
+                      const tot = unitPrice * next;
+                      setTotalPrice(tot);
+                      setTotalPriceText(tot ? tot.toFixed(2) : '');
+                    } else if (totalPrice) {
+                      const u = totalPrice / next;
+                      setUnitPrice(u);
+                      setUnitPriceText(u ? u.toFixed(2) : '');
+                    }
+                    return next;
+                  });
                   bumpQty();
                 }}
                 style={styles.qtyBtn}
@@ -152,6 +198,57 @@ export default function AddShoppingItemModal({
                 </Pressable>
               ))}
             </View>
+
+            <Text style={styles.labelBold}>Precio</Text>
+            <View style={styles.priceRow}>
+              <TextInput
+                style={[styles.priceInput, { marginRight: 4 }]}
+                keyboardType="decimal-pad"
+                inputMode="decimal"
+                placeholder="Costo unitario"
+                placeholderTextColor={palette.textDim}
+                value={unitPriceText}
+                onChangeText={(t) => {
+                  const sanitized = t.replace(/[^0-9.]/g, '');
+                  setUnitPriceText(sanitized);
+                  const u = parseFloat(sanitized);
+                  if (!isNaN(u)) {
+                    setUnitPrice(u);
+                    const tot = u * (quantity || 0);
+                    setTotalPrice(tot);
+                    setTotalPriceText(tot ? tot.toFixed(2) : '');
+                  } else {
+                    setUnitPrice(0);
+                    setTotalPrice(0);
+                    setTotalPriceText('');
+                  }
+                }}
+              />
+              <Text style={styles.priceDivider}>/</Text>
+              <TextInput
+                style={[styles.priceInput, { marginLeft: 4 }]}
+                keyboardType="decimal-pad"
+                inputMode="decimal"
+                placeholder="Costo total"
+                placeholderTextColor={palette.textDim}
+                value={totalPriceText}
+                onChangeText={(t) => {
+                  const sanitized = t.replace(/[^0-9.]/g, '');
+                  setTotalPriceText(sanitized);
+                  const tot = parseFloat(sanitized);
+                  if (!isNaN(tot)) {
+                    setTotalPrice(tot);
+                    const u = (quantity || 0) ? tot / (quantity || 0) : 0;
+                    setUnitPrice(u);
+                    setUnitPriceText(u ? u.toFixed(2) : '');
+                  } else {
+                    setTotalPrice(0);
+                    setUnitPrice(0);
+                    setUnitPriceText('');
+                  }
+                }}
+              />
+            </View>
           </ScrollView>
 
           <View style={styles.footerRow}>
@@ -160,7 +257,14 @@ export default function AddShoppingItemModal({
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.footerBtn, styles.footerPrimary]}
-              onPress={() => onSave({ quantity: quantity || 0, unit })}
+              onPress={() =>
+                onSave({
+                  quantity: quantity || 0,
+                  unit,
+                  unitPrice: unitPrice || 0,
+                  totalPrice: totalPrice || 0,
+                })
+              }
             >
               <Text
                 style={[styles.footerBtnText, styles.footerPrimaryText]}
@@ -292,6 +396,19 @@ const createStyles = (palette) =>
       paddingHorizontal: 10,
       color: palette.text,
     },
+    priceRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
+    priceInput: {
+      flex: 1,
+      textAlign: 'center',
+      backgroundColor: palette.surface2,
+      borderWidth: 1,
+      borderColor: palette.border,
+      borderRadius: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      color: palette.text,
+    },
+    priceDivider: { color: palette.text, paddingHorizontal: 4 },
     footerRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
