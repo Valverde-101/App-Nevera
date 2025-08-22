@@ -58,7 +58,7 @@ export default function RecipeDetailScreen({ route }) {
     if (!recipe) return [];
     return recipe.ingredients.filter((ing) => {
       const available = locations.reduce((sum, loc) => {
-        const item = (inventory[loc.key] || []).find((it) => it.name === ing.name);
+        const item = (inventory[loc.key] || []).find((it) => (it.key || it.name) === ing.name);
         return sum + (item ? item.quantity : 0);
       }, 0);
       return available < ing.quantity;
