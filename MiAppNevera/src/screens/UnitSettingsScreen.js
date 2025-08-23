@@ -5,9 +5,11 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Platform
 import { useNavigation } from '@react-navigation/native';
 import { useUnits } from '../context/UnitsContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/LangContext';
 
 export default function UnitSettingsScreen() {
   const palette = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
@@ -16,8 +18,9 @@ export default function UnitSettingsScreen() {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
+      title: t('screen.settings.unit_title'),
     });
-  }, [nav, palette]);
+  }, [nav, palette, t]);
 
   const { units, addUnit, updateUnit, removeUnit } = useUnits();
   const [singular, setSingular] = useState('');
@@ -31,7 +34,7 @@ export default function UnitSettingsScreen() {
   const onSubmit = () => {
     const s = (singular || '').trim();
     const p = (plural || '').trim();
-    if (!s || !p) { setError('Completa singular y plural.'); return; }
+    if (!s || !p) { setError(t('msg.units.error_required')); return; }
     if (editingKey) { updateUnit(editingKey, s, p); cancelEdit(); }
     else { addUnit(s, p); setSingular(''); setPlural(''); setError(''); }
   };
@@ -43,10 +46,10 @@ export default function UnitSettingsScreen() {
         <Text style={styles.rowSub}>{item.key}</Text>
       </View>
       <TouchableOpacity style={styles.smallBtn} onPress={() => startEdit(item)}>
-        <Text style={styles.smallBtnText}>✏️ Editar</Text>
+        <Text style={styles.smallBtnText}>{t('screen.units.list_edit')}</Text>
       </TouchableOpacity>
         <TouchableOpacity style={[styles.smallBtn, styles.smallBtnDanger, { marginLeft: 8 }]} onPress={() => removeUnit(item.key)}>
-          <Text style={styles.smallBtnDangerText}>🗑️ Eliminar</Text>
+          <Text style={styles.smallBtnDangerText}>{t('screen.units.list_delete')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -63,20 +66,20 @@ export default function UnitSettingsScreen() {
       />
 
       <View style={styles.editor}>
-        <Text style={styles.editorTitle}>{editingKey ? 'Editar unidad' : 'Añadir unidad'}</Text>
-        <TextInput placeholder="Singular" placeholderTextColor={palette.textDim} value={singular}
+        <Text style={styles.editorTitle}>{editingKey ? t('screen.units.editor_edit_title') : t('screen.units.editor_add_title')}</Text>
+        <TextInput placeholder={t('placeholder.unit.singular')} placeholderTextColor={palette.textDim} value={singular}
           onChangeText={t => { setSingular(t); setError(''); }} style={styles.input} />
-        <TextInput placeholder="Plural" placeholderTextColor={palette.textDim} value={plural}
+        <TextInput placeholder={t('placeholder.unit.plural')} placeholderTextColor={palette.textDim} value={plural}
           onChangeText={t => { setPlural(t); setError(''); }} style={styles.input} />
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={{ flexDirection: 'row', marginTop: 6 }}>
           <TouchableOpacity style={[styles.primaryBtn, { flex: 1 }]} onPress={onSubmit}>
-            <Text style={styles.primaryBtnText}>{editingKey ? 'Actualizar' : 'Añadir'}</Text>
+            <Text style={styles.primaryBtnText}>{editingKey ? t('btn.update') : t('btn.add')}</Text>
           </TouchableOpacity>
           {editingKey ? (
             <TouchableOpacity style={[styles.btn, { flex: 1, marginLeft: 10 }]} onPress={cancelEdit}>
-              <Text style={styles.btnText}>Cancelar</Text>
+              <Text style={styles.btnText}>{t('btn.cancel')}</Text>
             </TouchableOpacity>
           ) : null}
         </View>

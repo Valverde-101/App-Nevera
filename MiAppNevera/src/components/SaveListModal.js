@@ -5,6 +5,7 @@ import AddShoppingItemModal from './AddShoppingItemModal';
 import FoodPickerModal from './FoodPickerModal';
 import { getFoodCategory } from '../foodIcons';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/LangContext';
 
 export default function SaveListModal({ visible, items = [], initialName = '', initialNote = '', onSave, onClose }) {
   const [name, setName] = useState('');
@@ -18,6 +19,7 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
   const [addVisible, setAddVisible] = useState(false);
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (visible) {
@@ -97,15 +99,15 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
   return (
     <Modal visible={visible} animationType="slide">
       <View style={styles.container}>
-        <Text style={styles.title}>Guardar lista</Text>
+        <Text style={styles.title}>{t('modal.save_list.title')}</Text>
         <TextInput
-          placeholder="Nombre"
+          placeholder={t('placeholder.name')}
           style={styles.input}
           value={name}
           onChangeText={setName}
         />
         <TextInput
-          placeholder="Nota"
+          placeholder={t('placeholder.note')}
           style={styles.input}
           value={note}
           onChangeText={setNote}
@@ -119,14 +121,14 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
         />
         <View style={styles.actions}>
           <Button
-            title={selectMode ? 'Cancelar selección' : 'Cancelar'}
+            title={selectMode ? t('btn.cancel_selection') : t('btn.cancel')}
             onPress={selectMode ? () => { setSelectMode(false); setSelected([]); } : onClose}
           />
-          <Button title="Añadir" onPress={() => setPickerVisible(true)} />
+          <Button title={t('btn.add')} onPress={() => setPickerVisible(true)} />
           {selectMode && selected.length > 0 && (
-            <Button title="Eliminar" color="#b00" onPress={deleteSelected} />
+            <Button title={t('btn.delete')} color="#b00" onPress={deleteSelected} />
           )}
-          <Button title="Guardar" onPress={() => onSave({ name: name.trim(), note, items: localItems })} />
+          <Button title={t('btn.save')} onPress={() => onSave({ name: name.trim(), note, items: localItems })} />
         </View>
         <AddShoppingItemModal
           visible={editIdx !== null}
