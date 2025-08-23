@@ -1,0 +1,65 @@
+{
+  "settings": {
+    "colorTheme": {"title": "Thème de couleurs", "desc": "Choisissez entre clair ou sombre."},
+    "units": {"title": "Types d'unité", "desc": "Gérez le singulier et le pluriel de vos unités."},
+    "currency": {"title": "Devise", "desc": "Sélectionnez la devise pour les coûts."},
+    "locations": {"title": "Gestion des lieux", "desc": "Définissez où vous rangez vos aliments."},
+    "userData": {"title": "Données utilisateur", "desc": "Sauvegardes, importation et suppression totale."},
+    "language": {"title": "Langue", "desc": "Sélectionnez la langue de l'application."}
+  },
+  "themeSettings": {"darkPremium": "Dark Premium", "light": "Clair", "current": "Actuel"},
+  "unitSettings": {
+    "singular": "Singulier",
+    "plural": "Pluriel",
+    "edit": "✏️ Modifier",
+    "delete": "🗑️ Supprimer",
+    "editUnit": "Modifier l'unité",
+    "addUnit": "Ajouter une unité",
+    "update": "Mettre à jour",
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "completeBoth": "Complétez le singulier et le pluriel."
+  },
+  "home": {
+    "fridge": "Réfrigérateur",
+    "freezer": "Congélateur",
+    "pantry": "Garde-manger",
+    "shopping": "Liste de courses"
+  },
+  "languageSettings": {
+    "title": "Langue",
+    "spanish": "Espagnol",
+    "english": "Anglais",
+    "french": "Français",
+    "japanese": "Japonais",
+    "current": "Actuel"
+  },
+  "app": {"restarted": "L'application a redémarré."},
+  "common": {"add": "Ajouter", "cancel": "Annuler", "save": "Enregistrer", "delete": "Supprimer"},
+  "category": {"search": "Rechercher"},
+  "locationSettings": {
+    "inactive": "Inactive",
+    "deactivate": "Désactiver",
+    "activate": "Activer",
+    "editLocation": "Modifier l'emplacement",
+    "addLocation": "Ajouter un emplacement",
+    "name": "Nom",
+    "removeConfirm": "Voulez-vous vraiment supprimer cet emplacement ?",
+    "locationHasItems": "L'emplacement contient des aliments. Videz-le avant de le supprimer."
+  },
+  "currency": {"sol": "Sol", "dollar": "Dollar", "euro": "Euro", "yen": "Yen/Yuan", "peso": "Peso"},
+  "titles": {
+    "inventory": "Réfrigérateur",
+    "shopping": "Liste de courses",
+    "savedLists": "Listes enregistrées",
+    "recipes": "Livre de recettes",
+    "recipe": "Recette",
+    "settings": "Paramètres",
+    "themeSettings": "Thème de couleurs",
+    "unitSettings": "Types d'unité",
+    "currencySettings": "Devise",
+    "locationSettings": "Gestion des lieux",
+    "userData": "Données utilisateur",
+    "languageSettings": "Langue"
+  }
+}
