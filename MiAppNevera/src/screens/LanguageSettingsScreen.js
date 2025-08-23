@@ -1,12 +1,12 @@
 import React, { useLayoutEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme, useThemeController } from '../context/ThemeContext';
-import { useTranslation } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
+import { useLanguage, useTranslation } from '../context/LanguageContext';
 
-export default function ThemeSettingsScreen() {
+export default function LanguageSettingsScreen() {
   const palette = useTheme();
-  const { themeName, setThemeName } = useThemeController();
+  const { language, setLanguage } = useLanguage();
   const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
@@ -20,19 +20,21 @@ export default function ThemeSettingsScreen() {
     });
   }, [nav, palette]);
 
-  const themes = [
-    { key: 'dark', label: t('themeSettings.darkPremium') },
-    { key: 'light', label: t('themeSettings.light') },
+  const langs = [
+    { key: 'es', label: t('languageSettings.spanish') },
+    { key: 'en', label: t('languageSettings.english') },
+    { key: 'fr', label: t('languageSettings.french') },
+    { key: 'ja', label: t('languageSettings.japanese') },
   ];
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
-        {themes.map(t => (
-          <TouchableOpacity key={t.key} style={styles.item} onPress={() => setThemeName(t.key)}>
-            <Text style={styles.itemTitle}>{t.label}</Text>
-            {themeName === t.key ? <Text style={styles.current}>{t('themeSettings.current')}</Text> : null}
+        {langs.map(l => (
+          <TouchableOpacity key={l.key} style={styles.item} onPress={() => setLanguage(l.key)}>
+            <Text style={styles.itemTitle}>{l.label}</Text>
+            {language === l.key ? <Text style={styles.current}>{t('themeSettings.current')}</Text> : null}
           </TouchableOpacity>
         ))}
       </ScrollView>
