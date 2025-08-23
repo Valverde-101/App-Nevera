@@ -15,7 +15,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useLocations } from '../context/LocationsContext';
 import { useInventory } from '../context/InventoryContext';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../context/LangContext';
 
 const icons = ['🥶','❄️','🗃️','📦','🍽️','🧊','🥫','🥕','🥩','🥛'];
 
@@ -23,16 +22,15 @@ export default function LocationSettingsScreen() {
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
-  const { t } = useTranslation();
   useLayoutEffect(() => {
     nav.setOptions?.({
       headerStyle: { backgroundColor: palette.surface },
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: t('screen.locations.title'),
+      title: 'Ubicaciones',
     });
-  }, [nav, palette, t]);
+  }, [nav, palette]);
 
   const { locations, addLocation, updateLocation, removeLocation, toggleActive } = useLocations();
   const { inventory } = useInventory();
@@ -57,7 +55,7 @@ export default function LocationSettingsScreen() {
 
   const handleRemove = key => {
     if (inventory[key] && inventory[key].length > 0) {
-      setWarning(t('msg.location.not_empty'));
+      setWarning('La ubicación contiene alimentos. Vacíe la ubicación antes de eliminarla.');
       setPendingKey(null);
       setConfirmVisible(true);
       return;
@@ -74,16 +72,16 @@ export default function LocationSettingsScreen() {
           <Text style={{ fontSize: 18 }}>{item.icon}</Text>  {item.name}
           <Text style={styles.rowSub}>  • {item.key}</Text>
         </Text>
-        {!item.active && <Text style={[styles.badge, { color: '#ffcc80' }]}>{t('label.inactive')}</Text>}
+        {!item.active && <Text style={[styles.badge, { color: '#ffcc80' }]}>Inactiva</Text>}
       </TouchableOpacity>
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity style={[styles.smallBtn, item.active ? null : styles.smallBtnAccent]} onPress={() => toggleActive(item.key)}>
           <Text style={item.active ? styles.smallBtnText : styles.smallBtnAccentText}>
-            {item.active ? t('btn.disable') : t('btn.enable')}
+            {item.active ? 'Desactivar' : 'Activar'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.smallBtn, styles.smallBtnDanger]} onPress={() => handleRemove(item.key)}>
-          <Text style={styles.smallBtnDangerText}>{t('btn.delete')}</Text>
+          <Text style={styles.smallBtnDangerText}>Eliminar</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -102,9 +100,9 @@ export default function LocationSettingsScreen() {
 
       {/* Editor */}
       <View style={styles.editor}>
-        <Text style={styles.editorTitle}>{editingKey ? t('screen.locations.editor_edit_title') : t('screen.locations.editor_add_title')}</Text>
+        <Text style={styles.editorTitle}>{editingKey ? 'Editar ubicación' : 'Añadir ubicación'}</Text>
         <TextInput
-          placeholder={t('placeholder.name')}
+          placeholder="Nombre"
           placeholderTextColor={palette.textDim}
           value={name}
           onChangeText={setName}
@@ -132,11 +130,11 @@ export default function LocationSettingsScreen() {
               }
             }}
           >
-            <Text style={styles.primaryBtnText}>{editingKey ? t('btn.save') : t('btn.add')}</Text>
+            <Text style={styles.primaryBtnText}>{editingKey ? 'Guardar' : 'Añadir'}</Text>
           </TouchableOpacity>
           {editingKey ? (
             <TouchableOpacity style={[styles.btn, { flex: 1, marginLeft: 10 }]} onPress={cancelEdit}>
-              <Text style={styles.btnText}>{t('btn.cancel')}</Text>
+              <Text style={styles.btnText}>Cancelar</Text>
             </TouchableOpacity>
           ) : null}
         </View>
@@ -156,18 +154,20 @@ export default function LocationSettingsScreen() {
                 {warning ? (
                   <Text style={styles.modalBody}>{warning}</Text>
                 ) : (
-                  <Text style={styles.modalBody}>{t('msg.location.confirm_delete')}</Text>
+                  <Text style={styles.modalBody}>
+                    ¿Seguro que deseas eliminar esta ubicación?
+                  </Text>
                 )}
                 <View style={styles.modalRow}>
                   <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setConfirmVisible(false)}>
-                    <Text style={styles.btnText}>{t('btn.cancel')}</Text>
+                    <Text style={styles.btnText}>Cancelar</Text>
                   </TouchableOpacity>
                   {!warning && (
                     <TouchableOpacity
                       style={[styles.dangerBtn, { flex: 1, marginLeft: 12 }]}
                       onPress={() => { removeLocation(pendingKey); setConfirmVisible(false); }}
                     >
-                      <Text style={styles.dangerBtnText}>{t('btn.delete')}</Text>
+                      <Text style={styles.dangerBtnText}>Eliminar</Text>
                     </TouchableOpacity>
                   )}
                 </View>

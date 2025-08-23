@@ -18,7 +18,6 @@ import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
-import { useTranslation } from '../context/LangContext';
 
 export default function AddShoppingItemModal({
   visible,
@@ -37,7 +36,6 @@ export default function AddShoppingItemModal({
   const { units } = useUnits();
   // subscribe to default food overrides so edits persist
   const { overrides } = useDefaultFoods();
-  const { t } = useTranslation();
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState(units[0]?.key || 'units');
   const [unitPrice, setUnitPrice] = useState(0);
@@ -114,7 +112,7 @@ export default function AddShoppingItemModal({
             style={styles.scroll}
             contentContainerStyle={{ padding: 16 }}
           >
-            <Text style={styles.labelBold}>{t('label.quantity')}</Text>
+            <Text style={styles.labelBold}>Cantidad</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
@@ -262,7 +260,7 @@ export default function AddShoppingItemModal({
 
           <View style={styles.footerRow}>
             <TouchableOpacity style={styles.footerBtn} onPress={onClose}>
-              <Text style={styles.footerBtnText}>{t('btn.cancel')}</Text>
+              <Text style={styles.footerBtnText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.footerBtn, styles.footerPrimary]}
@@ -278,7 +276,7 @@ export default function AddShoppingItemModal({
               <Text
                 style={[styles.footerBtnText, styles.footerPrimaryText]}
               >
-                {t('btn.save')}
+                Guardar
               </Text>
             </TouchableOpacity>
           </View>

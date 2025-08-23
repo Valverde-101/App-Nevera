@@ -30,12 +30,11 @@ import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { gradientForKey } from '../theme/gradients';
-import { useTranslation } from '../context/LangContext';
 
 // ===== Helpers =====
-const getExpiryMeta = (palette, d, t) => {
+const getExpiryMeta = (palette, d) => {
   if (d === null || isNaN(d)) return null;
-  if (d <= 0)  return { bg: palette.danger, text: '#fff', label: t('label.expired_short') };
+  if (d <= 0)  return { bg: palette.danger, text: '#fff', label: 'Venc.' };
   if (d <= 3)  return { bg: palette.warn,   text: '#1b1d22', label: `D-${d}` };
   return        { bg: palette.accent, text: '#1b1d22', label: `D-${d}` };
 };
@@ -104,7 +103,6 @@ export default function InventoryScreen({ navigation }) {
   const { categories } = useCategories();
   // subscribe to default food overrides so inventory names update after refresh
   const { overrides } = useDefaultFoods();
-  const { t } = useTranslation();
   const [storage, setStorage] = useState(locations[0]?.key || 'fridge');
 
   useEffect(() => {
@@ -441,10 +439,10 @@ export default function InventoryScreen({ navigation }) {
           {isEmpty ? (
             <View style={styles.emptyWrap}>
               <Text style={{ color: palette.textDim, marginBottom: 8 }}>
-                {t('screen.inventory.empty', { location: currentLoc?.name })}
+                {`Su "${currentLoc?.name}" se encuentra vacío`}
               </Text>
               <TouchableOpacity onPress={() => setPickerVisible(true)} style={styles.emptyBtn}>
-                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('screen.inventory.add_food')}</Text>
+                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Añadir alimento</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -469,7 +467,7 @@ export default function InventoryScreen({ navigation }) {
                     const key = `${item.location}-${item.index}`;
                     const selected = selectedItems.some(it => it.key === key);
                     const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                    const meta = getExpiryMeta(palette, daysLeft, t);
+                    const meta = getExpiryMeta(palette, daysLeft);
                     const g = gradientForKey(themeName, item.name || key);
                     const label = getFoodInfo(item.name)?.name || item.name;
 
@@ -522,7 +520,7 @@ export default function InventoryScreen({ navigation }) {
                       const key = `${item.location}-${item.index}`;
                       const selected = selectedItems.some(it => it.key === key);
                       const daysLeft = item.expiration ? Math.ceil((new Date(item.expiration) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-                      const meta = getExpiryMeta(palette, daysLeft, t);
+                      const meta = getExpiryMeta(palette, daysLeft);
                       const g = gradientForKey(themeName, item.name || key);
                       const label = getFoodInfo(item.name)?.name || item.name;
 
@@ -666,10 +664,10 @@ export default function InventoryScreen({ navigation }) {
                 ))}
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
                   <TouchableOpacity onPress={() => setSortVisible(false)} style={{ padding: 10, marginRight: 10 }}>
-                    <Text style={{ color: palette.accent }}>{t('btn.cancel')}</Text>
+                    <Text style={{ color: palette.accent }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => { setSortOrder(tempSortOrder); setGroupBy(tempGroupBy); setSortVisible(false); }} style={{ backgroundColor: palette.accent, padding: 10, borderRadius: 6 }}>
-                    <Text style={{ color: '#1b1d22' }}>{t('btn.confirm')}</Text>
+                    <Text style={{ color: '#1b1d22' }}>Confirmar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -692,10 +690,10 @@ export default function InventoryScreen({ navigation }) {
                 ))}
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
                   <TouchableOpacity onPress={() => setViewVisible(false)} style={{ padding: 10, marginRight: 10 }}>
-                    <Text style={{ color: palette.accent }}>{t('btn.cancel')}</Text>
+                    <Text style={{ color: palette.accent }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => { setViewType(tempViewType); setViewVisible(false); }} style={{ backgroundColor: palette.accent, padding: 10, borderRadius: 6 }}>
-                    <Text style={{ color: '#1b1d22' }}>{t('btn.confirm')}</Text>
+                    <Text style={{ color: '#1b1d22' }}>Confirmar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -722,7 +720,7 @@ export default function InventoryScreen({ navigation }) {
             <TouchableWithoutFeedback>
               <View style={{ backgroundColor: palette.surface, padding: 20, borderRadius: 12, maxHeight: '80%', width: '80%', borderWidth: 1, borderColor: palette.border }}>
                 <Text style={{ marginBottom: 10, color: palette.text }}>
-                  {t('msg.inventory.add_to_shopping', { count: selectedItems.length })}
+                  Añadir los siguientes {selectedItems.length} elementos a la lista de compras?
                 </Text>
                 <ScrollView style={{ marginBottom: 10 }}>
                   {getSelectedFullItems().map((item, idx) => (
@@ -752,8 +750,8 @@ export default function InventoryScreen({ navigation }) {
                   ))}
                 </ScrollView>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                  <Button title={t('btn.cancel')} color={palette.accent} onPress={() => setShoppingVisible(false)} />
-                  <Button title={t('btn.add')} color={palette.accent} onPress={handleAddToShopping} />
+                  <Button title="Cancelar" color={palette.accent} onPress={() => setShoppingVisible(false)} />
+                  <Button title="Añadir" color={palette.accent} onPress={handleAddToShopping} />
                 </View>
               </View>
             </TouchableWithoutFeedback>
@@ -767,13 +765,13 @@ export default function InventoryScreen({ navigation }) {
             <TouchableWithoutFeedback>
               <View style={{ backgroundColor: palette.surface, padding: 20, borderRadius: 12, borderWidth: 1, borderColor: palette.border }}>
                 <Text style={{ marginBottom: 10, color: palette.text }}>
-                  {transferType === 'move' ? t('modal.transfer.move') : t('modal.transfer.copy')}
+                  {transferType === 'move' ? 'Mover a:' : 'Copiar a:'}
                 </Text>
                 {locations.map(opt => (
                   <Button key={opt.key} title={opt.name} color={palette.accent} onPress={() => handleTransfer(opt.key)} />
                 ))}
                 <View style={{ height: 8 }} />
-                <Button title={t('btn.cancel')} color={palette.accent} onPress={() => setTransferType(null)} />
+                <Button title="Cancelar" color={palette.accent} onPress={() => setTransferType(null)} />
               </View>
             </TouchableWithoutFeedback>
           </View>
@@ -786,11 +784,11 @@ export default function InventoryScreen({ navigation }) {
             <TouchableWithoutFeedback>
               <View style={{ backgroundColor: palette.surface, padding: 20, borderRadius: 12, borderWidth: 1, borderColor: palette.border }}>
                 <Text style={{ marginBottom: 10, color: palette.text }}>
-                  {t('msg.inventory.delete_items', { count: selectedItems.length })}
+                  ¿Eliminar {selectedItems.length} items?
                 </Text>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-                  <Button title={t('btn.cancel')} color={palette.accent} onPress={() => setConfirmVisible(false)} />
-                  <Button title={t('btn.delete')} color={palette.accent} onPress={handleDelete} />
+                  <Button title="Cancelar" color={palette.accent} onPress={() => setConfirmVisible(false)} />
+                  <Button title="Eliminar" color={palette.accent} onPress={handleDelete} />
                 </View>
               </View>
             </TouchableWithoutFeedback>

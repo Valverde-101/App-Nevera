@@ -2,12 +2,10 @@ import React, { useLayoutEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemeController } from '../context/ThemeContext';
-import { useTranslation } from '../context/LangContext';
 
 export default function ThemeSettingsScreen() {
   const palette = useTheme();
   const { themeName, setThemeName } = useThemeController();
-  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
 
@@ -17,23 +15,22 @@ export default function ThemeSettingsScreen() {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: t('screen.theme.title'),
     });
-  }, [nav, palette, t]);
+  }, [nav, palette]);
 
   const themes = [
-    { key: 'dark', label: t('screen.theme.dark') },
-    { key: 'light', label: t('screen.theme.light') },
+    { key: 'dark', label: 'Dark Premium' },
+    { key: 'light', label: 'Claro' },
   ];
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
-        {themes.map(opt => (
-          <TouchableOpacity key={opt.key} style={styles.item} onPress={() => setThemeName(opt.key)}>
-            <Text style={styles.itemTitle}>{opt.label}</Text>
-            {themeName === opt.key ? <Text style={styles.current}>{t('screen.theme.current')}</Text> : null}
+        {themes.map(t => (
+          <TouchableOpacity key={t.key} style={styles.item} onPress={() => setThemeName(t.key)}>
+            <Text style={styles.itemTitle}>{t.label}</Text>
+            {themeName === t.key ? <Text style={styles.current}>Actual</Text> : null}
           </TouchableOpacity>
         ))}
       </ScrollView>

@@ -22,13 +22,11 @@ import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../context/LangContext';
 
 export default function RecipeDetailScreen({ route }) {
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
-  const { t } = useTranslation();
   const { index } = route.params;
   const { recipes, updateRecipe } = useRecipes();
   const { inventory } = useInventory();
@@ -73,7 +71,7 @@ export default function RecipeDetailScreen({ route }) {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: recipe ? recipe.name : t('screen.recipe_detail.title'),
+      title: recipe ? recipe.name : 'Receta',
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity onPress={() => setEditVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}>
@@ -93,7 +91,7 @@ export default function RecipeDetailScreen({ route }) {
   if (!recipe) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: palette.bg }}>
-        <Text style={{ color: palette.textDim }}>{t('screen.recipe_detail.not_found')}</Text>
+        <Text style={{ color: palette.textDim }}>Receta no encontrada</Text>
       </View>
     );
   }
@@ -113,8 +111,9 @@ export default function RecipeDetailScreen({ route }) {
           />
         ) : null}
         <Text style={styles.title}>{recipe.name}</Text>
-        <Text style={styles.meta}>{t('recipe.card.meta', { persons: recipe.persons, difficulty: recipe.difficulty })}</Text>
-        <Text style={styles.blockTitle}>{t('label.ingredients')}</Text>
+        <Text style={styles.meta}>Para {recipe.persons} personas • Dificultad: {recipe.difficulty}</Text>
+
+        <Text style={styles.blockTitle}>Ingredientes</Text>
         {groupedOrder.map((cat) => (
           <View key={cat} style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -137,7 +136,7 @@ export default function RecipeDetailScreen({ route }) {
           </View>
         ))}
 
-        <Text style={styles.blockTitle}>{t('label.steps')}</Text>
+        <Text style={styles.blockTitle}>Pasos</Text>
         <Markdown
           style={{
             body: { color: palette.text, lineHeight: 20 },
@@ -174,8 +173,8 @@ export default function RecipeDetailScreen({ route }) {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>{t('modal.recipe.add_to_shopping.title')}</Text>
-                <Text style={styles.modalBody}>{t('modal.recipe.add_to_shopping.body')}</Text>
+                <Text style={styles.modalTitle}>Añadir a compras</Text>
+                <Text style={styles.modalBody}>¿Quieres añadir los siguientes ingredientes faltantes a la lista de compras?</Text>
                 <View style={{ maxHeight: 220 }}>
                   <ScrollView>
                     {missing.map((ing, idx) => (
@@ -192,10 +191,10 @@ export default function RecipeDetailScreen({ route }) {
                     ))}
                   </ScrollView>
                 </View>
-                <Text style={[styles.modalBody, { marginTop: 8 }]}>{t('modal.recipe.add_to_shopping.body_all')}</Text>
+                <Text style={[styles.modalBody, { marginTop: 8 }]}>¿O deseas añadir <Text style={{ color: palette.accent, fontWeight: '700' }}>todos</Text> los ingredientes?</Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity onPress={() => setConfirmVisible(false)} style={[styles.modalBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>{t('btn.cancel')}</Text>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
@@ -204,7 +203,7 @@ export default function RecipeDetailScreen({ route }) {
                     }}
                     style={[styles.modalBtn, { backgroundColor: palette.accent }]}
                   >
-                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('modal.recipe.add_missing')}</Text>
+                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Añadir faltantes</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
@@ -213,7 +212,7 @@ export default function RecipeDetailScreen({ route }) {
                     }}
                     style={[styles.modalBtn, { backgroundColor: palette.selected, borderColor: palette.frame }]}
                   >
-                    <Text style={{ color: palette.accent, fontWeight: '700' }}>{t('modal.recipe.add_all')}</Text>
+                    <Text style={{ color: palette.accent, fontWeight: '700' }}>Añadir todos</Text>
                   </TouchableOpacity>
                 </View>
               </View>

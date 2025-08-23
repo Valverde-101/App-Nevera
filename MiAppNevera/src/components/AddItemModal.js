@@ -23,13 +23,11 @@ import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
-import { useTranslation } from '../context/LangContext';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
-  const { t } = useTranslation();
   const today = new Date().toISOString().split('T')[0];
   const { units } = useUnits();
   const { locations } = useLocations();
@@ -102,7 +100,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                   unitPrice || 0,
                   totalPrice || 0,
                 );
-                Alert.alert(t('msg.added'), t('msg.added_to_shopping', { name: foodName }));
+                Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
               }}
               style={styles.iconBtn}
             >
@@ -123,7 +121,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             contentContainerStyle={{ padding: 16 }}
           >
             {/* Ubicación */}
-            <Text style={styles.labelBold}>{t('label.location')}</Text>
+            <Text style={styles.labelBold}>Ubicación</Text>
             <View style={styles.chipWrap}>
               {locations.map((opt, idx) => (
                 <Pressable
@@ -143,7 +141,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Cantidad */}
-            <Text style={styles.labelBold}>{t('label.quantity')}</Text>
+            <Text style={styles.labelBold}>Cantidad</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
@@ -213,7 +211,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Unidad */}
-            <Text style={styles.labelBold}>{t('label.unit')}</Text>
+            <Text style={styles.labelBold}>Unidad</Text>
             <View style={styles.chipWrap}>
               {units.map((opt, idx) => (
                 <Pressable
@@ -233,7 +231,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>{t('label.price')}</Text>
+            <Text style={styles.labelBold}>Precio</Text>
             <View style={styles.priceRow}>
               <TextInput
                 style={[styles.priceInput, { marginRight: 4 }]}
@@ -286,7 +284,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
 
             {/* Fechas (con inputs gris) */}
             <View style={{ marginTop: 6 }}>
-              <Text style={styles.labelBold}>{t('label.register_date')}</Text>
+              <Text style={styles.labelBold}>Fecha de registro</Text>
               <DatePicker
                 value={regDate}
                 onChange={setRegDate}
@@ -294,7 +292,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 containerStyle={styles.dateContainer}
               />
               <View style={{ height: 8 }} />
-              <Text style={styles.labelBold}>{t('label.expire_date')}</Text>
+              <Text style={styles.labelBold}>Fecha de caducidad</Text>
               <DatePicker
                 value={expDate}
                 onChange={setExpDate}
@@ -304,7 +302,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Nota */}
-            <Text style={styles.labelBold}>{t('label.note')}</Text>
+            <Text style={styles.labelBold}>Nota</Text>
             <TextInput
               style={styles.noteInput}
               value={note}
@@ -331,7 +329,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             }
             style={styles.saveFab}
           >
-            <Text style={styles.saveFabText}>{t('btn.save')}</Text>
+            <Text style={styles.saveFabText}>Guardar</Text>
           </TouchableOpacity>
         </View>
       </View>
