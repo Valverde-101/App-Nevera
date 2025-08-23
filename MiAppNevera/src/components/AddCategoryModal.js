@@ -3,11 +3,9 @@ import React, { useState, useMemo } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, Image, StyleSheet, Platform, TouchableWithoutFeedback } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../context/LanguageContext';
 
 export default function AddCategoryModal({ visible, onClose, onSave }) {
   const palette = useTheme();
-  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const [name, setName] = useState('');
   const [iconUri, setIconUri] = useState(null);
@@ -37,34 +35,34 @@ export default function AddCategoryModal({ visible, onClose, onSave }) {
         <View style={styles.backdrop}>
           <TouchableWithoutFeedback>
             <View style={styles.card}>
-              <Text style={styles.title}>{t('addCategory.title')}</Text>
-              <Text style={styles.help}>{t('addCategory.help')}</Text>
+              <Text style={styles.title}>Nueva categoría</Text>
+              <Text style={styles.help}>Opcionalmente, agrega un icono personalizado.</Text>
 
-              <Text style={styles.label}>{t('addCategory.name')}</Text>
+              <Text style={styles.label}>Nombre</Text>
               <TextInput
                 style={styles.input}
-                placeholder={t('addCategory.placeholder')}
+                placeholder="Ej. Frutas"
                 placeholderTextColor={palette.textDim}
                 value={name}
                 onChangeText={setName}
               />
 
-              <Text style={styles.label}>{t('addCategory.icon')}</Text>
+              <Text style={styles.label}>Icono</Text>
               {iconUri ? (
                 <Image source={{ uri: iconUri }} style={styles.preview} />
               ) : (
                 <View style={[styles.preview, { alignItems: 'center', justifyContent: 'center' }]}>
-                  <Text style={{ color: palette.textDim, fontSize: 12 }}>{t('addCategory.noIcon')}</Text>
+                  <Text style={{ color: palette.textDim, fontSize: 12 }}>Sin icono</Text>
                 </View>
               )}
 
               <View style={{ flexDirection: 'row', marginTop: 8 }}>
                 <TouchableOpacity onPress={pickImage} style={[styles.btn, styles.btnNeutral, { flex: 1 }]}>
-                  <Text style={styles.btnNeutralText}>{t('addCategory.loadImage')}</Text>
+                  <Text style={styles.btnNeutralText}>Cargar imagen</Text>
                 </TouchableOpacity>
                 {iconUri && (
                   <TouchableOpacity onPress={() => setIconUri(null)} style={[styles.btn, { flex: 1, marginLeft: 8 }]}>
-                    <Text style={styles.btnText}>{t('addCategory.removeImage')}</Text>
+                    <Text style={styles.btnText}>Quitar</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -73,10 +71,10 @@ export default function AddCategoryModal({ visible, onClose, onSave }) {
 
               <View style={{ flexDirection: 'row' }}>
                 <TouchableOpacity onPress={onClose} style={[styles.btn, { flex: 1 }]}>
-                  <Text style={styles.btnText}>{t('common.cancel')}</Text>
+                  <Text style={styles.btnText}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={save} style={[styles.btn, styles.btnPrimary, { flex: 1, marginLeft: 10 }]}>
-                  <Text style={styles.btnPrimaryText}>{t('common.save')}</Text>
+                  <Text style={styles.btnPrimaryText}>Guardar</Text>
                 </TouchableOpacity>
               </View>
             </View>

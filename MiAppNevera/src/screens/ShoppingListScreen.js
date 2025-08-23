@@ -32,7 +32,6 @@ import { useCurrency } from '../context/CurrencyContext';
 import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import CostPieChart from '../components/CostPieChart';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
-import { useTranslation } from '../context/LanguageContext';
 
 export default function ShoppingListScreen() {
   const palette = useTheme();
@@ -65,7 +64,6 @@ export default function ShoppingListScreen() {
   const { categories } = useCategories();
   // subscribe to default food overrides so shopping names update after refresh
   const { overrides } = useDefaultFoods();
-  const t = useTranslation();
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [addVisible, setAddVisible] = useState(false);
@@ -276,7 +274,7 @@ export default function ShoppingListScreen() {
         {!selectMode ? (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionBtn} onPress={() => setPickerVisible(true)}>
-              <Text style={styles.actionText}>{`＋ ${t('common.add')}`}</Text>
+              <Text style={styles.actionText}>＋ Añadir</Text>
             </TouchableOpacity>
             <View style={{ flexDirection: 'row' }}>
               <TouchableOpacity style={[styles.iconBtn, { marginLeft: 8 }]} onPress={() => setAutoVisible(true)}>
@@ -296,27 +294,27 @@ export default function ShoppingListScreen() {
         ) : (
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.actionBtn} onPress={selectAll}>
-            <Text style={styles.actionText}>{t('common.selectAll')}</Text>
+              <Text style={styles.actionText}>Seleccionar todo</Text>
             </TouchableOpacity>
             {selected.length === 1 && (
               <TouchableOpacity
                 style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
                 onPress={() => setEditIdx(selected[0])}
               >
-                <Text style={[styles.actionText, { color: palette.accent }]}>{t('common.edit')}</Text>
+                <Text style={[styles.actionText, { color: palette.accent }]}>Editar</Text>
               </TouchableOpacity>
             )}
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: palette.surface3, borderColor: palette.border }]}
               onPress={() => setBatchVisible(true)}
             >
-              <Text style={[styles.actionText, { color: palette.accent }]}>{t('common.save')}</Text>
+              <Text style={[styles.actionText, { color: palette.accent }]}>Guardar</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.actionBtn, { backgroundColor: palette.danger, borderColor: '#ad2c2c' }]}
               onPress={() => setConfirmVisible(true)}
             >
-              <Text style={[styles.actionText, { color: '#fff' }]}>{t('common.delete')}</Text>
+              <Text style={[styles.actionText, { color: '#fff' }]}>Eliminar</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -330,9 +328,9 @@ export default function ShoppingListScreen() {
       >
         {empty ? (
           <View style={styles.emptyWrap}>
-            <Text style={{ color: palette.textDim, marginBottom: 8 }}>{t('shoppingList.empty')}</Text>
+            <Text style={{ color: palette.textDim, marginBottom: 8 }}>Tu lista de compras está vacía</Text>
             <TouchableOpacity onPress={() => setPickerVisible(true)} style={styles.emptyBtn}>
-              <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('common.addFood')}</Text>
+              <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Añadir alimento</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -341,7 +339,7 @@ export default function ShoppingListScreen() {
               <View key={cat} style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Text style={styles.sectionTitle}>
-                    {categories[cat]?.name || (cat === 'otros' ? t('common.others') : cat.charAt(0).toUpperCase() + cat.slice(1))}
+                    {categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1)}
                   </Text>
                 </View>
                 {items.map(({ item, index }) => {
@@ -400,13 +398,13 @@ export default function ShoppingListScreen() {
             ))}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{t('shoppingList.detailsTitle')}</Text>
+                <Text style={styles.sectionTitle}>Detalles de lista de compra</Text>
               </View>
               <View style={styles.detailsRow}>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => setDetailsVisible(true)}>
-                  <Text style={styles.actionText}>{t('shoppingList.moreDetails')}</Text>
+                  <Text style={styles.actionText}>Más detalles</Text>
                 </TouchableOpacity>
-                <Text style={styles.totalText}>{`${t('shoppingList.totalCost')}: ${symbol}${totalCost.toFixed(2)}`}</Text>
+                <Text style={styles.totalText}>{`Costo Total: ${symbol}${totalCost.toFixed(2)}`}</Text>
               </View>
             </View>
           </>
@@ -475,7 +473,7 @@ export default function ShoppingListScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={[styles.card, { alignItems: 'center' }]}> 
-                <Text style={[styles.cardTitle, { marginBottom: 16 }]}>{t('shoppingList.costDistribution')}</Text>
+                <Text style={[styles.cardTitle, { marginBottom: 16 }]}>Distribución de costos</Text>
                 {totalCost > 0 ? (
                   <>
                     <CostPieChart data={chartData} size={200} />
@@ -483,8 +481,8 @@ export default function ShoppingListScreen() {
                       {chartData.map(d => (
                         <View key={d.key} style={styles.legendRow}>
                           <View style={[styles.legendColor, { backgroundColor: d.color }]} />
-                          <Text style={[styles.legendLabel, { flex: 1 }]}>
-                            {categories[d.key]?.name || (d.key === 'otros' ? t('common.others') : d.key)}
+                          <Text style={[styles.legendLabel, { flex: 1 }]}> 
+                            {categories[d.key]?.name || d.key}
                           </Text>
                           <Text style={styles.legendValue}>{`${symbol}${d.value.toFixed(2)}`}</Text>
                           <Text style={styles.legendPercent}>{`${d.percent.toFixed(0)}%`}</Text>
@@ -493,7 +491,7 @@ export default function ShoppingListScreen() {
                     </View>
                   </>
                 ) : (
-                  <Text style={{ color: palette.textDim }}>{t('shoppingList.noCostData')}</Text>
+                  <Text style={{ color: palette.textDim }}>Sin datos de costo</Text>
                 )}
               </View>
             </TouchableWithoutFeedback>
@@ -512,16 +510,16 @@ export default function ShoppingListScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>{t('shoppingList.deleteSelectedTitle')}</Text>
+                <Text style={styles.cardTitle}>Eliminar seleccionados</Text>
                 <Text style={styles.cardBody}>
-                  {t('shoppingList.deleteSelectedConfirm', { count: selected.length })}
+                  ¿Eliminar {selected.length} {selected.length === 1 ? 'alimento' : 'alimentos'} de la lista de compras?
                 </Text>
                 <View style={styles.cardActions}>
                   <TouchableOpacity onPress={() => setConfirmVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>{t('common.cancel')}</Text>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={deleteSelected} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>{t('common.delete')}</Text>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -541,14 +539,14 @@ export default function ShoppingListScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>{t('shoppingList.clearTitle')}</Text>
-                <Text style={styles.cardBody}>{t('shoppingList.clearConfirm')}</Text>
+                <Text style={styles.cardTitle}>Limpiar lista</Text>
+                <Text style={styles.cardBody}>¿Eliminar todos los alimentos de la lista de compras?</Text>
                 <View style={styles.cardActions}>
                   <TouchableOpacity onPress={() => setClearVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>{t('common.cancel')}</Text>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={clearAll} style={[styles.cardBtn, { backgroundColor: palette.danger }]}>
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>{t('common.delete')}</Text>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -568,16 +566,16 @@ export default function ShoppingListScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>{t('shoppingList.autoAddTitle')}</Text>
+                <Text style={styles.cardTitle}>Añadir automáticamente</Text>
                 <Text style={styles.cardBody}>
-                  {t('shoppingList.autoAddConfirm')}
+                  ¿Deseas añadir todos los alimentos con cantidad 0 del inventario a la lista de compras? Los que ya estén en la lista no se agregarán.
                 </Text>
                 <View style={styles.cardActions}>
                   <TouchableOpacity onPress={() => setAutoVisible(false)} style={[styles.cardBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>{t('common.cancel')}</Text>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={handleAutoAdd} style={[styles.cardBtn, { backgroundColor: palette.accent }]}>
-                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('common.accept')}</Text>
+                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Aceptar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
