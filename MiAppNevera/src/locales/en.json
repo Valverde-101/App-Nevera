@@ -1,0 +1,246 @@
+{
+  "settings": {
+    "colorTheme": {"title": "Color theme", "desc": "Choose between light or dark."},
+    "units": {"title": "Unit types", "desc": "Manage singular and plural units."},
+    "currency": {"title": "Currency", "desc": "Select the currency for costs."},
+    "locations": {"title": "Location management", "desc": "Define where you store your food."},
+    "userData": {"title": "User data", "desc": "Backups, import and full deletion."},
+    "language": {"title": "Language", "desc": "Select application language."}
+  },
+  "themeSettings": {"darkPremium": "Dark Premium", "light": "Light", "current": "Current"},
+  "unitSettings": {
+    "singular": "Singular",
+    "plural": "Plural",
+    "edit": "✏️ Edit",
+    "delete": "🗑️ Delete",
+    "editUnit": "Edit unit",
+    "addUnit": "Add unit",
+    "update": "Update",
+    "add": "Add",
+    "cancel": "Cancel",
+    "completeBoth": "Fill in singular and plural."
+  },
+  "home": {
+    "fridge": "Fridge",
+    "freezer": "Freezer",
+    "pantry": "Pantry",
+    "shopping": "Shopping list"
+  },
+  "languageSettings": {
+    "title": "Language",
+    "spanish": "Spanish",
+    "english": "English",
+    "french": "French",
+    "japanese": "Japanese",
+    "current": "Current"
+  },
+  "app": {"restarted": "The app has restarted."},
+  "common": {
+    "add": "Add",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "selectAll": "Select all",
+    "select": "Select",
+    "load": "Load",
+    "preview": "Preview",
+    "addFood": "Add food",
+    "accept": "Accept",
+    "error": "Error",
+    "success": "Success",
+    "others": "Others",
+    "close": "Close"
+  },
+  "category": {"search": "Search"},
+  "locationSettings": {
+    "inactive": "Inactive",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "editLocation": "Edit location",
+    "addLocation": "Add location",
+    "name": "Name",
+    "removeConfirm": "Are you sure you want to delete this location?",
+    "locationHasItems": "The location contains food. Empty it before deleting."
+  },
+  "currency": {"sol": "Sol", "dollar": "Dollar", "euro": "Euro", "yen": "Yen/Yuan", "peso": "Peso"},
+  "titles": {
+    "inventory": "Fridge",
+    "shopping": "Shopping list",
+    "savedLists": "Saved lists",
+    "recipes": "Recipe book",
+    "recipe": "Recipe",
+    "settings": "Settings",
+    "themeSettings": "Color theme",
+    "unitSettings": "Unit types",
+    "currencySettings": "Currency",
+    "locationSettings": "Location management",
+    "userData": "User data",
+    "languageSettings": "Language"
+  },
+  "recipes": {
+    "noImage": "No image",
+    "missing": "Missing",
+    "for": "For",
+    "people": "people",
+    "difficulty": "Difficulty",
+    "notFound": "Recipe not found",
+    "ingredients": "Ingredients",
+    "steps": "Steps",
+    "addToShopping": "Add to shopping",
+    "missingQuestion": "Do you want to add the following missing ingredients to the shopping list?",
+    "allQuestion": "Or do you want to add all ingredients?",
+    "addMissing": "Add missing",
+    "addAll": "Add all"
+  },
+  "addCategory": {
+    "title": "New category",
+    "help": "Optionally add a custom icon.",
+    "name": "Name",
+    "placeholder": "e.g. Fruits",
+    "icon": "Icon",
+    "noIcon": "No icon",
+    "loadImage": "Load image",
+    "removeImage": "Remove"
+  },
+  "shoppingItem": {
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "price": "Price",
+    "unitCostPlaceholder": "Unit cost",
+    "totalCostPlaceholder": "Total cost"
+  },
+  "saveList": {
+    "title": "Save list",
+    "namePlaceholder": "Name",
+    "notePlaceholder": "Note",
+    "cancelSelection": "Cancel selection"
+  },
+  "foodPicker": {
+    "searchPlaceholder": "Search food",
+    "createNew": "Create new",
+    "manageDefaults": "Manage default foods",
+    "manageIntro": "Full list of all default foods",
+    "hiddenHint": "Shaded foods won't appear in the add list",
+    "longPressHint": "Hold a food to edit more details"
+  },
+  "itemForm": {
+    "location": "Location",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "price": "Price",
+    "unitPrice": "Unit price",
+    "unitCostPlaceholder": "Unit cost",
+    "totalCostPlaceholder": "Total cost",
+    "registeredDate": "Registered date",
+    "expirationDate": "Expiration date",
+    "note": "Note",
+    "optional": "Optional"
+  },
+  "addItem": {
+    "addedTitle": "Added",
+    "addedMessage": "{item} added to the shopping list"
+  },
+  "batchAddItem": {
+    "title": "Add {count} food(s)"
+  },
+  "customFood": {
+    "manage": "My ingredients",
+    "help": "Create your own ingredients. Use default icons or upload an image.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Chimichurri",
+    "category": "Category",
+    "defaultExpiration": "Default expiration days",
+    "defaultUnit": "Default unit",
+    "defaultPrice": "Default unit price",
+    "icon": "Icon",
+    "noIcon": "No icon",
+    "useDefault": "Default",
+    "customCategories": "Custom categories",
+    "customIngredients": "Custom ingredients",
+    "deleteSelectedTitle": "Delete selected",
+    "inUseWarning": "Some selected ingredients are in use and cannot be deleted.",
+    "cannotDelete": "{name} is in use and cannot be deleted.",
+    "categoryHasItems": "The category contains ingredients.",
+    "categoryInUse": "Category {name} is in use.",
+    "deleteQuestion": "Delete {name}?"
+  },
+  "inventory": {
+    "expiredShort": "Exp",
+    "noRecord": "No record",
+    "sortBy": "Sort by",
+    "sortOptions": {
+      "name": "Name",
+      "expiration": "Expiration date",
+      "registered": "Registered date"
+    },
+    "groupBy": "Group by",
+    "groupOptions": {
+      "category": "Category",
+      "none": "No grouping",
+      "registered": "Registered date"
+    },
+    "viewType": "View type",
+    "viewOptions": {
+      "list": "List",
+      "grid": "Grid"
+    },
+    "intersection": "Intersection",
+    "empty": "Your {location} is empty",
+    "addToShoppingQuestion": "Add the following {count} items to the shopping list?",
+    "moveTo": "Move to:",
+    "copyTo": "Copy to:",
+    "deleteItemsQuestion": "Delete {count} items?"
+  },
+  "shoppingList": {
+    "empty": "Your shopping list is empty",
+    "detailsTitle": "Shopping list details",
+    "moreDetails": "More details",
+    "totalCost": "Total cost",
+    "costDistribution": "Cost distribution",
+    "noCostData": "No cost data",
+    "deleteSelectedTitle": "Delete selected",
+    "deleteSelectedConfirm": "Delete {count} items from the shopping list?",
+    "clearTitle": "Clear list",
+    "clearConfirm": "Remove all foods from the shopping list?",
+    "autoAddTitle": "Add automatically",
+    "autoAddConfirm": "Add all foods with quantity 0 from the inventory to the shopping list? Existing items will not be added."
+  },
+  "savedLists": {
+    "untitled": "Untitled",
+    "items": "{count} items",
+    "deleteTitle": "Delete list",
+    "deleteConfirm": "Delete this saved list?"
+  },
+  "userData": {
+    "syncTitle": "Synchronization",
+    "syncDesc": "Connect your Google account to save a cloud backup.",
+    "connectedAs": "Connected as {email}",
+    "user": "user",
+    "uploadBackup": "Upload backup",
+    "restoreBackup": "Restore backup",
+    "disconnect": "Disconnect account",
+    "connectGoogle": "Connect with Google",
+    "backupTitle": "Backup and data",
+    "backupDesc": "Export or import all your data.",
+    "exportData": "Export data",
+    "importData": "Import data",
+    "deleteAllTitle": "Delete everything",
+    "deleteAllDesc": "This will permanently delete all user data.",
+    "deleteAllData": "Delete all data",
+    "uploadConfirmTitle": "Upload backup",
+    "uploadConfirmBody": "A copy of your current data and settings will be saved to Google Drive, replacing any previous backup. Continue?",
+    "downloadConfirmTitle": "Restore backup",
+    "downloadConfirmBody": "All local data will be replaced with the copy stored on Google Drive. This will overwrite your current information. Continue?",
+    "exportConfirmTitle": "Export data",
+    "exportConfirmBody": "Export all user data?",
+    "resetConfirmTitle": "Delete all data",
+    "resetConfirmBody": "This action is permanent. Continue?",
+    "uploadSuccess": "Backup uploaded to Google Drive.",
+    "uploadError": "Failed to upload backup.",
+    "downloadError": "Failed to restore backup.",
+    "signInError": "Could not sign in with Google.",
+    "restartTitle": "Restart",
+    "restartMessage": "The application will restart"
+  }
+}

@@ -1,0 +1,246 @@
+{
+  "settings": {
+    "colorTheme": {"title": "色のテーマ", "desc": "ライトまたはダークを選択します。"},
+    "units": {"title": "単位の種類", "desc": "単数形と複数形を管理します。"},
+    "currency": {"title": "通貨", "desc": "コストに使用する通貨を選択します。"},
+    "locations": {"title": "場所の管理", "desc": "食品を保管する場所を定義します。"},
+    "userData": {"title": "ユーザーデータ", "desc": "バックアップ、インポート、完全削除。"},
+    "language": {"title": "言語", "desc": "アプリの言語を選択します。"}
+  },
+  "themeSettings": {"darkPremium": "ダークプレミアム", "light": "ライト", "current": "現在"},
+  "unitSettings": {
+    "singular": "単数形",
+    "plural": "複数形",
+    "edit": "✏️ 編集",
+    "delete": "🗑️ 削除",
+    "editUnit": "単位を編集",
+    "addUnit": "単位を追加",
+    "update": "更新",
+    "add": "追加",
+    "cancel": "キャンセル",
+    "completeBoth": "単数形と複数形を入力してください。"
+  },
+  "home": {
+    "fridge": "冷蔵庫",
+    "freezer": "冷凍庫",
+    "pantry": "パントリー",
+    "shopping": "買い物リスト"
+  },
+  "languageSettings": {
+    "title": "言語",
+    "spanish": "スペイン語",
+    "english": "英語",
+    "french": "フランス語",
+    "japanese": "日本語",
+    "current": "現在"
+  },
+  "app": {"restarted": "アプリが再起動しました。"},
+  "common": {
+    "add": "追加",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "selectAll": "すべて選択",
+    "select": "選択",
+    "load": "読み込む",
+    "preview": "プレビュー",
+    "addFood": "食品を追加",
+    "accept": "OK",
+    "error": "エラー",
+    "success": "成功",
+    "others": "その他",
+    "close": "閉じる"
+  },
+  "category": {"search": "検索"},
+  "locationSettings": {
+    "inactive": "無効",
+    "deactivate": "無効にする",
+    "activate": "有効にする",
+    "editLocation": "場所を編集",
+    "addLocation": "場所を追加",
+    "name": "名前",
+    "removeConfirm": "この場所を削除してもよろしいですか？",
+    "locationHasItems": "この場所には食品が含まれています。削除する前に空にしてください。"
+  },
+  "currency": {"sol": "ソル", "dollar": "ドル", "euro": "ユーロ", "yen": "円/元", "peso": "ペソ"},
+  "titles": {
+    "inventory": "冷蔵庫",
+    "shopping": "買い物リスト",
+    "savedLists": "保存したリスト",
+    "recipes": "レシピブック",
+    "recipe": "レシピ",
+    "settings": "設定",
+    "themeSettings": "色のテーマ",
+    "unitSettings": "単位の種類",
+    "currencySettings": "通貨",
+    "locationSettings": "場所の管理",
+    "userData": "ユーザーデータ",
+    "languageSettings": "言語"
+  },
+  "recipes": {
+    "noImage": "画像なし",
+    "missing": "不足",
+    "for": "",
+    "people": "人分",
+    "difficulty": "難易度",
+    "notFound": "レシピが見つかりません",
+    "ingredients": "材料",
+    "steps": "手順",
+    "addToShopping": "買い物に追加",
+    "missingQuestion": "不足している材料を買い物リストに追加しますか？",
+    "allQuestion": "それとも全ての材料を追加しますか？",
+    "addMissing": "不足分を追加",
+    "addAll": "全て追加"
+  },
+  "addCategory": {
+    "title": "新しいカテゴリ",
+    "help": "必要に応じてカスタムアイコンを追加します。",
+    "name": "名前",
+    "placeholder": "例：フルーツ",
+    "icon": "アイコン",
+    "noIcon": "アイコンなし",
+    "loadImage": "画像を読み込む",
+    "removeImage": "削除"
+  },
+  "shoppingItem": {
+    "quantity": "数量",
+    "unit": "単位",
+    "price": "価格",
+    "unitCostPlaceholder": "単価",
+    "totalCostPlaceholder": "合計価格"
+  },
+  "saveList": {
+    "title": "リストを保存",
+    "namePlaceholder": "名前",
+    "notePlaceholder": "メモ",
+    "cancelSelection": "選択をキャンセル"
+  },
+  "foodPicker": {
+    "searchPlaceholder": "食品を検索",
+    "createNew": "新規作成",
+    "manageDefaults": "デフォルト食品を管理",
+    "manageIntro": "すべてのデフォルト食品の一覧",
+    "hiddenHint": "灰色の食品は追加リストに表示されません",
+    "longPressHint": "食品を長押しして詳細を編集"
+  },
+  "itemForm": {
+    "location": "場所",
+    "quantity": "数量",
+    "unit": "単位",
+    "price": "価格",
+    "unitPrice": "単価",
+    "unitCostPlaceholder": "単価",
+    "totalCostPlaceholder": "合計費用",
+    "registeredDate": "登録日",
+    "expirationDate": "賞味期限",
+    "note": "メモ",
+    "optional": "任意"
+  },
+  "addItem": {
+    "addedTitle": "追加しました",
+    "addedMessage": "{item} を買い物リストに追加しました"
+  },
+  "batchAddItem": {
+    "title": "{count} 個の食品を追加"
+  },
+  "customFood": {
+    "manage": "マイ食材",
+    "help": "自分の食材を作成します。デフォルトアイコンを使用するか画像をアップロードしてください。",
+    "name": "名前",
+    "namePlaceholder": "例: チミチュリ",
+    "category": "カテゴリー",
+    "defaultExpiration": "デフォルトの賞味期限（日）",
+    "defaultUnit": "デフォルト単位",
+    "defaultPrice": "デフォルト単価",
+    "icon": "アイコン",
+    "noIcon": "アイコンなし",
+    "useDefault": "既定",
+    "customCategories": "カスタムカテゴリ",
+    "customIngredients": "カスタム食材",
+    "deleteSelectedTitle": "選択したものを削除",
+    "inUseWarning": "選択した食材の一部は使用中のため削除できません。",
+    "cannotDelete": "{name} は使用中のため削除できません。",
+    "categoryHasItems": "カテゴリーに食材が含まれています。",
+    "categoryInUse": "カテゴリー {name} は使用中です。",
+    "deleteQuestion": "{name} を削除しますか？"
+  },
+  "inventory": {
+    "expiredShort": "期限",
+    "noRecord": "記録なし",
+    "sortBy": "並べ替え",
+    "sortOptions": {
+      "name": "名前",
+      "expiration": "賞味期限",
+      "registered": "登録日"
+    },
+    "groupBy": "グループ化",
+    "groupOptions": {
+      "category": "カテゴリ",
+      "none": "グループ化しない",
+      "registered": "登録日"
+    },
+    "viewType": "表示タイプ",
+    "viewOptions": {
+      "list": "リスト",
+      "grid": "グリッド"
+    },
+    "intersection": "交差",
+    "empty": "{location} は空です",
+    "addToShoppingQuestion": "次の{count}項目を買い物リストに追加しますか？",
+    "moveTo": "移動先:",
+    "copyTo": "コピー先:",
+    "deleteItemsQuestion": "{count}項目を削除しますか？"
+  },
+  "shoppingList": {
+    "empty": "買い物リストは空です",
+    "detailsTitle": "買い物リストの詳細",
+    "moreDetails": "詳細を見る",
+    "totalCost": "合計金額",
+    "costDistribution": "費用の内訳",
+    "noCostData": "費用データなし",
+    "deleteSelectedTitle": "選択項目を削除",
+    "deleteSelectedConfirm": "買い物リストから{count}項目を削除しますか？",
+    "clearTitle": "リストをクリア",
+    "clearConfirm": "買い物リストのすべての食品を削除しますか？",
+    "autoAddTitle": "自動追加",
+    "autoAddConfirm": "在庫の数量0の食品をすべて買い物リストに追加しますか？ 既にある項目は追加されません。"
+  },
+  "savedLists": {
+    "untitled": "無題",
+    "items": "{count}件",
+    "deleteTitle": "リストを削除",
+    "deleteConfirm": "保存されたこのリストを削除しますか？"
+  },
+  "userData": {
+    "syncTitle": "同期",
+    "syncDesc": "Google アカウントを接続してクラウドにバックアップを保存します。",
+    "connectedAs": "{email}として接続済み",
+    "user": "ユーザー",
+    "uploadBackup": "バックアップをアップロード",
+    "restoreBackup": "バックアップを復元",
+    "disconnect": "アカウントを切断",
+    "connectGoogle": "Googleで接続",
+    "backupTitle": "バックアップとデータ",
+    "backupDesc": "すべてのデータをエクスポートまたはインポートします。",
+    "exportData": "データをエクスポート",
+    "importData": "データをインポート",
+    "deleteAllTitle": "すべて削除",
+    "deleteAllDesc": "ユーザーデータが完全に削除されます。",
+    "deleteAllData": "全データを削除",
+    "uploadConfirmTitle": "バックアップをアップロード",
+    "uploadConfirmBody": "現在のデータと設定のコピーが Google ドライブに保存され、以前のバックアップを置き換えます。続行しますか？",
+    "downloadConfirmTitle": "バックアップを復元",
+    "downloadConfirmBody": "ローカルのすべてのデータが Google ドライブに保存されたコピーで置き換えられます。この操作は現在の情報を上書きします。続行しますか？",
+    "exportConfirmTitle": "データをエクスポート",
+    "exportConfirmBody": "すべてのユーザーデータをエクスポートしますか？",
+    "resetConfirmTitle": "全データを削除",
+    "resetConfirmBody": "この操作は取り消せません。続行しますか？",
+    "uploadSuccess": "バックアップを Google ドライブにアップロードしました。",
+    "uploadError": "バックアップをアップロードできませんでした。",
+    "downloadError": "バックアップを復元できませんでした。",
+    "signInError": "Google にサインインできませんでした。",
+    "restartTitle": "再起動",
+    "restartMessage": "アプリが再起動します"
+  }
+}
