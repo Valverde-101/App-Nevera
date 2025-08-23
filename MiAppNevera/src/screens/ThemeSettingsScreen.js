@@ -2,12 +2,10 @@ import React, { useLayoutEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemeController } from '../context/ThemeContext';
-import { useTranslation } from '../context/LanguageContext';
 
 export default function ThemeSettingsScreen() {
   const palette = useTheme();
   const { themeName, setThemeName } = useThemeController();
-  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
 
@@ -21,8 +19,8 @@ export default function ThemeSettingsScreen() {
   }, [nav, palette]);
 
   const themes = [
-    { key: 'dark', label: t('themeSettings.darkPremium') },
-    { key: 'light', label: t('themeSettings.light') },
+    { key: 'dark', label: 'Dark Premium' },
+    { key: 'light', label: 'Claro' },
   ];
 
   return (
@@ -32,7 +30,7 @@ export default function ThemeSettingsScreen() {
         {themes.map(t => (
           <TouchableOpacity key={t.key} style={styles.item} onPress={() => setThemeName(t.key)}>
             <Text style={styles.itemTitle}>{t.label}</Text>
-            {themeName === t.key ? <Text style={styles.current}>{t('themeSettings.current')}</Text> : null}
+            {themeName === t.key ? <Text style={styles.current}>Actual</Text> : null}
           </TouchableOpacity>
         ))}
       </ScrollView>

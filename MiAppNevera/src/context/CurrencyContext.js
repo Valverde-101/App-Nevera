@@ -2,11 +2,11 @@ import React, { createContext, useContext, useState, useEffect, useMemo } from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const currencyOptions = [
-  { key: 'sol', labelKey: 'currency.sol', symbol: 'S/' },
-  { key: 'dollar', labelKey: 'currency.dollar', symbol: '$' },
-  { key: 'euro', labelKey: 'currency.euro', symbol: '€' },
-  { key: 'yen', labelKey: 'currency.yen', symbol: '¥' },
-  { key: 'peso', labelKey: 'currency.peso', symbol: '$' },
+  { key: 'sol', label: 'Sol', symbol: 'S/' },
+  { key: 'dollar', label: 'Dólar', symbol: '$' },
+  { key: 'euro', label: 'Euro', symbol: '€' },
+  { key: 'yen', label: 'Yen/Yuan', symbol: '¥' },
+  { key: 'peso', label: 'Peso', symbol: '$' },
 ];
 
 const CurrencyContext = createContext({

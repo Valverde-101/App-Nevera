@@ -6,7 +6,6 @@ import SaveListModal from '../components/SaveListModal';
 import ListPreviewModal from '../components/ListPreviewModal';
 import { useTheme } from '../context/ThemeContext';
 import { useCurrency } from '../context/CurrencyContext';
-import { useTranslation } from '../context/LanguageContext';
 
 export default function SavedListsScreen({ navigation }) {
   const { savedLists, deleteList, saveList } = useSavedLists();
@@ -14,7 +13,6 @@ export default function SavedListsScreen({ navigation }) {
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { symbol } = useCurrency();
-  const t = useTranslation();
 
   const [editing, setEditing] = useState(null);
   const [previewing, setPreviewing] = useState(null);
@@ -28,11 +26,11 @@ export default function SavedListsScreen({ navigation }) {
           return (
             <View key={list.id} style={styles.card}>
               <View style={styles.headerRow}>
-                <Text style={styles.title}>{list.name || t('savedLists.untitled')}</Text>
-                <Text style={styles.total}>{`${t('shoppingList.totalCost')}: ${symbol}${totalCost.toFixed(2)}`}</Text>
+                <Text style={styles.title}>{list.name || 'Sin título'}</Text>
+                <Text style={styles.total}>{`Costo Total: ${symbol}${totalCost.toFixed(2)}`}</Text>
               </View>
               {list.note ? <Text style={styles.note}>{list.note}</Text> : null}
-              <Text style={styles.count}>{t('savedLists.items', { count: list.items?.length || 0 })}</Text>
+              <Text style={styles.count}>{list.items?.length || 0} artículos</Text>
               <View style={styles.actions}>
                 <TouchableOpacity
                   style={[styles.actionBtn, { backgroundColor: palette.accent }]}
@@ -41,19 +39,19 @@ export default function SavedListsScreen({ navigation }) {
                     navigation.navigate('Shopping');
                   }}
                 >
-                  <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('common.load')}</Text>
+                  <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cargar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => setPreviewing(list)}>
-                  <Text style={styles.actionText}>{t('common.preview')}</Text>
+                  <Text style={styles.actionText}>Previsualizar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => setEditing(list)}>
-                  <Text style={styles.actionText}>{t('common.edit')}</Text>
+                  <Text style={styles.actionText}>Editar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.actionBtn, { backgroundColor: palette.danger }]}
                   onPress={() => setConfirmDel(list.id)}
                 >
-                  <Text style={{ color: '#fff', fontWeight: '700' }}>{t('common.delete')}</Text>
+                  <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -85,11 +83,11 @@ export default function SavedListsScreen({ navigation }) {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.cardModal}>
-                <Text style={styles.modalTitle}>{t('savedLists.deleteTitle')}</Text>
-                <Text style={styles.modalBody}>{t('savedLists.deleteConfirm')}</Text>
+                <Text style={styles.modalTitle}>Eliminar lista</Text>
+                <Text style={styles.modalBody}>¿Eliminar esta lista guardada?</Text>
                 <View style={styles.modalActions}>
                   <TouchableOpacity style={[styles.modalBtn, { backgroundColor: palette.surface3 }]} onPress={() => setConfirmDel(null)}>
-                    <Text style={{ color: palette.text }}>{t('common.cancel')}</Text>
+                    <Text style={{ color: palette.text }}>Cancelar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.modalBtn, { backgroundColor: palette.danger }]}
@@ -98,7 +96,7 @@ export default function SavedListsScreen({ navigation }) {
                       setConfirmDel(null);
                     }}
                   >
-                    <Text style={{ color: '#fff', fontWeight: '700' }}>{t('common.delete')}</Text>
+                    <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
                   </TouchableOpacity>
                 </View>
               </View>
