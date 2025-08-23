@@ -7,7 +7,6 @@ import AddRecipeModal from '../components/AddRecipeModal';
 import { useLocations } from '../context/LocationsContext';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../context/LangContext';
 
 export default function RecipeBookScreen({ navigation }) {
   const palette = useTheme();
@@ -17,7 +16,6 @@ export default function RecipeBookScreen({ navigation }) {
   const { inventory } = useInventory();
   const { locations } = useLocations();
   const [addVisible, setAddVisible] = useState(false);
-  const { t } = useTranslation();
 
   useLayoutEffect(() => {
     nav.setOptions?.({
@@ -25,7 +23,7 @@ export default function RecipeBookScreen({ navigation }) {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: t('screen.recipes.title'),
+      title: 'Recetario',
       headerRight: () => (
         <TouchableOpacity onPress={() => setAddVisible(true)} style={styles.headerIconBtn}>
           <Text style={styles.headerIconTxt}>＋</Text>
@@ -64,13 +62,13 @@ export default function RecipeBookScreen({ navigation }) {
                   <Image source={{ uri: rec.image }} style={styles.thumb} resizeMode="cover" />
                 ) : (
                   <View style={styles.thumbPlaceholder}>
-                    <Text style={{ color: palette.textDim }}>{t('label.no_image')}</Text>
+                    <Text style={{ color: palette.textDim }}>Sin imagen</Text>
                   </View>
                 )}
-                {!enough && <Text style={styles.badge}>{t('badge.missing')}</Text>}
+                {!enough && <Text style={styles.badge}>Faltan</Text>}
               </View>
               <Text style={styles.cardTitle} numberOfLines={2}>{rec.name}</Text>
-              <Text style={styles.cardMeta}>{t('recipe.card.meta', { persons: rec.persons, difficulty: rec.difficulty })}</Text>
+              <Text style={styles.cardMeta}>Para {rec.persons} personas • Dificultad: {rec.difficulty}</Text>
             </TouchableOpacity>
           );
         })}

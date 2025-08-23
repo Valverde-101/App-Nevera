@@ -5,7 +5,6 @@ import FoodPickerModal from '../components/FoodPickerModal';
 import { useCategories } from '../context/CategoriesContext';
 import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
-import { useTranslation } from '../context/LangContext';
 
 export default function CategoryScreen({ route }) {
   const { category } = route.params;
@@ -13,7 +12,6 @@ export default function CategoryScreen({ route }) {
   const { categories } = useCategories();
   // subscribe to default food overrides so category list updates names
   const { overrides } = useDefaultFoods();
-  const { t } = useTranslation();
   const [quantity, setQuantity] = useState(1);
   const [search, setSearch] = useState('');
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -41,7 +39,7 @@ export default function CategoryScreen({ route }) {
       </Text>
       <TextInput
         style={{ borderWidth: 1, padding: 5, marginBottom: 10 }}
-        placeholder={t('placeholder.search')}
+        placeholder="Buscar"
         value={search}
         onChangeText={setSearch}
       />
@@ -52,7 +50,7 @@ export default function CategoryScreen({ route }) {
           onChangeText={t => setQuantity(parseInt(t, 10) || 0)}
           keyboardType="numeric"
         />
-        <Button title={t('btn.add')} onPress={() => setPickerVisible(true)} />
+        <Button title="Añadir" onPress={() => setPickerVisible(true)} />
       </View>
       <FoodPickerModal
         visible={pickerVisible}
@@ -94,7 +92,7 @@ export default function CategoryScreen({ route }) {
                   onPress={() => updateQuantity(category, idx, 1)}
                 />
                 <Button
-                  title={t('btn.delete')}
+                  title="Eliminar"
                   onPress={() => removeItem(category, idx)}
                 />
               </View>
