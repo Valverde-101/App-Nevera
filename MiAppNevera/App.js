@@ -17,7 +17,6 @@ import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
 import ThemeSettingsScreen from './src/screens/ThemeSettingsScreen';
 import CurrencySettingsScreen from './src/screens/CurrencySettingsScreen';
-import LanguageSettingsScreen from './src/screens/LanguageSettingsScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
@@ -26,18 +25,16 @@ import { DefaultFoodsProvider } from './src/context/DefaultFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
 import { CurrencyProvider } from './src/context/CurrencyContext';
-import { LanguageProvider, useTranslation } from './src/context/LanguageContext';
 
 const Stack = createNativeStackNavigator();
 
 function MainApp() {
   const { themeName } = useThemeController();
-  const t = useTranslation();
   useEffect(() => {
     if (Platform.OS === 'web') {
       const msg = sessionStorage.getItem('reset_notice');
       if (msg) {
-        alert(t('app.restarted'));
+        alert('La aplicación se reinició.');
         sessionStorage.removeItem('reset_notice');
       }
     }
@@ -59,62 +56,57 @@ function MainApp() {
                     <Stack.Screen
                       name="Inventory"
                       component={InventoryScreen}
-                      options={{ title: t('titles.inventory') }}
+                      options={{ title: 'Nevera' }}
                     />
                     <Stack.Screen
                       name="Shopping"
                       component={ShoppingListScreen}
-                      options={{ title: t('titles.shopping') }}
+                      options={{ title: 'Lista de compras' }}
                     />
                     <Stack.Screen
                       name="SavedLists"
                       component={SavedListsScreen}
-                      options={{ title: t('titles.savedLists') }}
+                      options={{ title: 'Listas guardadas' }}
                     />
                     <Stack.Screen
                       name="Recipes"
                       component={RecipeBookScreen}
-                      options={{ title: t('titles.recipes') }}
+                      options={{ title: 'Recetario' }}
                     />
                     <Stack.Screen
                       name="RecipeDetail"
                       component={RecipeDetailScreen}
-                      options={{ title: t('titles.recipe') }}
+                      options={{ title: 'Receta' }}
                     />
                     <Stack.Screen
                       name="Settings"
                       component={SettingsScreen}
-                      options={{ title: t('titles.settings') }}
+                      options={{ title: 'Ajustes' }}
                     />
                     <Stack.Screen
                       name="ThemeSettings"
                       component={ThemeSettingsScreen}
-                      options={{ title: t('titles.themeSettings') }}
+                      options={{ title: 'Tema de colores' }}
                     />
                     <Stack.Screen
                       name="UnitSettings"
                       component={UnitSettingsScreen}
-                      options={{ title: t('titles.unitSettings') }}
+                      options={{ title: 'Tipos de unidad' }}
                     />
                     <Stack.Screen
                       name="CurrencySettings"
                       component={CurrencySettingsScreen}
-                      options={{ title: t('titles.currencySettings') }}
+                      options={{ title: 'Tipo de Moneda' }}
                     />
                     <Stack.Screen
                       name="LocationSettings"
                       component={LocationSettingsScreen}
-                      options={{ title: t('titles.locationSettings') }}
+                      options={{ title: 'Gestión de ubicación' }}
                     />
                     <Stack.Screen
                       name="UserData"
                       component={UserDataScreen}
-                      options={{ title: t('titles.userData') }}
-                    />
-                    <Stack.Screen
-                      name="LanguageSettings"
-                      component={LanguageSettingsScreen}
-                      options={{ title: t('titles.languageSettings') }}
+                      options={{ title: 'Datos de usuario' }}
                     />
                     </Stack.Navigator>
                   </NavigationContainer>
@@ -133,10 +125,8 @@ function MainApp() {
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <ThemeProvider>
-        <MainApp />
-      </ThemeProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <MainApp />
+    </ThemeProvider>
   );
 }
