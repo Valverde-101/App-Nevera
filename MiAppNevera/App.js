@@ -12,7 +12,6 @@ import RecipeBookScreen from './src/screens/RecipeBookScreen';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
 import { RecipeProvider } from './src/context/RecipeContext';
 import SettingsScreen from './src/screens/SettingsScreen';
-import MembershipsScreen from './src/screens/MembershipsScreen';
 import UnitSettingsScreen from './src/screens/UnitSettingsScreen';
 import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
@@ -83,11 +82,6 @@ function MainApp() {
                       name="Settings"
                       component={SettingsScreen}
                       options={{ title: 'Ajustes' }}
-                    />
-                    <Stack.Screen
-                      name="Memberships"
-                      component={MembershipsScreen}
-                      options={{ title: 'Membresías' }}
                     />
                     <Stack.Screen
                       name="ThemeSettings"
