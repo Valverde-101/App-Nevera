@@ -26,14 +26,12 @@ import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
 import { useTheme } from '../context/ThemeContext';
 import { useUnits } from '../context/UnitsContext';
-import { useTranslation } from '../context/LanguageContext';
 
 // ========================
 // Gestor de personalizados
 // ========================
 function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
   const palette = useTheme();
-  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { customFoods, removeCustomFood } = useCustomFoods();
   const { customCategories, categories, removeCategory } = useCategories();
@@ -78,7 +76,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
     const foods = customFoods.filter(f => selected.includes(f.key));
     const inUse = foods.filter(f => isFoodInUse(f.name));
     if (inUse.length) {
-      setWarning(t('customFood.inUseWarning'));
+      setWarning('Algunos ingredientes seleccionados están en uso y no se pueden eliminar.');
       return;
     }
     setFoodToDelete({ multiple: true, items: foods });
@@ -86,7 +84,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 
   const handleDeleteFood = food => {
     if (isFoodInUse(food.name)) {
-      setWarning(t('customFood.cannotDelete', { name: food.name }));
+      setWarning(`No se puede eliminar, ${food.name} está en uso.`);
     } else {
       setFoodToDelete(food);
     }
@@ -94,11 +92,11 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 
   const handleDeleteCategory = cat => {
     if (customFoods.some(f => f.category === cat.key)) {
-      setWarning(t('customFood.categoryHasItems'));
+      setWarning('La categoría contiene ingredientes.');
       return;
     }
     if (isCategoryInUse(cat.key)) {
-      setWarning(t('customFood.categoryInUse', { name: cat.name }));
+      setWarning(`La categoría ${cat.name} está en uso.`);
       return;
     }
     setCategoryToDelete(cat);
@@ -134,18 +132,18 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
           {selectMode ? (
             <View style={{ flexDirection: 'row' }}>
               <TouchableOpacity onPress={selectAll} style={[styles.actionBtn, { marginRight: 8 }]}>
-                <Text style={styles.actionTxt}>{t('common.selectAll')}</Text>
+                <Text style={styles.actionTxt}>Seleccionar todo</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={deleteSelected} style={[styles.actionBtn, styles.actionBtnDanger, { marginRight: 8 }]}>
-                <Text style={styles.actionBtnDangerText}>{t('common.delete')}</Text>
+                <Text style={styles.actionBtnDangerText}>Eliminar</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => { setSelectMode(false); setSelected([]); }} style={styles.actionBtn}>
-                <Text style={styles.actionTxt}>{t('common.cancel')}</Text>
+                <Text style={styles.actionTxt}>Cancelar</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity onPress={() => setSelectMode(true)} style={styles.actionBtn}>
-              <Text style={styles.actionTxt}>{t('common.select')}</Text>
+              <Text style={styles.actionTxt}>Seleccionar</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -155,18 +153,18 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
           contentContainerStyle={{ padding: 16, paddingBottom: 140 }}
           showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
         >
-          <Text style={styles.blockTitle}>{t('customFood.customCategories')}</Text>
+          <Text style={styles.blockTitle}>Categorías personalizadas</Text>
           {customCategories.map(cat => (
             <View key={cat.key} style={styles.row}>
               {cat.icon && <Image source={{ uri: cat.icon }} style={styles.icon} />}
               <Text style={[styles.rowText, { flex: 1 }]}>{cat.name} <Text style={styles.rowSub}>• {cat.key}</Text></Text>
               <TouchableOpacity onPress={() => handleDeleteCategory(cat)} style={[styles.smallBtn, styles.smallBtnDanger]}>
-                <Text style={styles.smallBtnDangerText}>{t('common.delete')}</Text>
+                <Text style={styles.smallBtnDangerText}>Eliminar</Text>
               </TouchableOpacity>
             </View>
           ))}
 
-          <Text style={[styles.blockTitle, { marginTop: 10 }]}>{t('customFood.customIngredients')}</Text>
+          <Text style={[styles.blockTitle, { marginTop: 10 }]}>Ingredientes personalizados</Text>
           {categoryOrder.map(catKey => {
             const list = foodsByCategory[catKey];
             if (!list || list.length === 0) return null;
@@ -192,10 +190,10 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                       ) : (
                         <>
                           <TouchableOpacity onPress={() => onEdit(f)} style={styles.smallBtn}>
-                            <Text style={styles.smallBtnText}>{t('common.edit')}</Text>
+                            <Text style={styles.smallBtnText}>Editar</Text>
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => handleDeleteFood(f)} style={[styles.smallBtn, styles.smallBtnDanger]}>
-                            <Text style={styles.smallBtnDangerText}>{t('common.delete')}</Text>
+                            <Text style={styles.smallBtnDangerText}>Eliminar</Text>
                           </TouchableOpacity>
                         </>
                       )}
@@ -216,7 +214,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                   <View style={styles.modalCard}>
                     {foodToDelete.multiple ? (
                       <>
-                        <Text style={styles.modalTitle}>{t('customFood.deleteSelectedTitle')}</Text>
+                        <Text style={styles.modalTitle}>Eliminar seleccionados</Text>
                         <ScrollView style={{ maxHeight: 200, width: '100%' }}>
                           {foodToDelete.items.map(item => (
                             <View key={item.key} style={[styles.row, { backgroundColor: 'transparent', borderWidth: 0, paddingHorizontal: 0 }]}>
@@ -239,15 +237,15 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                             style={[styles.icon, { width: 40, height: 40, marginBottom: 10 }]}
                           />
                         )}
-                        <Text style={styles.modalBody}>{t('customFood.deleteQuestion', { name: foodToDelete.name })}</Text>
+                        <Text style={styles.modalBody}>¿Eliminar {foodToDelete.name}?</Text>
                       </>
                     )}
                     <View style={styles.modalRow}>
                       <TouchableOpacity onPress={() => setFoodToDelete(null)} style={[styles.btn, { flex: 1 }]}>
-                        <Text style={styles.btnText}>{t('common.cancel')}</Text>
+                        <Text style={styles.btnText}>Cancelar</Text>
                       </TouchableOpacity>
                       <TouchableOpacity onPress={confirmDeleteFood} style={[styles.btn, styles.btnDanger, { flex: 1, marginLeft: 12 }]}>
-                        <Text style={styles.btnDangerText}>{t('common.delete')}</Text>
+                        <Text style={styles.btnDangerText}>Eliminar</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -265,13 +263,13 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                 <TouchableWithoutFeedback>
                   <View style={styles.modalCard}>
                     {categoryToDelete.icon && <Image source={{ uri: categoryToDelete.icon }} style={[styles.icon, { width: 40, height: 40, marginBottom: 10 }]} />}
-                    <Text style={styles.modalBody}>{t('customFood.deleteQuestion', { name: categoryToDelete.name })}</Text>
+                    <Text style={styles.modalBody}>¿Eliminar {categoryToDelete.name}?</Text>
                     <View style={styles.modalRow}>
                       <TouchableOpacity onPress={() => setCategoryToDelete(null)} style={[styles.btn, { flex: 1 }]}>
-                        <Text style={styles.btnText}>{t('common.cancel')}</Text>
+                        <Text style={styles.btnText}>Cancelar</Text>
                       </TouchableOpacity>
                       <TouchableOpacity onPress={confirmDeleteCategory} style={[styles.btn, styles.btnDanger, { flex: 1, marginLeft: 12 }]}>
-                        <Text style={styles.btnDangerText}>{t('common.delete')}</Text>
+                        <Text style={styles.btnDangerText}>Eliminar</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -291,7 +289,7 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
                     <Text style={styles.modalBody}>{warning}</Text>
                     <View style={styles.modalRow}>
                       <TouchableOpacity onPress={() => setWarning(null)} style={[styles.btn, styles.btnPrimary, { flex: 1 }]}>
-                        <Text style={styles.btnPrimaryText}>{t('common.accept')}</Text>
+                        <Text style={styles.btnPrimaryText}>Aceptar</Text>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -310,7 +308,6 @@ function ManageCustomFoodsModal({ visible, onClose, onEdit }) {
 // =====================
 export default function AddCustomFoodModal({ visible, onClose }) {
   const palette = useTheme();
-  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { addCustomFood, updateCustomFood } = useCustomFoods();
   const { categories, addCategory } = useCategories();
@@ -402,7 +399,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             <Text style={styles.iconTxt}>←</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setManageVisible(true)} style={styles.actionBtn}>
-            <Text style={styles.actionTxt}>{t('customFood.manage')}</Text>
+            <Text style={styles.actionTxt}>Mis ingredientes</Text>
           </TouchableOpacity>
         </View>
 
@@ -412,19 +409,19 @@ export default function AddCustomFoodModal({ visible, onClose }) {
           showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
         >
           <Text style={styles.helpCentered}>
-            {t('customFood.help')}
+            Crea tus propios ingredientes. Usa iconos predeterminados o carga una imagen.
           </Text>
 
-          <Text style={styles.label}>{t('customFood.name')}</Text>
+          <Text style={styles.label}>Nombre</Text>
           <TextInput
             style={styles.input}
-            placeholder={t('customFood.namePlaceholder')}
+            placeholder="Ej. Chimichurri"
             placeholderTextColor={palette.textDim}
             value={name}
             onChangeText={setName}
           />
 
-          <Text style={styles.label}>{t('customFood.category')}</Text>
+          <Text style={styles.label}>Categoría</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {categoryNames.map(cat => (
               <TouchableOpacity
@@ -442,17 +439,17 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.label}>{t('customFood.defaultExpiration')}</Text>
+          <Text style={styles.label}>Días de caducidad por defecto</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={expirationDays}
             onChangeText={t => setExpirationDays(t.replace(/[^0-9]/g, ''))}
-            placeholder={t('itemForm.optional')}
+            placeholder="Opcional"
             placeholderTextColor={palette.textDim}
           />
 
-          <Text style={styles.label}>{t('customFood.defaultUnit')}</Text>
+          <Text style={styles.label}>Unidad por defecto</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {units.map(u => (
               <TouchableOpacity
@@ -467,7 +464,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             ))}
           </View>
 
-          <Text style={styles.label}>{t('customFood.defaultPrice')}</Text>
+          <Text style={styles.label}>Precio unitario por defecto</Text>
           <TextInput
             style={styles.input}
             value={defaultPrice}
@@ -481,31 +478,31 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             }}
             keyboardType="decimal-pad"
             inputMode="decimal"
-            placeholder={t('itemForm.optional')}
+            placeholder="Opcional"
             placeholderTextColor={palette.textDim}
           />
 
-          <Text style={styles.label}>{t('customFood.icon')}</Text>
+          <Text style={styles.label}>Icono</Text>
           {(iconUri || baseIcon) ? (
             <Image source={iconUri ? { uri: iconUri } : getFoodIcon(baseIcon)} style={styles.preview} />
           ) : (
             <View style={[styles.preview, { alignItems: 'center', justifyContent: 'center' }]}>
-              <Text style={{ color: palette.textDim, fontSize: 12 }}>{t('customFood.noIcon')}</Text>
+              <Text style={{ color: palette.textDim, fontSize: 12 }}>Sin icono</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', marginTop: 8 }}>
             <TouchableOpacity onPress={() => setPickerVisible(true)} style={[styles.btn, styles.btnNeutral, { flex: 1 }]}>
-              <Text style={styles.btnNeutralText}>{t('customFood.useDefault')}</Text>
+              <Text style={styles.btnNeutralText}>Predeterminado</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={pickImage} style={[styles.btn, styles.btnNeutral, { flex: 1, marginLeft: 10 }]}>
-              <Text style={styles.btnNeutralText}>{t('common.load')}</Text>
+              <Text style={styles.btnNeutralText}>Cargar</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
 
         {/* Guardar */}
         <TouchableOpacity onPress={save} style={styles.fab}>
-          <Text style={styles.fabTxt}>{t('common.save')}</Text>
+          <Text style={styles.fabTxt}>Guardar</Text>
         </TouchableOpacity>
 
         {/* Modales internos */}

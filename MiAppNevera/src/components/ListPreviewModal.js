@@ -1,12 +1,10 @@
 import React, { useMemo } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../context/LanguageContext';
 import ShoppingListPreview from './ShoppingListPreview';
 
 export default function ListPreviewModal({ visible, name, items = [], onClose }) {
   const palette = useTheme();
-  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   return (
     <Modal visible={visible} animationType="slide">
@@ -15,7 +13,7 @@ export default function ListPreviewModal({ visible, name, items = [], onClose })
           <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
             <Text style={styles.iconText}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>{name || t('titles.shopping')}</Text>
+          <Text style={styles.title}>{name || 'Lista'}</Text>
         </View>
         <ShoppingListPreview items={items} style={{ flex: 1 }} />
       </View>

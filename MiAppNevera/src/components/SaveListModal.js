@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Modal, View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useTranslation } from '../context/LanguageContext';
 import ShoppingListPreview from './ShoppingListPreview';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import FoodPickerModal from './FoodPickerModal';
@@ -18,7 +17,6 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
   const [adding, setAdding] = useState(null);
   const [addVisible, setAddVisible] = useState(false);
   const palette = useTheme();
-  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
 
   useEffect(() => {
@@ -99,15 +97,15 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
   return (
     <Modal visible={visible} animationType="slide">
       <View style={styles.container}>
-        <Text style={styles.title}>{t('saveList.title')}</Text>
+        <Text style={styles.title}>Guardar lista</Text>
         <TextInput
-          placeholder={t('saveList.namePlaceholder')}
+          placeholder="Nombre"
           style={styles.input}
           value={name}
           onChangeText={setName}
         />
         <TextInput
-          placeholder={t('saveList.notePlaceholder')}
+          placeholder="Nota"
           style={styles.input}
           value={note}
           onChangeText={setNote}
@@ -121,14 +119,14 @@ export default function SaveListModal({ visible, items = [], initialName = '', i
         />
         <View style={styles.actions}>
           <Button
-            title={selectMode ? t('saveList.cancelSelection') : t('common.cancel')}
+            title={selectMode ? 'Cancelar selección' : 'Cancelar'}
             onPress={selectMode ? () => { setSelectMode(false); setSelected([]); } : onClose}
           />
-          <Button title={t('common.add')} onPress={() => setPickerVisible(true)} />
+          <Button title="Añadir" onPress={() => setPickerVisible(true)} />
           {selectMode && selected.length > 0 && (
-            <Button title={t('common.delete')} color="#b00" onPress={deleteSelected} />
+            <Button title="Eliminar" color="#b00" onPress={deleteSelected} />
           )}
-          <Button title={t('common.save')} onPress={() => onSave({ name: name.trim(), note, items: localItems })} />
+          <Button title="Guardar" onPress={() => onSave({ name: name.trim(), note, items: localItems })} />
         </View>
         <AddShoppingItemModal
           visible={editIdx !== null}
