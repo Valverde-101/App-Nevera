@@ -23,11 +23,9 @@ import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
-import { useTranslation } from '../context/LanguageContext';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const palette = useTheme();
-  const t = useTranslation();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const today = new Date().toISOString().split('T')[0];
@@ -102,7 +100,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                   unitPrice || 0,
                   totalPrice || 0,
                 );
-                Alert.alert(t('addItem.addedTitle'), t('addItem.addedMessage', { item: foodName }));
+                Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
               }}
               style={styles.iconBtn}
             >
@@ -123,7 +121,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             contentContainerStyle={{ padding: 16 }}
           >
             {/* Ubicación */}
-            <Text style={styles.labelBold}>{t('itemForm.location')}</Text>
+            <Text style={styles.labelBold}>Ubicación</Text>
             <View style={styles.chipWrap}>
               {locations.map((opt, idx) => (
                 <Pressable
@@ -143,7 +141,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Cantidad */}
-            <Text style={styles.labelBold}>{t('itemForm.quantity')}</Text>
+            <Text style={styles.labelBold}>Cantidad</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
@@ -213,7 +211,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Unidad */}
-            <Text style={styles.labelBold}>{t('itemForm.unit')}</Text>
+            <Text style={styles.labelBold}>Unidad</Text>
             <View style={styles.chipWrap}>
               {units.map((opt, idx) => (
                 <Pressable
@@ -233,13 +231,13 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>{t('itemForm.price')}</Text>
+            <Text style={styles.labelBold}>Precio</Text>
             <View style={styles.priceRow}>
               <TextInput
                 style={[styles.priceInput, { marginRight: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder={t('itemForm.unitCostPlaceholder')}
+                placeholder="Costo unitario"
                 placeholderTextColor={palette.textDim}
                 value={unitPriceText}
                 onChangeText={(t) => {
@@ -263,7 +261,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 style={[styles.priceInput, { marginLeft: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder={t('itemForm.totalCostPlaceholder')}
+                placeholder="Costo total"
                 placeholderTextColor={palette.textDim}
                 value={totalPriceText}
                 onChangeText={(t) => {
@@ -286,7 +284,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
 
             {/* Fechas (con inputs gris) */}
             <View style={{ marginTop: 6 }}>
-              <Text style={styles.labelBold}>{t('itemForm.registeredDate')}</Text>
+              <Text style={styles.labelBold}>Fecha de registro</Text>
               <DatePicker
                 value={regDate}
                 onChange={setRegDate}
@@ -294,7 +292,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 containerStyle={styles.dateContainer}
               />
               <View style={{ height: 8 }} />
-              <Text style={styles.labelBold}>{t('itemForm.expirationDate')}</Text>
+              <Text style={styles.labelBold}>Fecha de caducidad</Text>
               <DatePicker
                 value={expDate}
                 onChange={setExpDate}
@@ -304,12 +302,12 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Nota */}
-            <Text style={styles.labelBold}>{t('itemForm.note')}</Text>
+            <Text style={styles.labelBold}>Nota</Text>
             <TextInput
               style={styles.noteInput}
               value={note}
               onChangeText={setNote}
-              placeholder={t('itemForm.optional')}
+              placeholder="Opcional"
               placeholderTextColor={palette.textDim}
             />
 
@@ -331,7 +329,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             }
             style={styles.saveFab}
           >
-            <Text style={styles.saveFabText}>{t('common.save')}</Text>
+            <Text style={styles.saveFabText}>Guardar</Text>
           </TouchableOpacity>
         </View>
       </View>
