@@ -17,6 +17,7 @@ import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
 import ThemeSettingsScreen from './src/screens/ThemeSettingsScreen';
 import CurrencySettingsScreen from './src/screens/CurrencySettingsScreen';
+import MembershipsScreen from './src/screens/MembershipsScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
@@ -107,6 +108,11 @@ function MainApp() {
                       name="UserData"
                       component={UserDataScreen}
                       options={{ title: 'Datos de usuario' }}
+                    />
+                    <Stack.Screen
+                      name="Memberships"
+                      component={MembershipsScreen}
+                      options={{ title: 'Membresías' }}
                     />
                     </Stack.Navigator>
                   </NavigationContainer>
