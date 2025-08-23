@@ -7,9 +7,11 @@ import AddRecipeModal from '../components/AddRecipeModal';
 import { useLocations } from '../context/LocationsContext';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function RecipeBookScreen({ navigation }) {
   const palette = useTheme();
+  const t = useTranslation();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   const { recipes, addRecipe } = useRecipes();
@@ -23,7 +25,7 @@ export default function RecipeBookScreen({ navigation }) {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: 'Recetario',
+      title: t('titles.recipes'),
       headerRight: () => (
         <TouchableOpacity onPress={() => setAddVisible(true)} style={styles.headerIconBtn}>
           <Text style={styles.headerIconTxt}>＋</Text>
@@ -62,13 +64,15 @@ export default function RecipeBookScreen({ navigation }) {
                   <Image source={{ uri: rec.image }} style={styles.thumb} resizeMode="cover" />
                 ) : (
                   <View style={styles.thumbPlaceholder}>
-                    <Text style={{ color: palette.textDim }}>Sin imagen</Text>
+                    <Text style={{ color: palette.textDim }}>{t('recipes.noImage')}</Text>
                   </View>
                 )}
-                {!enough && <Text style={styles.badge}>Faltan</Text>}
+                {!enough && <Text style={styles.badge}>{t('recipes.missing')}</Text>}
               </View>
               <Text style={styles.cardTitle} numberOfLines={2}>{rec.name}</Text>
-              <Text style={styles.cardMeta}>Para {rec.persons} personas • Dificultad: {rec.difficulty}</Text>
+              <Text style={styles.cardMeta}>
+                {t('recipes.for')} {rec.persons} {t('recipes.people')} • {t('recipes.difficulty')}: {rec.difficulty}
+              </Text>
             </TouchableOpacity>
           );
         })}
