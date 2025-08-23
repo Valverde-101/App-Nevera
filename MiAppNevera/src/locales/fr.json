@@ -1,0 +1,246 @@
+{
+  "settings": {
+    "colorTheme": {"title": "Thème de couleurs", "desc": "Choisissez entre clair ou sombre."},
+    "units": {"title": "Types d'unité", "desc": "Gérez le singulier et le pluriel de vos unités."},
+    "currency": {"title": "Devise", "desc": "Sélectionnez la devise pour les coûts."},
+    "locations": {"title": "Gestion des lieux", "desc": "Définissez où vous rangez vos aliments."},
+    "userData": {"title": "Données utilisateur", "desc": "Sauvegardes, importation et suppression totale."},
+    "language": {"title": "Langue", "desc": "Sélectionnez la langue de l'application."}
+  },
+  "themeSettings": {"darkPremium": "Dark Premium", "light": "Clair", "current": "Actuel"},
+  "unitSettings": {
+    "singular": "Singulier",
+    "plural": "Pluriel",
+    "edit": "✏️ Modifier",
+    "delete": "🗑️ Supprimer",
+    "editUnit": "Modifier l'unité",
+    "addUnit": "Ajouter une unité",
+    "update": "Mettre à jour",
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "completeBoth": "Complétez le singulier et le pluriel."
+  },
+  "home": {
+    "fridge": "Réfrigérateur",
+    "freezer": "Congélateur",
+    "pantry": "Garde-manger",
+    "shopping": "Liste de courses"
+  },
+  "languageSettings": {
+    "title": "Langue",
+    "spanish": "Espagnol",
+    "english": "Anglais",
+    "french": "Français",
+    "japanese": "Japonais",
+    "current": "Actuel"
+  },
+  "app": {"restarted": "L'application a redémarré."},
+  "common": {
+    "add": "Ajouter",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Éditer",
+    "selectAll": "Tout sélectionner",
+    "select": "Sélectionner",
+    "load": "Charger",
+    "preview": "Prévisualiser",
+    "addFood": "Ajouter aliment",
+    "accept": "Accepter",
+    "error": "Erreur",
+    "success": "Succès",
+    "others": "Autres",
+    "close": "Fermer"
+  },
+  "category": {"search": "Rechercher"},
+  "locationSettings": {
+    "inactive": "Inactive",
+    "deactivate": "Désactiver",
+    "activate": "Activer",
+    "editLocation": "Modifier l'emplacement",
+    "addLocation": "Ajouter un emplacement",
+    "name": "Nom",
+    "removeConfirm": "Voulez-vous vraiment supprimer cet emplacement ?",
+    "locationHasItems": "L'emplacement contient des aliments. Videz-le avant de le supprimer."
+  },
+  "currency": {"sol": "Sol", "dollar": "Dollar", "euro": "Euro", "yen": "Yen/Yuan", "peso": "Peso"},
+  "titles": {
+    "inventory": "Réfrigérateur",
+    "shopping": "Liste de courses",
+    "savedLists": "Listes enregistrées",
+    "recipes": "Livre de recettes",
+    "recipe": "Recette",
+    "settings": "Paramètres",
+    "themeSettings": "Thème de couleurs",
+    "unitSettings": "Types d'unité",
+    "currencySettings": "Devise",
+    "locationSettings": "Gestion des lieux",
+    "userData": "Données utilisateur",
+    "languageSettings": "Langue"
+  },
+  "recipes": {
+    "noImage": "Sans image",
+    "missing": "Manquants",
+    "for": "Pour",
+    "people": "personnes",
+    "difficulty": "Difficulté",
+    "notFound": "Recette introuvable",
+    "ingredients": "Ingrédients",
+    "steps": "Étapes",
+    "addToShopping": "Ajouter aux courses",
+    "missingQuestion": "Voulez-vous ajouter les ingrédients manquants à la liste de courses?",
+    "allQuestion": "Ou voulez-vous ajouter tous les ingrédients?",
+    "addMissing": "Ajouter manquants",
+    "addAll": "Ajouter tout"
+  },
+  "addCategory": {
+    "title": "Nouvelle catégorie",
+    "help": "Ajoutez éventuellement une icône personnalisée.",
+    "name": "Nom",
+    "placeholder": "Ex. Fruits",
+    "icon": "Icône",
+    "noIcon": "Sans icône",
+    "loadImage": "Charger une image",
+    "removeImage": "Retirer"
+  },
+  "shoppingItem": {
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "price": "Prix",
+    "unitCostPlaceholder": "Coût unitaire",
+    "totalCostPlaceholder": "Coût total"
+  },
+  "saveList": {
+    "title": "Enregistrer la liste",
+    "namePlaceholder": "Nom",
+    "notePlaceholder": "Note",
+    "cancelSelection": "Annuler la sélection"
+  },
+  "foodPicker": {
+    "searchPlaceholder": "Rechercher un aliment",
+    "createNew": "Créer nouveau",
+    "manageDefaults": "Gérer les aliments par défaut",
+    "manageIntro": "Liste complète de tous les aliments par défaut",
+    "hiddenHint": "Les aliments grisés n'apparaîtront pas dans la liste d'ajout",
+    "longPressHint": "Maintenez un aliment pour modifier davantage de détails"
+  },
+  "itemForm": {
+    "location": "Emplacement",
+    "quantity": "Quantité",
+    "unit": "Unité",
+    "price": "Prix",
+    "unitPrice": "Prix unitaire",
+    "unitCostPlaceholder": "Coût unitaire",
+    "totalCostPlaceholder": "Coût total",
+    "registeredDate": "Date d'enregistrement",
+    "expirationDate": "Date d'expiration",
+    "note": "Note",
+    "optional": "Optionnel"
+  },
+  "addItem": {
+    "addedTitle": "Ajouté",
+    "addedMessage": "{item} ajouté à la liste de courses"
+  },
+  "batchAddItem": {
+    "title": "Ajouter {count} aliment(s)"
+  },
+  "customFood": {
+    "manage": "Mes ingrédients",
+    "help": "Créez vos propres ingrédients. Utilisez des icônes par défaut ou chargez une image.",
+    "name": "Nom",
+    "namePlaceholder": "ex. Chimichurri",
+    "category": "Catégorie",
+    "defaultExpiration": "Jours d'expiration par défaut",
+    "defaultUnit": "Unité par défaut",
+    "defaultPrice": "Prix unitaire par défaut",
+    "icon": "Icône",
+    "noIcon": "Pas d'icône",
+    "useDefault": "Par défaut",
+    "customCategories": "Catégories personnalisées",
+    "customIngredients": "Ingrédients personnalisés",
+    "deleteSelectedTitle": "Supprimer la sélection",
+    "inUseWarning": "Certains ingrédients sélectionnés sont utilisés et ne peuvent pas être supprimés.",
+    "cannotDelete": "{name} est utilisé et ne peut pas être supprimé.",
+    "categoryHasItems": "La catégorie contient des ingrédients.",
+    "categoryInUse": "La catégorie {name} est utilisée.",
+    "deleteQuestion": "Supprimer {name} ?"
+  },
+  "inventory": {
+    "expiredShort": "Exp",
+    "noRecord": "Sans enregistrement",
+    "sortBy": "Trier par",
+    "sortOptions": {
+      "name": "Nom",
+      "expiration": "Date d'expiration",
+      "registered": "Date d'enregistrement"
+    },
+    "groupBy": "Grouper par",
+    "groupOptions": {
+      "category": "Catégorie",
+      "none": "Sans regroupement",
+      "registered": "Date d'enregistrement"
+    },
+    "viewType": "Type d'affichage",
+    "viewOptions": {
+      "list": "Liste",
+      "grid": "Grille"
+    },
+    "intersection": "Intersection",
+    "empty": "Votre {location} est vide",
+    "addToShoppingQuestion": "Ajouter les {count} éléments suivants à la liste de courses ?",
+    "moveTo": "Déplacer vers :",
+    "copyTo": "Copier vers :",
+    "deleteItemsQuestion": "Supprimer {count} éléments ?"
+  },
+  "shoppingList": {
+    "empty": "Votre liste de courses est vide",
+    "detailsTitle": "Détails de la liste de courses",
+    "moreDetails": "Plus de détails",
+    "totalCost": "Coût total",
+    "costDistribution": "Répartition des coûts",
+    "noCostData": "Pas de données de coût",
+    "deleteSelectedTitle": "Supprimer la sélection",
+    "deleteSelectedConfirm": "Supprimer {count} élément(s) de la liste de courses ?",
+    "clearTitle": "Vider la liste",
+    "clearConfirm": "Supprimer tous les aliments de la liste de courses ?",
+    "autoAddTitle": "Ajouter automatiquement",
+    "autoAddConfirm": "Ajouter tous les aliments avec quantité 0 de l'inventaire à la liste de courses ? Les éléments déjà présents ne seront pas ajoutés."
+  },
+  "savedLists": {
+    "untitled": "Sans titre",
+    "items": "{count} articles",
+    "deleteTitle": "Supprimer la liste",
+    "deleteConfirm": "Supprimer cette liste enregistrée ?"
+  },
+  "userData": {
+    "syncTitle": "Synchronisation",
+    "syncDesc": "Connectez votre compte Google pour sauvegarder une copie dans le cloud.",
+    "connectedAs": "Connecté en tant que {email}",
+    "user": "utilisateur",
+    "uploadBackup": "Téléverser la sauvegarde",
+    "restoreBackup": "Restaurer la sauvegarde",
+    "disconnect": "Déconnecter le compte",
+    "connectGoogle": "Se connecter avec Google",
+    "backupTitle": "Sauvegarde et données",
+    "backupDesc": "Exportez ou importez toutes vos données.",
+    "exportData": "Exporter les données",
+    "importData": "Importer les données",
+    "deleteAllTitle": "Tout supprimer",
+    "deleteAllDesc": "Cela supprimera définitivement toutes les données utilisateur.",
+    "deleteAllData": "Supprimer toutes les données",
+    "uploadConfirmTitle": "Téléverser la sauvegarde",
+    "uploadConfirmBody": "Une copie de vos données et paramètres actuels sera enregistrée sur Google Drive, remplaçant toute sauvegarde précédente. Continuer ?",
+    "downloadConfirmTitle": "Restaurer la sauvegarde",
+    "downloadConfirmBody": "Toutes les données locales seront remplacées par la copie stockée sur Google Drive. Cette action écrasera vos informations actuelles. Continuer ?",
+    "exportConfirmTitle": "Exporter les données",
+    "exportConfirmBody": "Exporter toutes les données utilisateur ?",
+    "resetConfirmTitle": "Supprimer toutes les données",
+    "resetConfirmBody": "Cette action est permanente. Continuer ?",
+    "uploadSuccess": "Sauvegarde téléversée sur Google Drive.",
+    "uploadError": "Échec du téléversement de la sauvegarde.",
+    "downloadError": "Échec de la restauration de la sauvegarde.",
+    "signInError": "Impossible de se connecter avec Google.",
+    "restartTitle": "Redémarrage",
+    "restartMessage": "L'application va redémarrer"
+  }
+}

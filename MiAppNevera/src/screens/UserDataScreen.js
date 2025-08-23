@@ -15,6 +15,7 @@ import { useRecipes } from '../context/RecipeContext';
 import { useCustomFoods } from '../context/CustomFoodsContext';
 import { exportBackup, importBackup } from '../utils/backup';
 import { useTheme, useThemeController } from '../context/ThemeContext';
+import { useTranslation } from '../context/LanguageContext';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { uploadBackupToGoogleDrive, downloadBackupFromGoogleDrive } from '../utils/googleDrive';
@@ -33,6 +34,7 @@ export default function UserDataScreen() {
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const navigation = useNavigation();
+  const t = useTranslation();
   useLayoutEffect(() => {
     navigation.setOptions?.({
       headerStyle: { backgroundColor: palette.surface },
@@ -131,7 +133,7 @@ export default function UserDataScreen() {
     if (res?.type === 'success') {
       await handleAuthResponse(res.authentication.accessToken);
     } else {
-      Alert.alert('Error', 'No se pudo iniciar sesión con Google.');
+      Alert.alert(t('common.error'), t('userData.signInError'));
     }
   };
 
@@ -154,16 +156,16 @@ export default function UserDataScreen() {
     try {
       await uploadBackupToGoogleDrive(googleToken);
       if (Platform.OS === 'web') {
-        alert('Respaldo subido a Google Drive.');
+        alert(t('userData.uploadSuccess'));
       } else {
-        Alert.alert('Éxito', 'Respaldo subido a Google Drive.');
+        Alert.alert(t('common.success'), t('userData.uploadSuccess'));
       }
     } catch (e) {
       console.error('Upload to Drive failed', e);
       if (Platform.OS === 'web') {
-        alert('No se pudo subir el respaldo.');
+        alert(t('userData.uploadError'));
       } else {
-        Alert.alert('Error', 'No se pudo subir el respaldo.');
+        Alert.alert(t('common.error'), t('userData.uploadError'));
       }
     } finally {
       setUploading(false);
@@ -178,9 +180,9 @@ export default function UserDataScreen() {
     } catch (e) {
       console.error('Download from Drive failed', e);
       if (Platform.OS === 'web') {
-        alert('No se pudo restaurar el respaldo.');
+        alert(t('userData.downloadError'));
       } else {
-        Alert.alert('Error', 'No se pudo restaurar el respaldo.');
+        Alert.alert(t('common.error'), t('userData.downloadError'));
       }
     } finally {
       setDownloading(false);
@@ -201,8 +203,8 @@ export default function UserDataScreen() {
       sessionStorage.setItem('reset_notice', '1');
       window.location.reload();
     } else {
-      Alert.alert('Reinicio', 'La aplicación se reiniciará', [
-        { text: 'OK', onPress: () => Updates.reloadAsync() },
+      Alert.alert(t('userData.restartTitle'), t('userData.restartMessage'), [
+        { text: t('common.accept'), onPress: () => Updates.reloadAsync() },
       ]);
     }
   };
@@ -212,19 +214,19 @@ export default function UserDataScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
         <View style={styles.card}>
-          <Text style={styles.title}>Sincronización</Text>
-          <Text style={styles.subtitle}>Conecta tu cuenta de Google para guardar un respaldo en la nube.</Text>
+          <Text style={styles.title}>{t('userData.syncTitle')}</Text>
+          <Text style={styles.subtitle}>{t('userData.syncDesc')}</Text>
           {googleToken ? (
             <>
               <Text style={styles.connectedText}>
-                Conectado como {googleUser?.email || 'usuario'}
+                {t('userData.connectedAs', { email: googleUser?.email || t('userData.user') })}
               </Text>
               <TouchableOpacity
                 style={[styles.primaryBtn, uploading && { opacity: 0.5 }]}
                 disabled={uploading}
                 onPress={() => setUploadConfirm(true)}
               >
-                <Text style={styles.primaryBtnText}>Subir respaldo</Text>
+                <Text style={styles.primaryBtnText}>{t('userData.uploadBackup')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -235,10 +237,10 @@ export default function UserDataScreen() {
                 disabled={uploading || downloading}
                 onPress={() => setDownloadConfirm(true)}
               >
-                <Text style={styles.btnText}>Restaurar respaldo</Text>
+                <Text style={styles.btnText}>{t('userData.restoreBackup')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={handleDisconnect}>
-                <Text style={styles.btnText}>Desconectar cuenta</Text>
+                <Text style={styles.btnText}>{t('userData.disconnect')}</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -247,27 +249,27 @@ export default function UserDataScreen() {
               disabled={isWeb && !request}
               onPress={isWeb ? () => promptAsync() : signInNative}
             >
-              <Text style={styles.btnText}>Conectar con Google</Text>
+              <Text style={styles.btnText}>{t('userData.connectGoogle')}</Text>
             </TouchableOpacity>
           )}
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.title}>Respaldo y datos</Text>
-          <Text style={styles.subtitle}>Exporta o importa todos tus datos.</Text>
+          <Text style={styles.title}>{t('userData.backupTitle')}</Text>
+          <Text style={styles.subtitle}>{t('userData.backupDesc')}</Text>
           <TouchableOpacity style={styles.primaryBtn} onPress={() => setExportConfirm(true)}>
-            <Text style={styles.primaryBtnText}>Exportar datos</Text>
+            <Text style={styles.primaryBtnText}>{t('userData.exportData')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.btn, { marginTop: 10 }]} onPress={importBackup}>
-            <Text style={styles.btnText}>Importar datos</Text>
+            <Text style={styles.btnText}>{t('userData.importData')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={[styles.card, { borderColor: '#4a1e1e' }]}>
-          <Text style={styles.title}>Eliminar todo</Text>
-          <Text style={styles.subtitle}>Esto borrará permanentemente todos los datos de usuario.</Text>
+          <Text style={styles.title}>{t('userData.deleteAllTitle')}</Text>
+          <Text style={styles.subtitle}>{t('userData.deleteAllDesc')}</Text>
           <TouchableOpacity style={styles.dangerBtn} onPress={() => setResetConfirm(true)}>
-            <Text style={styles.dangerBtnText}>Eliminar todos los datos</Text>
+            <Text style={styles.dangerBtnText}>{t('userData.deleteAllData')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -277,14 +279,13 @@ export default function UserDataScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Subir respaldo</Text>
+                <Text style={styles.modalTitle}>{t('userData.uploadConfirmTitle')}</Text>
                 <Text style={styles.modalBody}>
-                  Se guardará en Google Drive una copia de tus datos y configuraciones actuales,
-                  reemplazando cualquier respaldo anterior. ¿Deseas continuar?
+                  {t('userData.uploadConfirmBody')}
                 </Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setUploadConfirm(false)}>
-                    <Text style={styles.btnText}>Cancelar</Text>
+                    <Text style={styles.btnText}>{t('common.cancel')}</Text>
                   </TouchableOpacity>
                   <View style={{ width: 12 }} />
                   <TouchableOpacity
@@ -292,7 +293,7 @@ export default function UserDataScreen() {
                     disabled={uploading}
                     onPress={() => { setUploadConfirm(false); handleUpload(); }}
                   >
-                    <Text style={styles.primaryBtnText}>Aceptar</Text>
+                    <Text style={styles.primaryBtnText}>{t('common.accept')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -306,14 +307,13 @@ export default function UserDataScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Restaurar respaldo</Text>
+                <Text style={styles.modalTitle}>{t('userData.downloadConfirmTitle')}</Text>
                 <Text style={styles.modalBody}>
-                  Se reemplazarán todos los datos locales con la copia almacenada en Google Drive.
-                  Esta acción sobrescribirá tu información actual. ¿Deseas continuar?
+                  {t('userData.downloadConfirmBody')}
                 </Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setDownloadConfirm(false)}>
-                    <Text style={styles.btnText}>Cancelar</Text>
+                    <Text style={styles.btnText}>{t('common.cancel')}</Text>
                   </TouchableOpacity>
                   <View style={{ width: 12 }} />
                   <TouchableOpacity
@@ -321,7 +321,7 @@ export default function UserDataScreen() {
                     disabled={downloading}
                     onPress={() => { setDownloadConfirm(false); handleDownload(); }}
                   >
-                    <Text style={styles.primaryBtnText}>Aceptar</Text>
+                    <Text style={styles.primaryBtnText}>{t('common.accept')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -335,16 +335,16 @@ export default function UserDataScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Exportar datos</Text>
-                <Text style={styles.modalBody}>¿Deseas exportar todos los datos de usuario?</Text>
+                <Text style={styles.modalTitle}>{t('userData.exportConfirmTitle')}</Text>
+                <Text style={styles.modalBody}>{t('userData.exportConfirmBody')}</Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setExportConfirm(false)}>
-                    <Text style={styles.btnText}>Cancelar</Text>
+                    <Text style={styles.btnText}>{t('common.cancel')}</Text>
                   </TouchableOpacity>
                   <View style={{ width: 12 }} />
                   <TouchableOpacity style={[styles.primaryBtn, { flex: 1 }]}
                     onPress={() => { setExportConfirm(false); exportBackup(); }}>
-                    <Text style={styles.primaryBtnText}>Exportar</Text>
+                    <Text style={styles.primaryBtnText}>{t('userData.exportData')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -358,15 +358,15 @@ export default function UserDataScreen() {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Eliminar todos los datos</Text>
-                <Text style={styles.modalBody}>Esta acción es permanente. ¿Deseas continuar?</Text>
+                <Text style={styles.modalTitle}>{t('userData.resetConfirmTitle')}</Text>
+                <Text style={styles.modalBody}>{t('userData.resetConfirmBody')}</Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={() => setResetConfirm(false)}>
-                    <Text style={styles.btnText}>Cancelar</Text>
+                    <Text style={styles.btnText}>{t('common.cancel')}</Text>
                   </TouchableOpacity>
                   <View style={{ width: 12 }} />
                   <TouchableOpacity style={[styles.dangerBtn, { flex: 1 }]} onPress={resetAll}>
-                    <Text style={styles.dangerBtnText}>Eliminar</Text>
+                    <Text style={styles.dangerBtnText}>{t('common.delete')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>

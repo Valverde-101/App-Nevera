@@ -21,11 +21,13 @@ import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function BatchAddItemModal({ visible, items = [], onSave, onClose }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette, themeName), [palette, themeName]);
+  const t = useTranslation();
 
   const today = new Date().toISOString().split('T')[0];
   const { units, getLabel } = useUnits();
@@ -87,14 +89,14 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
               <Text style={styles.iconText}>←</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={saveAll} style={styles.iconBtnAccent}>
-              <Text style={styles.iconTextOnAccent}>Guardar</Text>
+              <Text style={styles.iconTextOnAccent}>{t('common.save')}</Text>
             </TouchableOpacity>
           </View>
 
           {/* Hero con gradiente y resumen */}
           <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.hero}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.heroTitle}>Añadir {items.length} alimento(s)</Text>
+              <Text style={styles.heroTitle}>{t('batchAddItem.title', { count: items.length })}</Text>
             </View>
           </LinearGradient>
 
@@ -119,7 +121,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                   </View>
 
                 {/* Ubicación */}
-                <Text style={styles.labelBold}>Ubicación</Text>
+                <Text style={styles.labelBold}>{t('itemForm.location')}</Text>
                 <View style={styles.chipWrap}>
                   {locations.map((opt, k) => (
                     <Pressable
@@ -142,7 +144,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Cantidad */}
-                <Text style={styles.labelBold}>Cantidad</Text>
+                <Text style={styles.labelBold}>{t('itemForm.quantity')}</Text>
                 <View style={styles.qtyRow}>
                   <TouchableOpacity
                     onPress={() => updateField(idx, 'quantity', String(Math.max(0, (parseFloat(data[idx]?.quantity) || 0) - 1)))}
@@ -170,7 +172,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Unidad */}
-                <Text style={styles.labelBold}>Unidad</Text>
+                <Text style={styles.labelBold}>{t('itemForm.unit')}</Text>
                 <View style={styles.chipWrap}>
                   {units.map((opt, k) => (
                     <Pressable
@@ -193,7 +195,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Precio */}
-                <Text style={styles.labelBold}>Precio unitario</Text>
+                <Text style={styles.labelBold}>{t('itemForm.unitPrice')}</Text>
                 <TextInput
                   style={styles.priceInput}
                   value={data[idx]?.price}
