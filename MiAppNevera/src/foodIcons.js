@@ -1,5 +1,9 @@
 export const foodData = {
-  // Bebidas
+
+   /////////////
+  // Bebidas //
+ /////////////
+
   'agua': {
     icon: require('./../../icons/Bebidas/agua_icon.png'),
     name: 'Agua',
@@ -9,8 +13,8 @@ export const foodData = {
   'aguamineral': {
     icon: require('./../../icons/Bebidas/agua_mineral_icon.png'),
     name: 'Agua Mineral',
-    expirationDays: null,
-    defaultPrice: null,
+    expirationDays: 365,
+    defaultPrice: 2.5,
   },
   'arcoiris': {
     icon: require('./../../icons/Bebidas/arco_iris_icon.png'),
@@ -414,7 +418,11 @@ export const foodData = {
     expirationDays: null,
     defaultPrice: null,
   },
-  // Carnes
+
+   /////////////
+  // Carnes  //
+ /////////////
+
   'albondigas': {
     icon: require('./../../icons/Carnes/albóndigas_icon.png'),
     name: 'Albóndigas',
@@ -613,14 +621,23 @@ export const foodData = {
     expirationDays: null,
     defaultPrice: null,
   },
-  // Cereales
+
+   /////////////
+  // Cereales /
+ /////////////
+
   'cereal': {
     icon: require('./../../icons/Cereales/cereal_icon.png'),
     name: 'Cereal',
     expirationDays: null,
     defaultPrice: null,
   },
-  // Comidas
+
+   /////////////
+  // Comidas //
+ /////////////
+
+
   'aceitedeoliva': {
     icon: require('./../../icons/Comidas/aceite_de_oliva_icon.png'),
     name: 'Aceite De Oliva',
@@ -1527,7 +1544,11 @@ export const foodData = {
     expirationDays: null,
     defaultPrice: null,
   },
-  // Condimentos
+
+   /////////////
+  /Condimentos/
+ /////////////
+
   'aceitevegetal': {
     icon: require('./../../icons/Condimentos/aceite_vegetal_icon.png'),
     name: 'Aceite Vegetal',
