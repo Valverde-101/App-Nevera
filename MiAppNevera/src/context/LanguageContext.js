@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
+import * as Updates from 'expo-updates';
 import i18n from '../i18n';
 
 const LanguageContext = createContext({
@@ -24,14 +26,28 @@ export const LanguageProvider = ({ children }) => {
     })();
   }, []);
 
-  useEffect(() => {
-    i18n.locale = lang;
-    (async () => {
-      try { await AsyncStorage.setItem('lang', lang); } catch (e) { console.error('Failed to save language', e); }
-    })();
-  }, [lang]);
+  const changeLang = async newLang => {
+    setLang(newLang);
+    try {
+      await AsyncStorage.setItem('lang', newLang);
+    } catch (e) {
+      console.error('Failed to save language', e);
+    }
+    if (Platform.OS === 'web') {
+      window.location.reload();
+    } else {
+      await Updates.reloadAsync();
+    }
+  };
 
-  const value = useMemo(() => ({ lang, setLang, t: (scope, options) => i18n.t(scope, options) }), [lang]);
+  const value = useMemo(() => {
+    i18n.locale = lang;
+    return {
+      lang,
+      setLang: changeLang,
+      t: (scope, options) => i18n.t(scope, options),
+    };
+  }, [lang]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };
 
