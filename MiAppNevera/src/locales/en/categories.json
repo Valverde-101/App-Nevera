@@ -1,0 +1,17 @@
+{
+  "bebidas": "Drinks",
+  "carnes": "Meats",
+  "cereales": "Cereals",
+  "comidas": "Meals",
+  "condimentos": "Condiments",
+  "dulces": "Sweets",
+  "frutas": "Fruit",
+  "frutassecas": "Dry fruits",
+  "lacteos": "Dairy",
+  "legumbres": "Legumes",
+  "panes": "Bread",
+  "peces": "Fish",
+  "sandwich": "Sandwich",
+  "variado": "Varied",
+  "vegetales": "Vegetables"
+}
