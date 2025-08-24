@@ -32,6 +32,39 @@
     "english": "English"
   },
   "inventory": {
-    "settingsButton": "Settings"
+    "settingsButton": "Settings",
+    "empty": "%{location} is empty",
+    "addFood": "Add food",
+    "intersection": "Intersection",
+    "searchPlaceholder": "Search...",
+    "sortButton": "Sort",
+    "groupBy": "Group by",
+    "group": {
+      "category": "Category",
+      "none": "No grouping",
+      "registered": "Date added"
+    },
+    "sortTitle": "Sort by",
+    "sort": {
+      "name": "Name",
+      "expiration": "Expiration date",
+      "registered": "Date added"
+    },
+    "viewTitle": "View type",
+    "view": {
+      "list": "List",
+      "grid": "Grid"
+    },
+    "addToShoppingConfirm": "Add the following %{count} items to the shopping list?",
+    "add": "Add",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "moveTo": "Move to:",
+    "copyTo": "Copy to:",
+    "deletePrompt": "Delete %{count} items?",
+    "delete": "Delete",
+    "expiredLabel": "Exp.",
+    "dayPrefix": "D-",
+    "unregistered": "No record"
   }
 }
