@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useShopping } from '../context/ShoppingContext';
+import { useLanguage } from '../context/LanguageContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
@@ -35,6 +36,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
   const palette = useTheme();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
+  const { t } = useLanguage();
   const { addItem: addShoppingItem } = useShopping();
   const { units } = useUnits();
   const { locations } = useLocations();
@@ -129,7 +131,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                 {item?.icon && <Image source={item.icon} style={{ width: 64, height: 64 }} resizeMode="contain" />}
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.foodName} numberOfLines={2}>{label || 'Alimento'}</Text>
+                <Text style={styles.foodName} numberOfLines={2}>{label || ''}</Text>
                 {!!foodCategory && (
                   <Text style={{ color: palette.textDim, fontSize: 12 }} numberOfLines={1}>{foodCategory}</Text>
                 )}
@@ -142,7 +144,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
             >
               {/* Ubicación */}
-              <Text style={styles.labelBold}>Ubicación</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.batchAdd.location')}</Text>
               <View style={styles.chipWrap}>
                 {locations.map((opt, idx) => (
                   <Pressable
@@ -162,7 +164,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </View>
 
             {/* Cantidad */}
-            <Text style={styles.labelBold}>Cantidad</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.batchAdd.quantity')}</Text>
               <View style={styles.qtyRow}>
                 <TouchableOpacity
                   onPress={() => {
@@ -232,7 +234,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               </View>
 
               {/* Unidad */}
-              <Text style={styles.labelBold}>Unidad</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.batchAdd.unit')}</Text>
               <View style={styles.chipWrap}>
                 {units.map((opt, idx) => (
                   <Pressable
@@ -252,13 +254,13 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>Precio</Text>
+            <Text style={styles.labelBold}>{t('system.shopping.batchAdd.price')}</Text>
             <View style={styles.priceRow}>
               <TextInput
                 style={[styles.priceInput, { marginRight: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo unitario"
+                  placeholder={t('system.shopping.batchAdd.unitPricePlaceholder')}
                 placeholderTextColor={palette.textDim}
                 value={unitPriceText}
                 onChangeText={(t) => {
@@ -282,7 +284,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                 style={[styles.priceInput, { marginLeft: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo total"
+                  placeholder={t('system.shopping.batchAdd.totalPricePlaceholder')}
                 placeholderTextColor={palette.textDim}
                 value={totalPriceText}
                 onChangeText={(t) => {
@@ -305,7 +307,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
 
             {/* Fechas (inputs gris) */}
             <View style={{ marginTop: 6 }}>
-                <Text style={styles.labelBold}>Fecha de registro</Text>
+                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.regDate')}</Text>
                 <DatePicker
                   value={regDate}
                   onChange={setRegDate}
@@ -313,7 +315,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                   containerStyle={styles.dateContainer}
                 />
                 <View style={{ height: 8 }} />
-                <Text style={styles.labelBold}>Fecha de caducidad</Text>
+                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.expDate')}</Text>
                 <DatePicker
                   value={expDate}
                   onChange={setExpDate}
@@ -323,12 +325,12 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               </View>
 
               {/* Nota */}
-              <Text style={styles.labelBold}>Nota</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.batchAdd.note')}</Text>
               <TextInput
                 style={styles.noteInput}
                 value={note}
                 onChangeText={setNote}
-                placeholder="Opcional"
+                placeholder={t('system.common.optional')}
                 placeholderTextColor={palette.textDim}
               />
 
@@ -336,9 +338,9 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </ScrollView>
 
             {/* Guardar */}
-            <TouchableOpacity onPress={handleSave} style={styles.saveFab}>
-              <Text style={styles.saveFabText}>Guardar</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} style={styles.saveFab}>
+                <Text style={styles.saveFabText}>{t('system.common.save')}</Text>
+              </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -354,7 +356,10 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
         initialTotalPrice={item?.price ? item.price * (item.quantity ?? 0) : 0}
         onSave={({ quantity: q, unit: u, unitPrice, totalPrice }) => {
           addShoppingItem(item?.name, q || 0, u, unitPrice, totalPrice);
-          Alert.alert('Añadido', `${item?.name} añadido a la lista de compras`);
+          Alert.alert(
+            t('system.inventory.addItem.addedTitle'),
+            t('system.inventory.addItem.addedMsg', { name: item?.name })
+          );
           setShoppingVisible(false);
         }}
         onClose={() => setShoppingVisible(false)}
@@ -367,18 +372,18 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             <View style={{ alignItems: 'center', marginBottom: 10 }}>
               {item?.icon && <Image source={item.icon} style={{ width: 64, height: 64, marginBottom: 10 }} />}
               <Text style={{ color: palette.text, textAlign: 'center' }}>
-                ¿Seguro que deseas eliminar <Text style={{ color: palette.accent }}>{item?.name}</Text>?
+                {t('system.inventory.deleteItemPrompt', { name: item?.name })}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <TouchableOpacity onPress={() => setConfirmVisible(false)} style={[styles.bottomBtn, { backgroundColor: palette.surface3, flex: 1, marginRight: 8 }]}>
-                <Text style={{ color: palette.text }}>Cancelar</Text>
+                <Text style={{ color: palette.text }}>{t('system.common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => { setConfirmVisible(false); onDelete && onDelete(); }}
                 style={[styles.bottomBtn, { backgroundColor: '#e53935', flex: 1, marginLeft: 8 }]}
               >
-                <Text style={{ color: '#fff', fontWeight: '700' }}>Eliminar</Text>
+                <Text style={{ color: '#fff', fontWeight: '700' }}>{t('system.common.delete')}</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
