@@ -30,6 +30,7 @@ import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { useCurrency } from '../context/CurrencyContext';
 import { gradientForKey } from '../theme/gradients';
+import { useLanguage } from '../context/LanguageContext';
 
 // ===== Helpers =====
 const getExpiryMeta = (palette, d) => {
@@ -96,6 +97,7 @@ export default function InventoryScreen({ navigation }) {
   const palette = useTheme();
   const { symbol } = useCurrency();
   const { themeName } = useThemeController();
+  const { t } = useLanguage();
   const { inventory, addItem, updateItem, removeItem, updateQuantity } = useInventory();
   const { addItems: addShoppingItems } = useShopping();
   const { getLabel } = useUnits();
@@ -636,7 +638,7 @@ export default function InventoryScreen({ navigation }) {
                 <View style={{ height: 8 }} />
                 <Button title="Tipo de vista" color={palette.accent} onPress={() => { setMenuVisible(false); setViewVisible(true); }} />
                 <View style={{ height: 8 }} />
-                <Button title="Ajustes" color={palette.accent} onPress={() => { setMenuVisible(false); navigation.navigate('Settings'); }} />
+                <Button title={t('system.inventory.settingsButton')} color={palette.accent} onPress={() => { setMenuVisible(false); navigation.navigate('Settings'); }} />
               </View>
             </TouchableWithoutFeedback>
           </View>
