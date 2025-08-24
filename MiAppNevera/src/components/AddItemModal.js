@@ -23,6 +23,7 @@ import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AddItemModal({ visible, foodName, foodIcon, initialLocation = 'fridge', onSave, onClose }) {
   const palette = useTheme();
@@ -31,6 +32,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
   const today = new Date().toISOString().split('T')[0];
   const { units } = useUnits();
   const { locations } = useLocations();
+  const { t } = useLanguage();
   // subscribe to default food overrides so edits persist after refresh
   const { overrides } = useDefaultFoods();
   const [location, setLocation] = useState(initialLocation);
@@ -100,7 +102,10 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                   unitPrice || 0,
                   totalPrice || 0,
                 );
-                Alert.alert('Añadido', `${foodName} añadido a la lista de compras`);
+                Alert.alert(
+                  t('system.inventory.addItem.addedTitle'),
+                  t('system.inventory.addItem.addedMsg', { name: foodName })
+                );
               }}
               style={styles.iconBtn}
             >
@@ -121,7 +126,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             contentContainerStyle={{ padding: 16 }}
           >
             {/* Ubicación */}
-            <Text style={styles.labelBold}>Ubicación</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.addItem.location')}</Text>
             <View style={styles.chipWrap}>
               {locations.map((opt, idx) => (
                 <Pressable
@@ -141,7 +146,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Cantidad */}
-            <Text style={styles.labelBold}>Cantidad</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.addItem.quantity')}</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
@@ -211,7 +216,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Unidad */}
-            <Text style={styles.labelBold}>Unidad</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.addItem.unit')}</Text>
             <View style={styles.chipWrap}>
               {units.map((opt, idx) => (
                 <Pressable
@@ -231,13 +236,13 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>Precio</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.addItem.price')}</Text>
             <View style={styles.priceRow}>
               <TextInput
                 style={[styles.priceInput, { marginRight: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo unitario"
+                placeholder={t('system.inventory.addItem.unitCost')}
                 placeholderTextColor={palette.textDim}
                 value={unitPriceText}
                 onChangeText={(t) => {
@@ -261,7 +266,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 style={[styles.priceInput, { marginLeft: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo total"
+                placeholder={t('system.inventory.addItem.totalCost')}
                 placeholderTextColor={palette.textDim}
                 value={totalPriceText}
                 onChangeText={(t) => {
@@ -284,7 +289,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
 
             {/* Fechas (con inputs gris) */}
             <View style={{ marginTop: 6 }}>
-              <Text style={styles.labelBold}>Fecha de registro</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.addItem.regDate')}</Text>
               <DatePicker
                 value={regDate}
                 onChange={setRegDate}
@@ -292,7 +297,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
                 containerStyle={styles.dateContainer}
               />
               <View style={{ height: 8 }} />
-              <Text style={styles.labelBold}>Fecha de caducidad</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.addItem.expDate')}</Text>
               <DatePicker
                 value={expDate}
                 onChange={setExpDate}
@@ -302,12 +307,12 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             </View>
 
             {/* Nota */}
-            <Text style={styles.labelBold}>Nota</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.addItem.note')}</Text>
             <TextInput
               style={styles.noteInput}
               value={note}
               onChangeText={setNote}
-              placeholder="Opcional"
+              placeholder={t('system.common.optional')}
               placeholderTextColor={palette.textDim}
             />
 
@@ -329,7 +334,7 @@ export default function AddItemModal({ visible, foodName, foodIcon, initialLocat
             }
             style={styles.saveFab}
           >
-            <Text style={styles.saveFabText}>Guardar</Text>
+            <Text style={styles.saveFabText}>{t('system.common.save')}</Text>
           </TouchableOpacity>
         </View>
       </View>

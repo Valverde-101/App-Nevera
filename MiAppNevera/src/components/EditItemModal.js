@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useShopping } from '../context/ShoppingContext';
+import { useLanguage } from '../context/LanguageContext';
 import AddShoppingItemModal from './AddShoppingItemModal';
 import DatePicker from './DatePicker';
 import { useUnits } from '../context/UnitsContext';
@@ -142,7 +143,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
             >
               {/* Ubicación */}
-              <Text style={styles.labelBold}>Ubicación</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.batchAdd.location')}</Text>
               <View style={styles.chipWrap}>
                 {locations.map((opt, idx) => (
                   <Pressable
@@ -162,7 +163,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </View>
 
             {/* Cantidad */}
-            <Text style={styles.labelBold}>Cantidad</Text>
+            <Text style={styles.labelBold}>{t('system.inventory.batchAdd.quantity')}</Text>
               <View style={styles.qtyRow}>
                 <TouchableOpacity
                   onPress={() => {
@@ -232,7 +233,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               </View>
 
               {/* Unidad */}
-              <Text style={styles.labelBold}>Unidad</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.batchAdd.unit')}</Text>
               <View style={styles.chipWrap}>
                 {units.map((opt, idx) => (
                   <Pressable
@@ -252,13 +253,13 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </View>
 
             {/* Precio */}
-            <Text style={styles.labelBold}>Precio</Text>
+            <Text style={styles.labelBold}>{t('system.shopping.batchAdd.price')}</Text>
             <View style={styles.priceRow}>
               <TextInput
                 style={[styles.priceInput, { marginRight: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo unitario"
+                  placeholder={t('system.shopping.batchAdd.unitPricePlaceholder')}
                 placeholderTextColor={palette.textDim}
                 value={unitPriceText}
                 onChangeText={(t) => {
@@ -282,7 +283,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                 style={[styles.priceInput, { marginLeft: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo total"
+                  placeholder={t('system.shopping.batchAdd.totalPricePlaceholder')}
                 placeholderTextColor={palette.textDim}
                 value={totalPriceText}
                 onChangeText={(t) => {
@@ -305,7 +306,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
 
             {/* Fechas (inputs gris) */}
             <View style={{ marginTop: 6 }}>
-                <Text style={styles.labelBold}>Fecha de registro</Text>
+                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.regDate')}</Text>
                 <DatePicker
                   value={regDate}
                   onChange={setRegDate}
@@ -313,7 +314,7 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
                   containerStyle={styles.dateContainer}
                 />
                 <View style={{ height: 8 }} />
-                <Text style={styles.labelBold}>Fecha de caducidad</Text>
+                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.expDate')}</Text>
                 <DatePicker
                   value={expDate}
                   onChange={setExpDate}
@@ -323,12 +324,12 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
               </View>
 
               {/* Nota */}
-              <Text style={styles.labelBold}>Nota</Text>
+              <Text style={styles.labelBold}>{t('system.inventory.batchAdd.note')}</Text>
               <TextInput
                 style={styles.noteInput}
                 value={note}
                 onChangeText={setNote}
-                placeholder="Opcional"
+                placeholder={t('system.common.optional')}
                 placeholderTextColor={palette.textDim}
               />
 
@@ -336,9 +337,9 @@ export default function EditItemModal({ visible, item, onSave, onDelete, onClose
             </ScrollView>
 
             {/* Guardar */}
-            <TouchableOpacity onPress={handleSave} style={styles.saveFab}>
-              <Text style={styles.saveFabText}>Guardar</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={handleSave} style={styles.saveFab}>
+                <Text style={styles.saveFabText}>{t('system.common.save')}</Text>
+              </TouchableOpacity>
           </View>
         </View>
       </Modal>
