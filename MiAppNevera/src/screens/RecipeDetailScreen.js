@@ -22,6 +22,7 @@ import { useLocations } from '../context/LocationsContext';
 import { useCategories } from '../context/CategoriesContext';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function RecipeDetailScreen({ route }) {
   const palette = useTheme();
@@ -37,6 +38,7 @@ export default function RecipeDetailScreen({ route }) {
   const { categories } = useCategories();
   const [editVisible, setEditVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const { t } = useLanguage();
 
   const groupedIngredients = useMemo(() => {
     if (!recipe) return {};
@@ -71,7 +73,7 @@ export default function RecipeDetailScreen({ route }) {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: recipe ? recipe.name : 'Receta',
+      title: recipe ? recipe.name : t('system.navigation.recipe'),
       headerRight: () => (
         <View style={{ flexDirection: 'row' }}>
           <TouchableOpacity onPress={() => setEditVisible(true)} style={[styles.iconBtn, { marginRight: 8 }]}>
@@ -86,12 +88,12 @@ export default function RecipeDetailScreen({ route }) {
         </View>
       ),
     });
-  }, [nav, missing, recipe, palette]);
+  }, [nav, missing, recipe, palette, t]);
 
   if (!recipe) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: palette.bg }}>
-        <Text style={{ color: palette.textDim }}>Receta no encontrada</Text>
+        <Text style={{ color: palette.textDim }}>{t('system.recipes.detail.notFound')}</Text>
       </View>
     );
   }
@@ -111,14 +113,13 @@ export default function RecipeDetailScreen({ route }) {
           />
         ) : null}
         <Text style={styles.title}>{recipe.name}</Text>
-        <Text style={styles.meta}>Para {recipe.persons} personas • Dificultad: {recipe.difficulty}</Text>
-
-        <Text style={styles.blockTitle}>Ingredientes</Text>
+        <Text style={styles.meta}>{t('system.recipes.meta', { persons: recipe.persons, difficulty: recipe.difficulty })}</Text>
+        <Text style={styles.blockTitle}>{t('system.recipes.detail.ingredients')}</Text>
         {groupedOrder.map((cat) => (
           <View key={cat} style={styles.section}>
             <View style={styles.sectionHeader}>
               {categories[cat]?.icon && <Image source={categories[cat].icon} style={styles.catIcon} />}
-              <Text style={styles.sectionTitle}>{categories[cat]?.name || cat}</Text>
+              <Text style={styles.sectionTitle}>{categories[cat]?.name || (cat === 'otros' ? t('system.inventory.otherCategory') : cat)}</Text>
             </View>
             {groupedIngredients[cat].map((ing, idx) => {
               const icon = ing.icon || getFoodIcon(ing.name);
@@ -136,7 +137,7 @@ export default function RecipeDetailScreen({ route }) {
           </View>
         ))}
 
-        <Text style={styles.blockTitle}>Pasos</Text>
+        <Text style={styles.blockTitle}>{t('system.recipes.detail.steps')}</Text>
         <Markdown
           style={{
             body: { color: palette.text, lineHeight: 20 },
@@ -173,8 +174,8 @@ export default function RecipeDetailScreen({ route }) {
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={styles.modalCard}>
-                <Text style={styles.modalTitle}>Añadir a compras</Text>
-                <Text style={styles.modalBody}>¿Quieres añadir los siguientes ingredientes faltantes a la lista de compras?</Text>
+                <Text style={styles.modalTitle}>{t('system.recipes.detail.addToShopping')}</Text>
+                <Text style={styles.modalBody}>{t('system.recipes.detail.missingPrompt')}</Text>
                 <View style={{ maxHeight: 220 }}>
                   <ScrollView>
                     {missing.map((ing, idx) => (
@@ -191,10 +192,10 @@ export default function RecipeDetailScreen({ route }) {
                     ))}
                   </ScrollView>
                 </View>
-                <Text style={[styles.modalBody, { marginTop: 8 }]}>¿O deseas añadir <Text style={{ color: palette.accent, fontWeight: '700' }}>todos</Text> los ingredientes?</Text>
+                <Text style={[styles.modalBody, { marginTop: 8 }]}>{t('system.recipes.detail.addAllPrompt')}</Text>
                 <View style={styles.modalRow}>
                   <TouchableOpacity onPress={() => setConfirmVisible(false)} style={[styles.modalBtn, { backgroundColor: palette.surface3 }]}>
-                    <Text style={{ color: palette.text }}>Cancelar</Text>
+                    <Text style={{ color: palette.text }}>{t('system.inventory.cancel')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
@@ -203,7 +204,7 @@ export default function RecipeDetailScreen({ route }) {
                     }}
                     style={[styles.modalBtn, { backgroundColor: palette.accent }]}
                   >
-                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Añadir faltantes</Text>
+                    <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('system.recipes.detail.addMissing')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
@@ -212,7 +213,7 @@ export default function RecipeDetailScreen({ route }) {
                     }}
                     style={[styles.modalBtn, { backgroundColor: palette.selected, borderColor: palette.frame }]}
                   >
-                    <Text style={{ color: palette.accent, fontWeight: '700' }}>Añadir todos</Text>
+                    <Text style={{ color: palette.accent, fontWeight: '700' }}>{t('system.recipes.detail.addAll')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
