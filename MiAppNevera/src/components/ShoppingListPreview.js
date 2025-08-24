@@ -16,12 +16,14 @@ import { useCurrency } from '../context/CurrencyContext';
 import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import CostPieChart from './CostPieChart';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ShoppingListPreview({ items = [], onItemPress, onItemLongPress, selected = [], style }) {
   const { getLabel } = useUnits();
   const { categories } = useCategories();
   const palette = useTheme();
   const { symbol } = useCurrency();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(palette), [palette]);
   // subscribe to default food overrides so preview names update
   const { overrides } = useDefaultFoods();
@@ -110,13 +112,13 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
         {items.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Detalles de lista de compra</Text>
+              <Text style={styles.sectionTitle}>{t('system.shopping.detailsTitle')}</Text>
             </View>
             <View style={styles.detailsRow}>
               <TouchableOpacity style={styles.actionBtn} onPress={() => setDetailsVisible(true)}>
-                <Text style={styles.actionText}>Más detalles</Text>
+                <Text style={styles.actionText}>{t('system.shopping.moreDetails')}</Text>
               </TouchableOpacity>
-              <Text style={styles.totalText}>{`Costo Total: ${symbol}${totalCost.toFixed(2)}`}</Text>
+              <Text style={styles.totalText}>{`${t('system.shopping.totalCost')}: ${symbol}${totalCost.toFixed(2)}`}</Text>
             </View>
           </View>
         )}
@@ -132,7 +134,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
           <View style={styles.modalBackdrop}>
             <TouchableWithoutFeedback>
               <View style={[styles.card, { alignItems: 'center' }]}>
-                <Text style={[styles.cardTitle, { marginBottom: 16 }]}>Distribución de costos</Text>
+                <Text style={[styles.cardTitle, { marginBottom: 16 }]}>{t('system.shopping.costDistribution')}</Text>
                 {totalCost > 0 ? (
                   <>
                     <CostPieChart data={chartData} size={200} />
@@ -150,7 +152,7 @@ export default function ShoppingListPreview({ items = [], onItemPress, onItemLon
                     </View>
                   </>
                 ) : (
-                  <Text style={{ color: palette.textDim }}>Sin datos de costo</Text>
+                  <Text style={{ color: palette.textDim }}>{t('system.shopping.noCostData')}</Text>
                 )}
               </View>
             </TouchableWithoutFeedback>
