@@ -17,6 +17,13 @@ function normalize(name) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+// Capitalize the first letter of each word, supporting Unicode characters.
+function toTitleCase(str) {
+  return str.replace(/\p{L}+/gu, word =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  );
+}
+
 // Load metadata (display names and expiration days) from foodConfig.json if present.
 const metaPath = path.join(__dirname, 'foodConfig.json');
 let metadata = {};
@@ -27,6 +34,7 @@ if (fs.existsSync(metaPath)) {
 // Store every individual food icon, the icon for each category and the mapping
 // from categories to the food names that belong to them.
 const entries = [];
+// Store metadata for category icons: path and original base name for display.
 const categoryIcons = {};
 const categoryItems = {};
 
@@ -53,7 +61,7 @@ function walk(dir) {
 
       if (category === 'categorias') {
         // These files are the icons that represent each category itself.
-        categoryIcons[key] = rel;
+        categoryIcons[key] = { rel, base };
       } else {
         // Regular food icon. Track it and associate it with its category.
         entries.push({ key, rel, base });
@@ -81,7 +89,7 @@ const seen = new Set();
 for (const { key, rel, base } of entries) {
   if (!seen.has(key)) {
     const cfg = metadata[key] || {};
-    const displayName = cfg.name || base.replace(/\b\w/g, c => c.toUpperCase());
+    const displayName = cfg.name || toTitleCase(base);
     const exp = cfg.expirationDays != null ? cfg.expirationDays : null;
     lines.push(`  '${key}': {`);
     lines.push(`    icon: require('./${rel}'),`);
@@ -106,7 +114,10 @@ const allCategories = new Set([
   ...Object.keys(categoryItems),
 ]);
 for (const cat of Array.from(allCategories).sort()) {
-  const icon = categoryIcons[cat];
+  const iconData = categoryIcons[cat];
+  const icon = iconData && iconData.rel;
+  const baseName = iconData ? iconData.base : cat;
+  const displayName = toTitleCase(baseName);
   const items = categoryItems[cat] || [];
   lines.push(`  '${cat}': {`);
   lines.push(
@@ -114,6 +125,7 @@ for (const cat of Array.from(allCategories).sort()) {
       ? `    icon: require('./${icon}'),`
       : '    icon: null,'
   );
+  lines.push(`    name: '${displayName.replace(/'/g, "\\'")}',`);
   lines.push(`    items: [${items.map(i => `'${i}'`).join(', ')}],`);
   lines.push('  },');
 }
