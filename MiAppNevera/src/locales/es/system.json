@@ -32,6 +32,26 @@
     "english": "Inglés"
   },
   "inventory": {
-    "settingsButton": "Ajustes"
+    "settingsButton": "Ajustes",
+    "empty": "Su \"{{location}}\" se encuentra vacío",
+    "addFood": "Añadir alimento",
+    "intersection": "Intersección",
+    "groupBy": "Agrupar por",
+    "group": {
+      "category": "Categoría",
+      "none": "Sin agrupación",
+      "registered": "Fecha de registro"
+    },
+    "viewTitle": "Tipo de vista",
+    "view": {
+      "list": "Lista",
+      "grid": "Cuadrícula"
+    },
+    "addToShoppingConfirm": "Añadir los siguientes {{count}} elementos a la lista de compras?",
+    "add": "Añadir",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "expiredLabel": "Venc.",
+    "dayPrefix": "D-"
   }
 }
