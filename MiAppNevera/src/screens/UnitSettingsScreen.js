@@ -5,19 +5,22 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, Platform
 import { useNavigation } from '@react-navigation/native';
 import { useUnits } from '../context/UnitsContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function UnitSettingsScreen() {
   const palette = useTheme();
+  const { t, lang } = useLanguage();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions?.({
+      title: t('system.navigation.unitSettings'),
       headerStyle: { backgroundColor: palette.surface },
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [nav, palette]);
+  }, [nav, palette, t, lang]);
 
   const { units, addUnit, updateUnit, removeUnit } = useUnits();
   const [singular, setSingular] = useState('');
@@ -31,7 +34,7 @@ export default function UnitSettingsScreen() {
   const onSubmit = () => {
     const s = (singular || '').trim();
     const p = (plural || '').trim();
-    if (!s || !p) { setError('Completa singular y plural.'); return; }
+    if (!s || !p) { setError(t('system.units.error')); return; }
     if (editingKey) { updateUnit(editingKey, s, p); cancelEdit(); }
     else { addUnit(s, p); setSingular(''); setPlural(''); setError(''); }
   };
@@ -43,11 +46,11 @@ export default function UnitSettingsScreen() {
         <Text style={styles.rowSub}>{item.key}</Text>
       </View>
       <TouchableOpacity style={styles.smallBtn} onPress={() => startEdit(item)}>
-        <Text style={styles.smallBtnText}>✏️ Editar</Text>
+        <Text style={styles.smallBtnText}>✏️ {t('system.units.edit')}</Text>
       </TouchableOpacity>
-        <TouchableOpacity style={[styles.smallBtn, styles.smallBtnDanger, { marginLeft: 8 }]} onPress={() => removeUnit(item.key)}>
-          <Text style={styles.smallBtnDangerText}>🗑️ Eliminar</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={[styles.smallBtn, styles.smallBtnDanger, { marginLeft: 8 }]} onPress={() => removeUnit(item.key)}>
+        <Text style={styles.smallBtnDangerText}>🗑️ {t('system.units.delete')}</Text>
+      </TouchableOpacity>
       </View>
     );
 
@@ -63,20 +66,30 @@ export default function UnitSettingsScreen() {
       />
 
       <View style={styles.editor}>
-        <Text style={styles.editorTitle}>{editingKey ? 'Editar unidad' : 'Añadir unidad'}</Text>
-        <TextInput placeholder="Singular" placeholderTextColor={palette.textDim} value={singular}
-          onChangeText={t => { setSingular(t); setError(''); }} style={styles.input} />
-        <TextInput placeholder="Plural" placeholderTextColor={palette.textDim} value={plural}
-          onChangeText={t => { setPlural(t); setError(''); }} style={styles.input} />
+        <Text style={styles.editorTitle}>{editingKey ? t('system.units.editTitle') : t('system.units.addTitle')}</Text>
+        <TextInput
+          placeholder={t('system.units.singularPlaceholder')}
+          placeholderTextColor={palette.textDim}
+          value={singular}
+          onChangeText={txt => { setSingular(txt); setError(''); }}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder={t('system.units.pluralPlaceholder')}
+          placeholderTextColor={palette.textDim}
+          value={plural}
+          onChangeText={txt => { setPlural(txt); setError(''); }}
+          style={styles.input}
+        />
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={{ flexDirection: 'row', marginTop: 6 }}>
           <TouchableOpacity style={[styles.primaryBtn, { flex: 1 }]} onPress={onSubmit}>
-            <Text style={styles.primaryBtnText}>{editingKey ? 'Actualizar' : 'Añadir'}</Text>
+            <Text style={styles.primaryBtnText}>{editingKey ? t('system.units.update') : t('system.units.add')}</Text>
           </TouchableOpacity>
           {editingKey ? (
             <TouchableOpacity style={[styles.btn, { flex: 1, marginLeft: 10 }]} onPress={cancelEdit}>
-              <Text style={styles.btnText}>Cancelar</Text>
+              <Text style={styles.btnText}>{t('system.units.cancel')}</Text>
             </TouchableOpacity>
           ) : null}
         </View>

@@ -11,7 +11,9 @@
     "currencySettings": "Currency type",
     "locationSettings": "Location management",
     "userData": "User data",
-    "languageSettings": "Language"
+    "languageSettings": "Language",
+    "freezer": "Freezer",
+    "pantry": "Pantry"
   },
   "settings": {
     "themeTitle": "Color theme",
@@ -30,6 +32,52 @@
   "language": {
     "spanish": "Spanish",
     "english": "English"
+  },
+  "currency": {
+    "current": "Current"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "close": "Close",
+    "optional": "Optional",
+    "of": "of"
+  },
+  "shopping": {
+    "selectAll": "Select all",
+    "edit": "Edit",
+    "save": "Save",
+    "empty": "Your shopping list is empty",
+    "addFood": "Add food",
+    "detailsTitle": "Shopping list details",
+    "moreDetails": "More details",
+    "totalCost": "Total cost",
+    "costDistribution": "Cost distribution",
+    "noCostData": "No cost data",
+    "deleteSelectedTitle": "Delete selected",
+    "deleteSelectedPrompt": "Delete %{count} item(s) from the shopping list?",
+    "clearTitle": "Clear list",
+    "clearPrompt": "Remove all items from the shopping list?",
+    "autoAddTitle": "Auto add",
+    "autoAddPrompt": "Add all inventory items with quantity 0 to the shopping list? Existing items won't be added.",
+    "addItem": {
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "price": "Price",
+      "unitCost": "Unit cost",
+      "totalCost": "Total cost",
+      "cancel": "Cancel",
+      "save": "Save"
+    }
+    ,"batchAdd": {
+      "title": "Add %{count} item(s)",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "price": "Price",
+      "unitPricePlaceholder": "Unit cost",
+      "totalPricePlaceholder": "Total cost"
+    }
   },
   "inventory": {
     "settingsButton": "Settings",
@@ -65,6 +113,206 @@
     "delete": "Delete",
     "expiredLabel": "Exp.",
     "dayPrefix": "D-",
-    "unregistered": "No record"
+    "unregistered": "No record",
+    "otherCategory": "Others",
+    "batchAdd": {
+      "title": "Add %{count} item(s)",
+      "location": "Location",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "unitPrice": "Unit price",
+      "regDate": "Register date",
+      "expDate": "Expiration date",
+      "note": "Note"
+    },
+    "addItem": {
+      "location": "Location",
+      "quantity": "Quantity",
+      "unit": "Unit",
+      "price": "Price",
+      "unitCost": "Unit cost",
+      "totalCost": "Total cost",
+      "regDate": "Register date",
+      "expDate": "Expiration date",
+      "note": "Note",
+      "addedTitle": "Added",
+      "addedMsg": "%{name} added to the shopping list"
+    }
+  },
+  "locations": {
+    "warningNotEmpty": "The location contains food. Empty it before deleting.",
+    "inactive": "Inactive",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "delete": "Delete",
+    "editTitle": "Edit location",
+    "addTitle": "Add location",
+    "namePlaceholder": "Name",
+    "save": "Save",
+    "add": "Add",
+    "deletePrompt": "Delete this location?"
+  },
+  "recipes": {
+    "noImage": "No image",
+    "missing": "Missing",
+    "meta": "Serves %{persons} people • Difficulty: %{difficulty}",
+    "detail": {
+      "notFound": "Recipe not found",
+      "ingredients": "Ingredients",
+      "addToShopping": "Add to shopping",
+      "missingPrompt": "Add the following missing ingredients to the shopping list?",
+      "addAllPrompt": "Or add all ingredients?",
+      "addMissing": "Add missing",
+      "addAll": "Add all",
+      "steps": "Steps"
+    }
+    ,"add": {
+      "newTitle": "New recipe",
+      "editTitle": "Edit recipe",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Pasta with red sauce",
+      "imageLabel": "Photo",
+      "noImage": "No image",
+      "selectImage": "Select image",
+      "remove": "Remove",
+      "urlPlaceholder": "or paste a URL",
+      "personsLabel": "Persons",
+      "difficultyLabel": "Difficulty",
+      "ingredientsLabel": "Ingredients",
+      "addIngredient": "Add ingredient",
+      "stepsLabel": "Steps (supports Markdown)",
+      "stepsPlaceholder": "Use **bold**, - lists, 1. numbered",
+      "errorTitle": "Check data",
+      "errorName": "Enter the recipe name.",
+      "errorIngredients": "Add at least one ingredient.",
+      "chooseUnit": "Choose unit",
+      "accept": "OK",
+      "difficulty": {"easy": "Easy","medium": "Medium","hard": "Hard"}
+    }
+  },
+  "savedLists": {
+    "untitled": "Untitled",
+    "totalCost": "Total cost",
+    "items": "%{count} items",
+    "load": "Load",
+    "preview": "Preview",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete list",
+    "deletePrompt": "Delete this saved list?",
+    "list": "List",
+    "saveModal": {
+      "title": "Save list",
+      "namePlaceholder": "Name",
+      "notePlaceholder": "Note",
+      "cancel": "Cancel",
+      "cancelSelection": "Cancel selection",
+      "add": "Add",
+      "delete": "Delete",
+      "save": "Save"
+    }
+  },
+  "theme": {
+    "dark": "Dark Premium",
+    "light": "Light",
+    "current": "Current"
+  },
+  "units": {
+    "error": "Please fill singular and plural.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editTitle": "Edit unit",
+    "addTitle": "Add unit",
+    "singularPlaceholder": "Singular",
+    "pluralPlaceholder": "Plural",
+    "update": "Update",
+    "add": "Add",
+    "cancel": "Cancel"
+  },
+  "userData": {
+    "syncTitle": "Synchronization",
+    "syncSubtitle": "Connect your Google account to store a backup in the cloud.",
+    "connectedAs": "Connected as %{email}",
+    "uploadBackup": "Upload backup",
+    "restoreBackup": "Restore backup",
+    "disconnect": "Disconnect account",
+    "connectGoogle": "Connect with Google",
+    "backupTitle": "Backup and data",
+    "backupSubtitle": "Export or import all your data.",
+    "exportData": "Export data",
+    "importData": "Import data",
+    "deleteTitle": "Delete all",
+    "deleteSubtitle": "This will permanently delete all user data.",
+    "deleteData": "Delete all data",
+    "uploadConfirmTitle": "Upload backup",
+    "uploadConfirmBody": "A copy of your data and settings will be saved to Google Drive, replacing any previous backup. Continue?",
+    "downloadConfirmTitle": "Restore backup",
+    "downloadConfirmBody": "All local data will be replaced with the copy stored in Google Drive. This action will overwrite your current information. Continue?",
+    "exportConfirmTitle": "Export data",
+    "exportConfirmBody": "Do you want to export all user data?",
+    "resetConfirmTitle": "Delete all data",
+    "resetConfirmBody": "This action is permanent. Continue?",
+    "googleSignInError": "Could not sign in with Google.",
+    "uploadSuccess": "Backup uploaded to Google Drive.",
+    "uploadError": "Could not upload the backup.",
+    "downloadError": "Could not restore the backup.",
+    "resetTitle": "Restart",
+    "resetMessage": "The app will restart",
+    "success": "Success",
+    "error": "Error",
+    "accept": "Accept",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "ok": "OK",
+    "user": "user"
+  },
+  "defaultFood": {
+    "editTitle": "Edit food",
+    "nameLabel": "Name",
+    "expirationLabel": "Expiration days",
+    "unitLabel": "Default unit",
+    "priceLabel": "Unit price",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "categories": {
+    "addTitle": "New category",
+    "help": "Optionally add a custom icon.",
+    "nameLabel": "Name",
+    "namePlaceholder": "e.g. Fruits",
+    "iconLabel": "Icon",
+    "noIcon": "No icon",
+    "pickImage": "Pick image",
+    "removeImage": "Remove",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "foodPicker": {
+    "createNew": "Create new",
+    "searchPlaceholder": "Search food",
+    "manageDefaults": "Manage default foods",
+    "manage": {
+      "title": "Full list of all default foods",
+      "hiddenNote": "Shaded foods won't appear in the add list",
+      "holdNote": "Hold a food to edit more details"
+    }
+  }
+,  "datePicker": {
+    "placeholder": "YYYY-MM-DD"
+  },
+  "customFood": {
+    "manage": "My ingredients",
+    "help": "Create your own ingredients. Use default icons or upload an image.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Chimichurri",
+    "category": "Category",
+    "expirationDays": "Default expiration days",
+    "defaultUnit": "Default unit",
+    "defaultPrice": "Default unit price",
+    "icon": "Icon",
+    "noIcon": "No icon",
+    "default": "Default",
+    "upload": "Upload",
+    "save": "Save"
   }
 }
