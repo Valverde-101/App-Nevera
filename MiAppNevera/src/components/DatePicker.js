@@ -9,10 +9,12 @@ import {
   Animated,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function DatePicker({ label, value, onChange }) {
   const [show, setShow] = useState(false);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const { t } = useLanguage();
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -50,7 +52,7 @@ export default function DatePicker({ label, value, onChange }) {
               <TextInput
                 style={styles.input}
                 value={displayValue}
-                placeholder="YYYY-MM-DD"
+                placeholder={t('system.datePicker.placeholder')}
                 editable={false}
               />
             </View>
