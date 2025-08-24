@@ -17,6 +17,7 @@ import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
 import ThemeSettingsScreen from './src/screens/ThemeSettingsScreen';
 import CurrencySettingsScreen from './src/screens/CurrencySettingsScreen';
+import MembershipScreen from './src/screens/MembershipScreen';
 import { UnitsProvider } from './src/context/UnitsContext';
 import { LocationsProvider } from './src/context/LocationsContext';
 import { StatusBar } from 'expo-status-bar';
@@ -82,6 +83,11 @@ function MainApp() {
                       name="Settings"
                       component={SettingsScreen}
                       options={{ title: 'Ajustes' }}
+                    />
+                    <Stack.Screen
+                      name="Memberships"
+                      component={MembershipScreen}
+                      options={{ title: 'Membresías' }}
                     />
                     <Stack.Screen
                       name="ThemeSettings"
