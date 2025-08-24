@@ -25,6 +25,7 @@ import { useShopping } from '../context/ShoppingContext';
 import { useRecipes } from '../context/RecipeContext';
 import AddCategoryModal from './AddCategoryModal';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 
 // ========================
@@ -312,6 +313,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
   const { addCustomFood, updateCustomFood } = useCustomFoods();
   const { categories, addCategory } = useCategories();
   const { units } = useUnits();
+  const { t } = useLanguage();
   const categoryNames = Object.keys(categories);
   const [name, setName] = useState('');
   const [category, setCategory] = useState(categoryNames[0]);
@@ -399,7 +401,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             <Text style={styles.iconTxt}>←</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setManageVisible(true)} style={styles.actionBtn}>
-            <Text style={styles.actionTxt}>Mis ingredientes</Text>
+            <Text style={styles.actionTxt}>{t('system.customFood.manage')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -408,20 +410,18 @@ export default function AddCustomFoodModal({ visible, onClose }) {
           contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
           showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
         >
-          <Text style={styles.helpCentered}>
-            Crea tus propios ingredientes. Usa iconos predeterminados o carga una imagen.
-          </Text>
+          <Text style={styles.helpCentered}>{t('system.customFood.help')}</Text>
 
-          <Text style={styles.label}>Nombre</Text>
+          <Text style={styles.label}>{t('system.customFood.name')}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej. Chimichurri"
+            placeholder={t('system.customFood.namePlaceholder')}
             placeholderTextColor={palette.textDim}
             value={name}
             onChangeText={setName}
           />
 
-          <Text style={styles.label}>Categoría</Text>
+          <Text style={styles.label}>{t('system.customFood.category')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {categoryNames.map(cat => (
               <TouchableOpacity
@@ -439,17 +439,17 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.label}>Días de caducidad por defecto</Text>
+          <Text style={styles.label}>{t('system.customFood.expirationDays')}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={expirationDays}
             onChangeText={t => setExpirationDays(t.replace(/[^0-9]/g, ''))}
-            placeholder="Opcional"
+            placeholder={t('system.common.optional')}
             placeholderTextColor={palette.textDim}
           />
 
-          <Text style={styles.label}>Unidad por defecto</Text>
+          <Text style={styles.label}>{t('system.customFood.defaultUnit')}</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
             {units.map(u => (
               <TouchableOpacity
@@ -464,7 +464,7 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             ))}
           </View>
 
-          <Text style={styles.label}>Precio unitario por defecto</Text>
+          <Text style={styles.label}>{t('system.customFood.defaultPrice')}</Text>
           <TextInput
             style={styles.input}
             value={defaultPrice}
@@ -478,31 +478,31 @@ export default function AddCustomFoodModal({ visible, onClose }) {
             }}
             keyboardType="decimal-pad"
             inputMode="decimal"
-            placeholder="Opcional"
+            placeholder={t('system.common.optional')}
             placeholderTextColor={palette.textDim}
           />
 
-          <Text style={styles.label}>Icono</Text>
+          <Text style={styles.label}>{t('system.customFood.icon')}</Text>
           {(iconUri || baseIcon) ? (
             <Image source={iconUri ? { uri: iconUri } : getFoodIcon(baseIcon)} style={styles.preview} />
           ) : (
             <View style={[styles.preview, { alignItems: 'center', justifyContent: 'center' }]}>
-              <Text style={{ color: palette.textDim, fontSize: 12 }}>Sin icono</Text>
+              <Text style={{ color: palette.textDim, fontSize: 12 }}>{t('system.customFood.noIcon')}</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', marginTop: 8 }}>
             <TouchableOpacity onPress={() => setPickerVisible(true)} style={[styles.btn, styles.btnNeutral, { flex: 1 }]}>
-              <Text style={styles.btnNeutralText}>Predeterminado</Text>
+              <Text style={styles.btnNeutralText}>{t('system.customFood.default')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={pickImage} style={[styles.btn, styles.btnNeutral, { flex: 1, marginLeft: 10 }]}>
-              <Text style={styles.btnNeutralText}>Cargar</Text>
+              <Text style={styles.btnNeutralText}>{t('system.customFood.upload')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
 
         {/* Guardar */}
         <TouchableOpacity onPress={save} style={styles.fab}>
-          <Text style={styles.fabTxt}>Guardar</Text>
+          <Text style={styles.fabTxt}>{t('system.common.save')}</Text>
         </TouchableOpacity>
 
         {/* Modales internos */}
