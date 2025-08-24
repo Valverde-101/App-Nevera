@@ -17,7 +17,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useUnits } from '../context/UnitsContext';
 import { useLocations } from '../context/LocationsContext';
 import DatePicker from './DatePicker';
-import { useLanguage } from '../context/LanguageContext';
 import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
@@ -27,7 +26,6 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
   const palette = useTheme();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette, themeName), [palette, themeName]);
-  const { t } = useLanguage();
 
   const today = new Date().toISOString().split('T')[0];
   const { units, getLabel } = useUnits();
@@ -89,14 +87,14 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
               <Text style={styles.iconText}>←</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={saveAll} style={styles.iconBtnAccent}>
-              <Text style={styles.iconTextOnAccent}>{t('system.common.save')}</Text>
+              <Text style={styles.iconTextOnAccent}>Guardar</Text>
             </TouchableOpacity>
           </View>
 
           {/* Hero con gradiente y resumen */}
           <LinearGradient colors={g.colors} locations={g.locations} start={g.start} end={g.end} style={styles.hero}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.heroTitle}>{t('system.inventory.batchAdd.title', { count: items.length })}</Text>
+              <Text style={styles.heroTitle}>Añadir {items.length} alimento(s)</Text>
             </View>
           </LinearGradient>
 
@@ -121,7 +119,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                   </View>
 
                 {/* Ubicación */}
-                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.location')}</Text>
+                <Text style={styles.labelBold}>Ubicación</Text>
                 <View style={styles.chipWrap}>
                   {locations.map((opt, k) => (
                     <Pressable
@@ -144,7 +142,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Cantidad */}
-                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.quantity')}</Text>
+                <Text style={styles.labelBold}>Cantidad</Text>
                 <View style={styles.qtyRow}>
                   <TouchableOpacity
                     onPress={() => updateField(idx, 'quantity', String(Math.max(0, (parseFloat(data[idx]?.quantity) || 0) - 1)))}
@@ -172,7 +170,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Unidad */}
-                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.unit')}</Text>
+                <Text style={styles.labelBold}>Unidad</Text>
                 <View style={styles.chipWrap}>
                   {units.map((opt, k) => (
                     <Pressable
@@ -195,7 +193,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Precio */}
-                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.unitPrice')}</Text>
+                <Text style={styles.labelBold}>Precio unitario</Text>
                 <TextInput
                   style={styles.priceInput}
                   value={data[idx]?.price}
@@ -209,13 +207,13 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                   }}
                   keyboardType="decimal-pad"
                   inputMode="decimal"
-                  placeholder={t('system.common.optional')}
+                  placeholder="Opcional"
                   placeholderTextColor={palette.textDim}
                 />
 
                 {/* Fechas */}
                 <View style={{ marginTop: 6 }}>
-                  <Text style={styles.labelBold}>{t('system.inventory.batchAdd.regDate')}</Text>
+                  <Text style={styles.labelBold}>Fecha de registro</Text>
                   <DatePicker
                     value={data[idx]?.regDate}
                     onChange={t => updateField(idx, 'regDate', t)}
@@ -223,7 +221,7 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                     containerStyle={styles.dateContainer}
                   />
                   <View style={{ height: 8 }} />
-                  <Text style={styles.labelBold}>{t('system.inventory.batchAdd.expDate')}</Text>
+                  <Text style={styles.labelBold}>Fecha de caducidad</Text>
                   <DatePicker
                     value={data[idx]?.expDate}
                     onChange={t => updateField(idx, 'expDate', t)}
@@ -233,12 +231,12 @@ export default function BatchAddItemModal({ visible, items = [], onSave, onClose
                 </View>
 
                 {/* Nota */}
-                <Text style={styles.labelBold}>{t('system.inventory.batchAdd.note')}</Text>
+                <Text style={styles.labelBold}>Nota</Text>
                 <TextInput
                   style={styles.noteInput}
                   value={data[idx]?.note}
                   onChangeText={t => updateField(idx, 'note', t)}
-                  placeholder={t('system.common.optional')}
+                  placeholder="Opcional"
                   placeholderTextColor={palette.textDim}
                 />
               </View>

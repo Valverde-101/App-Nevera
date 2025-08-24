@@ -30,7 +30,6 @@ import { useDefaultFoods } from '../context/DefaultFoodsContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function FoodPickerModal({
   visible,
@@ -43,7 +42,6 @@ export default function FoodPickerModal({
   const palette = useTheme();
   const { themeName } = useThemeController();
   const styles = useMemo(() => createStyles(palette), [palette]);
-  const { t } = useLanguage();
   const { categories } = useCategories();
   // subscribe to default food overrides so default names update after refresh
   const { overrides } = useDefaultFoods();
@@ -181,7 +179,7 @@ export default function FoodPickerModal({
                     onPress={() => setAddVisible(true)}
                     style={[styles.createBtn, { marginRight: showMenu ? 8 : 0 }]}
                   >
-                    <Text style={styles.createText}>{t('system.foodPicker.createNew')}</Text>
+                    <Text style={styles.createText}>Crear Nuevo</Text>
                   </TouchableOpacity>
                 )}
                 {showMenu && (
@@ -241,7 +239,7 @@ export default function FoodPickerModal({
               <View style={{ paddingHorizontal: 12, paddingTop: 6, backgroundColor: palette.bg }}>
                 <TextInput
                   style={styles.searchInput}
-                  placeholder={t('system.foodPicker.searchPlaceholder')}
+                  placeholder="Buscar alimento"
                   placeholderTextColor={palette.textDim}
                   value={search}
                   onChangeText={setSearch}
@@ -308,10 +306,10 @@ export default function FoodPickerModal({
                   onPress={() => { setSelectMode(false); setSelected([]); }}
                   style={[styles.bottomBtn, { backgroundColor: palette.surface3 }]}
                 >
-                  <Text style={{ color: palette.text }}>{t('system.common.cancel')}</Text>
+                  <Text style={{ color: palette.text }}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleSave} style={[styles.bottomBtn, { backgroundColor: palette.accent }]}>
-                  <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('system.common.save')}</Text>
+                  <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Guardar</Text>
                 </TouchableOpacity>
               </View>
             ) : null}
@@ -332,7 +330,7 @@ export default function FoodPickerModal({
                   }}
                   style={styles.menuItem}
                 >
-                  <Text style={{ color: palette.text }}>{t('system.foodPicker.manageDefaults')}</Text>
+                  <Text style={{ color: palette.text }}>Administrar alimentos predeterminados</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -346,13 +344,13 @@ export default function FoodPickerModal({
             <View style={[styles.sheet, { padding: 12 }]}>
               <View style={{ borderWidth: 1, borderColor: palette.border, backgroundColor: palette.surface2, padding: 10, marginBottom: 10, borderRadius: 10 }}>
                 <Text style={{ textAlign: 'center', color: palette.text }}>
-                  {t('system.foodPicker.manage.title')}
+                  Lista completa de todos los alimentos predeterminados
                 </Text>
                 <Text style={{ textAlign: 'center', color: palette.textDim }}>
-                  {t('system.foodPicker.manage.hiddenNote')}
+                  Los alimentos sombreados no se mostrarán en la lista de agregar
                 </Text>
                 <Text style={{ textAlign: 'center', color: palette.textDim }}>
-                  {t('system.foodPicker.manage.holdNote')}
+                  Mantener presionado el alimento para editar más detalles
                 </Text>
               </View>
               <View style={styles.catBar}>
@@ -445,7 +443,7 @@ export default function FoodPickerModal({
                 })}
               </ScrollView>
               <TouchableOpacity onPress={() => setManageVisible(false)} style={[styles.bottomBtn, { alignSelf: 'center', backgroundColor: palette.accent, marginBottom: 10 }]}>
-                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>{t('system.common.close')}</Text>
+                <Text style={{ color: '#1b1d22', fontWeight: '700' }}>Cerrar</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -3,12 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from '
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
 import { currencyOptions, useCurrencyController } from '../context/CurrencyContext';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function CurrencySettingsScreen() {
   const palette = useTheme();
   const { currencyKey, setCurrencyKey } = useCurrencyController();
-  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
 
@@ -28,9 +26,7 @@ export default function CurrencySettingsScreen() {
         {currencyOptions.map(c => (
           <TouchableOpacity key={c.key} style={styles.item} onPress={() => setCurrencyKey(c.key)}>
             <Text style={styles.itemTitle}>{`${c.label} (${c.symbol})`}</Text>
-            {currencyKey === c.key ? (
-              <Text style={styles.current}>{t('system.currency.current')}</Text>
-            ) : null}
+            {currencyKey === c.key ? <Text style={styles.current}>Actual</Text> : null}
           </TouchableOpacity>
         ))}
       </ScrollView>

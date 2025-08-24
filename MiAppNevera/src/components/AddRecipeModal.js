@@ -22,7 +22,6 @@ import {
 import FoodPickerModal from './FoodPickerModal';
 import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
-import { useLanguage } from '../context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
 
@@ -34,7 +33,6 @@ export default function AddRecipeModal({
 }) {
   const palette = useTheme();
   const styles = useMemo(() => createStyles(palette), [palette]);
-  const { t, lang } = useLanguage();
   const { units, getLabel } = useUnits();
   const [name, setName] = useState('');
   const [image, setImage] = useState('');
@@ -161,8 +159,8 @@ export default function AddRecipeModal({
   
 const save = () => {
   const nm = (name || '').trim();
-  if (!nm) { setErrorMsg(t('system.recipes.add.errorName')); return; }
-  if (!ingredients.length) { setErrorMsg(t('system.recipes.add.errorIngredients')); return; }
+  if (!nm) { setErrorMsg('Escribe el nombre de la receta.'); return; }
+  if (!ingredients.length) { setErrorMsg('Añade al menos un ingrediente.'); return; }
   const per = Math.max(1, parseInt(persons, 10) || 0);
   onSave({
 
@@ -180,7 +178,7 @@ const save = () => {
     });
   };
 
-  const diffOptions = useMemo(() => ['easy', 'medium', 'hard'], []);
+  const diffOptions = useMemo(() => ['facil', 'intermedio', 'dificil'], []);
 
   return (
     <Modal visible={visible} animationType="slide">
@@ -190,9 +188,9 @@ const save = () => {
           <TouchableOpacity onPress={onClose} style={styles.iconBtn}>
             <Text style={styles.iconTxt}>←</Text>
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{isEditing ? t('system.recipes.add.editTitle') : t('system.recipes.add.newTitle')}</Text>
+          <Text style={styles.headerTitle}>{isEditing ? 'Editar receta' : 'Nueva receta'}</Text>
           <TouchableOpacity onPress={save} style={styles.saveBtn}>
-            <Text style={styles.saveBtnText}>{t('system.common.save')}</Text>
+            <Text style={styles.saveBtnText}>Guardar</Text>
           </TouchableOpacity>
         </View>
 
@@ -202,45 +200,45 @@ const save = () => {
           showsVerticalScrollIndicator={Platform.OS === 'web' ? true : false}
         >
           {/* Nombre */}
-          <Text style={styles.label}>{t('system.recipes.add.nameLabel')}</Text>
+          <Text style={styles.label}>Nombre</Text>
           <TextInput
             style={styles.input}
             value={name}
             onChangeText={setName}
-            placeholder={t('system.recipes.add.namePlaceholder')}
+            placeholder="Ej. Pasta con salsa roja"
             placeholderTextColor={palette.textDim}
           />
 
           {/* Imagen */}
-          <Text style={styles.label}>{t('system.recipes.add.imageLabel')}</Text>
+          <Text style={styles.label}>Foto</Text>
           {image ? (
             <Image source={{ uri: image }} style={styles.image} resizeMode="cover" />
           ) : (
             <View style={[styles.image, styles.imagePlaceholder]}>
-                <Text style={{ color: palette.textDim }}>{t('system.recipes.add.noImage')}</Text>
+              <Text style={{ color: palette.textDim }}>Sin imagen</Text>
             </View>
           )}
           <View style={{ flexDirection: 'row', marginTop: 8 }}>
-              <TouchableOpacity style={[styles.btn, styles.btnNeutral, { flex: 1 }]} onPress={pickImage}>
-                <Text style={styles.btnNeutralText}>{t('system.recipes.add.selectImage')}</Text>
-              </TouchableOpacity>
+            <TouchableOpacity style={[styles.btn, styles.btnNeutral, { flex: 1 }]} onPress={pickImage}>
+              <Text style={styles.btnNeutralText}>Seleccionar imagen</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={[styles.btn, { flex: 1, marginLeft: 10 }]}
               onPress={() => setImage('')}
             >
-                <Text style={styles.btnText}>{t('system.recipes.add.remove')}</Text>
+              <Text style={styles.btnText}>Quitar</Text>
             </TouchableOpacity>
           </View>
           <TextInput
             style={[styles.input, { marginTop: 8 }]}
-            placeholder={t('system.recipes.add.urlPlaceholder')}
+            placeholder="o pega una URL"
             placeholderTextColor={palette.textDim}
             value={image}
             onChangeText={setImage}
           />
 
           {/* Personas */}
-          <Text style={styles.label}>{t('system.recipes.add.personsLabel')}</Text>
+          <Text style={styles.label}>Personas</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
             <TouchableOpacity
               onPress={() => setPersons(p => String(Math.max(1, (parseInt(p, 10) || 1) - 1)))}
@@ -263,7 +261,7 @@ const save = () => {
           </View>
 
           {/* Dificultad */}
-          <Text style={styles.label}>{t('system.recipes.add.difficultyLabel')}</Text>
+          <Text style={styles.label}>Dificultad</Text>
           <View style={{ flexDirection: 'row', marginBottom: 10 }}>
             {diffOptions.map(level => (
               <TouchableOpacity
@@ -272,14 +270,14 @@ const save = () => {
                 style={[styles.chip, difficulty === level && styles.chipOn]}
               >
                 <Text style={[styles.chipTxt, difficulty === level && styles.chipTxtOn]}>
-                  {t(`system.recipes.add.difficulty.${level}`)}
+                  {level.charAt(0).toUpperCase() + level.slice(1)}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {/* Ingredientes */}
-          <Text style={styles.label}>{t('system.recipes.add.ingredientsLabel')}</Text>
+          <Text style={styles.label}>Ingredientes</Text>
           {ingredients.map((ing, idx) => (
             <TouchableOpacity
               key={idx}
@@ -302,7 +300,7 @@ const save = () => {
                   onPress={() => openUnitPicker(idx)}
                 >
                   <Text style={styles.ingText}>
-                    {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} ${t('system.common.of')} ${
+                    {`${ing.quantity} ${getLabel(ing.quantity, ing.unit)} de ${
                       getFoodInfo(ing.name)?.name || ing.name
                     }`}
                   </Text>
@@ -346,32 +344,27 @@ const save = () => {
           {selectMode ? (
             <View style={{ flexDirection: 'row', marginTop: 6 }}>
               <TouchableOpacity style={[styles.btn, { flex: 1 }]} onPress={cancelSelect}>
-                <Text style={styles.btnText}>{t('system.common.cancel')}</Text>
+                <Text style={styles.btnText}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.btn, styles.btnDanger, { flex: 1, marginLeft: 10 }]}
                 onPress={deleteSelectedIngredients}
               >
-                <Text style={styles.btnDangerText}>{t('system.common.delete')}</Text>
+                <Text style={styles.btnDangerText}>Eliminar</Text>
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity
-              onPress={() => setPickerVisible(true)}
-              style={[styles.btn, styles.btnNeutral, { alignSelf: 'center', marginTop: 6 }]}
-            >
-              <Text style={styles.btnNeutralText}>
-                {t('system.recipes.add.addIngredient')}
-              </Text>
+            <TouchableOpacity onPress={() => setPickerVisible(true)} style={[styles.btn, styles.btnNeutral, { alignSelf: 'center', marginTop: 6 }]}>
+              <Text style={styles.btnNeutralText}>Añadir ingrediente</Text>
             </TouchableOpacity>
           )}
 
           {/* Pasos */}
-          <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
+          <Text style={styles.label}>Pasos (admite Markdown)</Text>
           <TextInput
             multiline
             style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
-            placeholder={t('system.recipes.add.stepsPlaceholder')}
+            placeholder="Usa **negrita**, - listas, 1. enumeraciones"
             placeholderTextColor={palette.textDim}
             value={steps}
             onChangeText={setSteps}
@@ -384,7 +377,7 @@ const save = () => {
             <View style={styles.modalBackdrop}>
               <TouchableWithoutFeedback>
                 <View style={styles.modalCard}>
-                  <Text style={styles.modalTitle}>{t('system.recipes.add.chooseUnit')}</Text>
+                  <Text style={styles.modalTitle}>Elegir unidad</Text>
                   <ScrollView style={{ maxHeight: 260 }}>
                     {units.map(opt => (
                       <TouchableOpacity key={opt.key} onPress={() => selectUnit(opt.key)} style={styles.optionRow}>
@@ -406,11 +399,11 @@ const save = () => {
     <View style={styles.modalBackdrop}>
       <TouchableWithoutFeedback>
         <View style={styles.modalCard}>
-          <Text style={styles.modalTitle}>{t('system.recipes.add.errorTitle')}</Text>
+          <Text style={styles.modalTitle}>Revisa los datos</Text>
           <Text style={styles.modalErrorText}>{errorMsg}</Text>
           <View style={styles.modalRow}>
             <TouchableOpacity onPress={() => setErrorMsg(null)} style={[styles.modalBtnOK]}>
-              <Text style={styles.modalBtnOKText}>{t('system.recipes.add.accept')}</Text>
+              <Text style={styles.modalBtnOKText}>Aceptar</Text>
             </TouchableOpacity>
           </View>
         </View>
