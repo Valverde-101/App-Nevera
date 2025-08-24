@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { categories as defaultCategories, normalizeFoodName } from '../foodIcons';
+import { useLanguage } from './LanguageContext';
 
 const CategoriesContext = createContext();
 
 export const CategoriesProvider = ({ children }) => {
   const [customCategories, setCustomCategories] = useState([]);
+  const { lang } = useLanguage();
 
   useEffect(() => {
     (async () => {
@@ -47,9 +49,7 @@ export const CategoriesProvider = ({ children }) => {
   }, [persist]);
 
   const categories = useMemo(() => {
-    const base = Object.fromEntries(
-      Object.entries(defaultCategories).map(([k, v]) => [k, { ...v, name: v.name || k }]),
-    );
+    const base = { ...defaultCategories };
     customCategories.forEach(cat => {
       base[cat.key] = {
         icon: cat.icon ? { uri: cat.icon } : undefined,
@@ -57,7 +57,7 @@ export const CategoriesProvider = ({ children }) => {
       };
     });
     return base;
-  }, [customCategories]);
+  }, [customCategories, lang]);
 
   const value = useMemo(() => ({
     categories,
