@@ -14,11 +14,9 @@ import { useTheme } from '../context/ThemeContext';
 import { useUnits } from '../context/UnitsContext';
 import { getFoodInfo, getFoodIcon } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function EditDefaultFoodModal({ visible, foodKey, onClose }) {
   const palette = useTheme();
-  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { units } = useUnits();
   const { updateOverride } = useDefaultFoods();
@@ -51,21 +49,21 @@ export default function EditDefaultFoodModal({ visible, foodKey, onClose }) {
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalBackdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>{t('system.defaultFood.editTitle')}</Text>
+          <Text style={styles.title}>Editar alimento</Text>
           <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}>
             {foodKey && (
               <Image source={getFoodIcon(foodKey)} style={styles.editIcon} />
             )}
-            <Text style={styles.label}>{t('system.defaultFood.nameLabel')}</Text>
+            <Text style={styles.label}>Nombre</Text>
             <TextInput value={name} onChangeText={setName} style={styles.input} />
-            <Text style={styles.label}>{t('system.defaultFood.expirationLabel')}</Text>
+            <Text style={styles.label}>Días de caducidad</Text>
             <TextInput
               value={days}
               onChangeText={t => setDays(t.replace(/[^0-9]/g, ''))}
               keyboardType="numeric"
               style={styles.input}
             />
-            <Text style={styles.label}>{t('system.defaultFood.unitLabel')}</Text>
+            <Text style={styles.label}>Unidad por defecto</Text>
             <View style={styles.chipWrap}>
               {units.map(u => (
                 <Pressable
@@ -79,7 +77,7 @@ export default function EditDefaultFoodModal({ visible, foodKey, onClose }) {
                 </Pressable>
               ))}
             </View>
-            <Text style={styles.label}>{t('system.defaultFood.priceLabel')}</Text>
+            <Text style={styles.label}>Precio unitario</Text>
             <TextInput
               value={price}
               onChangeText={t => {
@@ -97,10 +95,10 @@ export default function EditDefaultFoodModal({ visible, foodKey, onClose }) {
           </ScrollView>
           <View style={styles.footer}>
             <TouchableOpacity onPress={onClose} style={styles.btn}>
-              <Text style={styles.btnTxt}>{t('system.defaultFood.cancel')}</Text>
+              <Text style={styles.btnTxt}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSave} style={[styles.btn, styles.btnPrimary]}>
-              <Text style={styles.btnPrimaryTxt}>{t('system.defaultFood.save')}</Text>
+              <Text style={styles.btnPrimaryTxt}>Guardar</Text>
             </TouchableOpacity>
           </View>
         </View>
