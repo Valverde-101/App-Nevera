@@ -7,7 +7,6 @@ import AddRecipeModal from '../components/AddRecipeModal';
 import { useLocations } from '../context/LocationsContext';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
-import { useLanguage } from '../context/LanguageContext';
 
 export default function RecipeBookScreen({ navigation }) {
   const palette = useTheme();
@@ -17,7 +16,6 @@ export default function RecipeBookScreen({ navigation }) {
   const { inventory } = useInventory();
   const { locations } = useLocations();
   const [addVisible, setAddVisible] = useState(false);
-  const { t } = useLanguage();
 
   useLayoutEffect(() => {
     nav.setOptions?.({
@@ -25,14 +23,14 @@ export default function RecipeBookScreen({ navigation }) {
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
-      title: t('system.navigation.recipes'),
+      title: 'Recetario',
       headerRight: () => (
         <TouchableOpacity onPress={() => setAddVisible(true)} style={styles.headerIconBtn}>
           <Text style={styles.headerIconTxt}>＋</Text>
         </TouchableOpacity>
       ),
     });
-  }, [nav, palette, t]);
+  }, [nav, palette]);
 
   const hasIngredients = (recipe) => {
     return recipe.ingredients.every((ing) => {
@@ -64,13 +62,13 @@ export default function RecipeBookScreen({ navigation }) {
                   <Image source={{ uri: rec.image }} style={styles.thumb} resizeMode="cover" />
                 ) : (
                   <View style={styles.thumbPlaceholder}>
-                    <Text style={{ color: palette.textDim }}>{t('system.recipes.noImage')}</Text>
+                    <Text style={{ color: palette.textDim }}>Sin imagen</Text>
                   </View>
                 )}
-                {!enough && <Text style={styles.badge}>{t('system.recipes.missing')}</Text>}
+                {!enough && <Text style={styles.badge}>Faltan</Text>}
               </View>
               <Text style={styles.cardTitle} numberOfLines={2}>{rec.name}</Text>
-              <Text style={styles.cardMeta}>{t('system.recipes.meta', { persons: rec.persons, difficulty: rec.difficulty })}</Text>
+              <Text style={styles.cardMeta}>Para {rec.persons} personas • Dificultad: {rec.difficulty}</Text>
             </TouchableOpacity>
           );
         })}
