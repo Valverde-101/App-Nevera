@@ -90,6 +90,7 @@ mediante `react-native-web` y Expo.
 
 
 LICENCIAS
+
 https://www.flaticon.es/packs/fruit-and-vegetable-5
 https://www.flaticon.es/packs/vegan-food-4
 https://www.flaticon.es/packs/food-and-drink-18
