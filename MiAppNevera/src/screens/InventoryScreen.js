@@ -465,7 +465,7 @@ export default function InventoryScreen({ navigation }) {
                     )}
                     <Text style={{ fontSize: 14, color: palette.text }}>
                       {groupBy === 'category'
-                        ? (categories[cat]?.name || (cat === 'otros' ? t('system.inventory.otherCategory') : cat.charAt(0).toUpperCase() + cat.slice(1)))
+                        ? (categories[cat]?.name || cat.charAt(0).toUpperCase() + cat.slice(1))
                         : groupBy === 'registered'
                           ? (cat === UNREGISTERED_KEY ? t('system.inventory.unregistered') : cat)
                           : cat}
