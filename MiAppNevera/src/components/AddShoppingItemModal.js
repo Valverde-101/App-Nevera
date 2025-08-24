@@ -18,6 +18,7 @@ import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 import { getFoodInfo } from '../foodIcons';
 import { useDefaultFoods } from '../context/DefaultFoodsContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function AddShoppingItemModal({
   visible,
@@ -32,6 +33,7 @@ export default function AddShoppingItemModal({
 }) {
   const palette = useTheme();
   const { themeName } = useThemeController();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const { units } = useUnits();
   // subscribe to default food overrides so edits persist
@@ -112,7 +114,7 @@ export default function AddShoppingItemModal({
             style={styles.scroll}
             contentContainerStyle={{ padding: 16 }}
           >
-            <Text style={styles.labelBold}>Cantidad</Text>
+            <Text style={styles.labelBold}>{t('system.shopping.addItem.quantity')}</Text>
             <View style={styles.qtyRow}>
               <TouchableOpacity
                 onPress={() => {
@@ -181,7 +183,7 @@ export default function AddShoppingItemModal({
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.labelBold}>Unidad</Text>
+            <Text style={styles.labelBold}>{t('system.shopping.addItem.unit')}</Text>
             <View style={styles.chipWrap}>
               {units.map((opt, idx) => (
                 <Pressable
@@ -206,13 +208,13 @@ export default function AddShoppingItemModal({
               ))}
             </View>
 
-            <Text style={styles.labelBold}>Precio</Text>
+            <Text style={styles.labelBold}>{t('system.shopping.addItem.price')}</Text>
             <View style={styles.priceRow}>
               <TextInput
                 style={[styles.priceInput, { marginRight: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo unitario"
+                placeholder={t('system.shopping.addItem.unitCost')}
                 placeholderTextColor={palette.textDim}
                 value={unitPriceText}
                 onChangeText={(t) => {
@@ -236,7 +238,7 @@ export default function AddShoppingItemModal({
                 style={[styles.priceInput, { marginLeft: 4 }]}
                 keyboardType="decimal-pad"
                 inputMode="decimal"
-                placeholder="Costo total"
+                placeholder={t('system.shopping.addItem.totalCost')}
                 placeholderTextColor={palette.textDim}
                 value={totalPriceText}
                 onChangeText={(t) => {
@@ -260,7 +262,7 @@ export default function AddShoppingItemModal({
 
           <View style={styles.footerRow}>
             <TouchableOpacity style={styles.footerBtn} onPress={onClose}>
-              <Text style={styles.footerBtnText}>Cancelar</Text>
+              <Text style={styles.footerBtnText}>{t('system.shopping.addItem.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.footerBtn, styles.footerPrimary]}
@@ -276,7 +278,7 @@ export default function AddShoppingItemModal({
               <Text
                 style={[styles.footerBtnText, styles.footerPrimaryText]}
               >
-                Guardar
+                {t('system.shopping.addItem.save')}
               </Text>
             </TouchableOpacity>
           </View>

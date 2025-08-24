@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useUnits } from '../context/UnitsContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme, useThemeController } from '../context/ThemeContext';
 import { gradientForKey } from '../theme/gradients';
 import { getFoodInfo } from '../foodIcons';
@@ -67,7 +68,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
               <Text style={styles.iconText}>←</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={saveAll} style={styles.iconBtnAccent}>
-              <Text style={styles.iconTextOnAccent}>Guardar</Text>
+              <Text style={styles.iconTextOnAccent}>{t('system.common.save')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -78,7 +79,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
             end={g.end}
             style={styles.hero}
           >
-            <Text style={styles.heroTitle}>Añadir {items.length} alimento(s)</Text>
+            <Text style={styles.heroTitle}>{t('system.shopping.batchAdd.title', { count: items.length })}</Text>
           </LinearGradient>
 
           <ScrollView
@@ -112,7 +113,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                       </Text>
                     </View>
 
-                  <Text style={styles.labelBold}>Cantidad</Text>
+                  <Text style={styles.labelBold}>{t('system.shopping.batchAdd.quantity')}</Text>
                   <View style={styles.qtyRow}>
                     <TouchableOpacity
                       onPress={() =>
@@ -207,7 +208,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                     </TouchableOpacity>
                   </View>
 
-                  <Text style={styles.labelBold}>Unidad</Text>
+                  <Text style={styles.labelBold}>{t('system.shopping.batchAdd.unit')}</Text>
                   <View style={styles.chipWrap}>
                     {units.map(opt => (
                       <Pressable
@@ -231,13 +232,13 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                     ))}
                   </View>
 
-                  <Text style={styles.labelBold}>Precio</Text>
+                  <Text style={styles.labelBold}>{t('system.shopping.batchAdd.price')}</Text>
                   <View style={styles.priceRow}>
                     <TextInput
                       style={[styles.priceInput, { marginRight: 4 }]}
                       keyboardType="decimal-pad"
                       inputMode="decimal"
-                      placeholder="Costo unitario"
+                      placeholder={t('system.shopping.batchAdd.unitPricePlaceholder')}
                       placeholderTextColor={palette.textDim}
                       value={entry.unitPriceText || ''}
                       onChangeText={t => {
@@ -256,7 +257,7 @@ export default function BatchAddShoppingModal({ visible, items = [], onSave, onC
                       style={[styles.priceInput, { marginLeft: 4 }]}
                       keyboardType="decimal-pad"
                       inputMode="decimal"
-                      placeholder="Costo total"
+                      placeholder={t('system.shopping.batchAdd.totalPricePlaceholder')}
                       placeholderTextColor={palette.textDim}
                       value={entry.totalPriceText || ''}
                       onChangeText={t => {
