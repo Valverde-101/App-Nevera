@@ -32,6 +32,26 @@
     "english": "English"
   },
   "inventory": {
-    "settingsButton": "Settings"
+    "settingsButton": "Settings",
+    "empty": "{{location}} is empty",
+    "addFood": "Add food",
+    "intersection": "Intersection",
+    "groupBy": "Group by",
+    "group": {
+      "category": "Category",
+      "none": "No grouping",
+      "registered": "Date added"
+    },
+    "viewTitle": "View type",
+    "view": {
+      "list": "List",
+      "grid": "Grid"
+    },
+    "addToShoppingConfirm": "Add the following {{count}} items to the shopping list?",
+    "add": "Add",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "expiredLabel": "Exp.",
+    "dayPrefix": "D-"
   }
 }
