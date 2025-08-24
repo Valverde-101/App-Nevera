@@ -1,3 +1,4 @@
+import '@expo/metro-runtime';
 import React, { useEffect } from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,6 +13,7 @@ import RecipeBookScreen from './src/screens/RecipeBookScreen';
 import RecipeDetailScreen from './src/screens/RecipeDetailScreen';
 import { RecipeProvider } from './src/context/RecipeContext';
 import SettingsScreen from './src/screens/SettingsScreen';
+import LanguageSettingsScreen from './src/screens/LanguageSettingsScreen';
 import UnitSettingsScreen from './src/screens/UnitSettingsScreen';
 import LocationSettingsScreen from './src/screens/LocationSettingsScreen';
 import UserDataScreen from './src/screens/UserDataScreen';
@@ -25,11 +27,13 @@ import { DefaultFoodsProvider } from './src/context/DefaultFoodsContext';
 import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
 import { CurrencyProvider } from './src/context/CurrencyContext';
+import { LanguageProvider, useLanguage } from './src/context/LanguageContext';
 
 const Stack = createNativeStackNavigator();
 
 function MainApp() {
   const { themeName } = useThemeController();
+  const { t } = useLanguage();
   useEffect(() => {
     if (Platform.OS === 'web') {
       const msg = sessionStorage.getItem('reset_notice');
@@ -56,57 +60,62 @@ function MainApp() {
                     <Stack.Screen
                       name="Inventory"
                       component={InventoryScreen}
-                      options={{ title: 'Nevera' }}
+                      options={{ title: t('system.navigation.inventory') }}
                     />
                     <Stack.Screen
                       name="Shopping"
                       component={ShoppingListScreen}
-                      options={{ title: 'Lista de compras' }}
+                      options={{ title: t('system.navigation.shopping') }}
                     />
                     <Stack.Screen
                       name="SavedLists"
                       component={SavedListsScreen}
-                      options={{ title: 'Listas guardadas' }}
+                      options={{ title: t('system.navigation.savedLists') }}
                     />
                     <Stack.Screen
                       name="Recipes"
                       component={RecipeBookScreen}
-                      options={{ title: 'Recetario' }}
+                      options={{ title: t('system.navigation.recipes') }}
                     />
                     <Stack.Screen
                       name="RecipeDetail"
                       component={RecipeDetailScreen}
-                      options={{ title: 'Receta' }}
+                      options={{ title: t('system.navigation.recipe') }}
                     />
                     <Stack.Screen
                       name="Settings"
                       component={SettingsScreen}
-                      options={{ title: 'Ajustes' }}
+                      options={{ title: t('system.navigation.settings') }}
                     />
                     <Stack.Screen
                       name="ThemeSettings"
                       component={ThemeSettingsScreen}
-                      options={{ title: 'Tema de colores' }}
+                      options={{ title: t('system.navigation.themeSettings') }}
                     />
                     <Stack.Screen
                       name="UnitSettings"
                       component={UnitSettingsScreen}
-                      options={{ title: 'Tipos de unidad' }}
+                      options={{ title: t('system.navigation.unitSettings') }}
                     />
                     <Stack.Screen
                       name="CurrencySettings"
                       component={CurrencySettingsScreen}
-                      options={{ title: 'Tipo de Moneda' }}
+                      options={{ title: t('system.navigation.currencySettings') }}
                     />
                     <Stack.Screen
                       name="LocationSettings"
                       component={LocationSettingsScreen}
-                      options={{ title: 'Gestión de ubicación' }}
+                      options={{ title: t('system.navigation.locationSettings') }}
                     />
                     <Stack.Screen
                       name="UserData"
                       component={UserDataScreen}
-                      options={{ title: 'Datos de usuario' }}
+                      options={{ title: t('system.navigation.userData') }}
+                    />
+                    <Stack.Screen
+                      name="LanguageSettings"
+                      component={LanguageSettingsScreen}
+                      options={{ title: t('system.navigation.languageSettings') }}
                     />
                     </Stack.Navigator>
                   </NavigationContainer>
@@ -126,7 +135,9 @@ function MainApp() {
 export default function App() {
   return (
     <ThemeProvider>
-      <MainApp />
+      <LanguageProvider>
+        <MainApp />
+      </LanguageProvider>
     </ThemeProvider>
   );
 }
