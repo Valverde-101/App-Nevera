@@ -4,47 +4,55 @@ import React, { useLayoutEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function SettingsScreen({ navigation }) {
   const palette = useTheme();
+  const { t, lang } = useLanguage();
   const styles = useMemo(() => createStyles(palette), [palette]);
   const nav = useNavigation();
   useLayoutEffect(() => {
     nav.setOptions?.({
+      title: t('system.navigation.settings'),
       headerStyle: { backgroundColor: palette.surface },
       headerTintColor: palette.text,
       headerTitleStyle: { color: palette.text },
       headerShadowVisible: false,
     });
-  }, [nav, palette]);
+  }, [nav, palette, t, lang]);
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16 }}
         showsVerticalScrollIndicator={Platform.OS === 'web'}>
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('ThemeSettings')}>
-          <Text style={styles.itemTitle}>Tema de colores</Text>
-          <Text style={styles.itemDesc}>Elige entre claro u oscuro.</Text>
+          <Text style={styles.itemTitle}>{t('system.settings.themeTitle')}</Text>
+          <Text style={styles.itemDesc}>{t('system.settings.themeDesc')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('UnitSettings')}>
-          <Text style={styles.itemTitle}>Tipos de unidad</Text>
-          <Text style={styles.itemDesc}>Gestiona singular y plural de tus unidades.</Text>
+          <Text style={styles.itemTitle}>{t('system.settings.unitTitle')}</Text>
+          <Text style={styles.itemDesc}>{t('system.settings.unitDesc')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('CurrencySettings')}>
-          <Text style={styles.itemTitle}>Tipo de Moneda</Text>
-          <Text style={styles.itemDesc}>Selecciona la moneda para los costos.</Text>
+          <Text style={styles.itemTitle}>{t('system.settings.currencyTitle')}</Text>
+          <Text style={styles.itemDesc}>{t('system.settings.currencyDesc')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('LocationSettings')}>
-          <Text style={styles.itemTitle}>Gestión de ubicación</Text>
-          <Text style={styles.itemDesc}>Define dónde guardas tus alimentos.</Text>
+          <Text style={styles.itemTitle}>{t('system.settings.locationTitle')}</Text>
+          <Text style={styles.itemDesc}>{t('system.settings.locationDesc')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('UserData')}>
-          <Text style={styles.itemTitle}>Datos de usuario</Text>
-          <Text style={styles.itemDesc}>Respaldos, importación y eliminación total.</Text>
+          <Text style={styles.itemTitle}>{t('system.settings.userDataTitle')}</Text>
+          <Text style={styles.itemDesc}>{t('system.settings.userDataDesc')}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.item} onPress={() => navigation.navigate('LanguageSettings')}>
+          <Text style={styles.itemTitle}>{t('system.settings.languageTitle')}</Text>
+          <Text style={styles.itemDesc}>{t('system.settings.languageDesc')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
