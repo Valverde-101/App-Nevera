@@ -2,7 +2,7 @@ import '@expo/metro-runtime';
 import React, { useEffect } from 'react';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Platform, View } from 'react-native';
+import { Platform } from 'react-native';
 import InventoryScreen from './src/screens/InventoryScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import SavedListsScreen from './src/screens/SavedListsScreen';
@@ -28,7 +28,6 @@ import { CategoriesProvider } from './src/context/CategoriesContext';
 import { ThemeProvider, useThemeController } from './src/context/ThemeContext';
 import { CurrencyProvider } from './src/context/CurrencyContext';
 import { LanguageProvider, useLanguage } from './src/context/LanguageContext';
-import AdBanner from './src/components/AdBanner';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,7 +54,6 @@ function MainApp() {
                   <SavedListsProvider>
                     <ShoppingProvider>
                       <RecipeProvider>
-                        <View style={{ flex: 1 }}>
                   <NavigationContainer theme={themeName === 'light' ? DefaultTheme : DarkTheme}>
                     <StatusBar style={themeName === 'light' ? 'dark' : 'light'} />
                     <Stack.Navigator>
@@ -121,15 +119,13 @@ function MainApp() {
                     />
                     </Stack.Navigator>
                   </NavigationContainer>
-                          <AdBanner />
-                        </View>
-                      </RecipeProvider>
-                    </ShoppingProvider>
-                  </SavedListsProvider>
-                </InventoryProvider>
-              </LocationsProvider>
-            </UnitsProvider>
-          </CurrencyProvider>
+                </RecipeProvider>
+              </ShoppingProvider>
+            </SavedListsProvider>
+            </InventoryProvider>
+            </LocationsProvider>
+          </UnitsProvider>
+        </CurrencyProvider>
         </CustomFoodsProvider>
         </DefaultFoodsProvider>
       </CategoriesProvider>
