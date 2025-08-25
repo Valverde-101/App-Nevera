@@ -13,12 +13,6 @@
       "package": "com.anonymous.miappnevera",
       "edgeToEdgeEnabled": true
     },
-    "plugins": [
-      ["expo-ads-admob", {
-        "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-        "iosAppId": "ca-app-pub-3940256099942544~1458002511"
-      }]
-    ],
     "extra": {
       "eas": {
         "projectId": "29bdbb1e-a7ff-4f47-a1c8-178ab45939ff"
