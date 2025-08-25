@@ -66,7 +66,7 @@ export default function UserDataScreen() {
       webClientId: '388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com',
       scopes: ['https://www.googleapis.com/auth/drive.appdata', 'profile', 'email'],
       ...(isWeb && typeof window !== 'undefined'
-        ? { redirectUri: window.location.origin }
+        ? { redirectUri: window.location.origin + '/App-Nevera/' }
         : {}),
     },
     { useProxy: !isWeb }
