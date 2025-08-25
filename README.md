@@ -1,5 +1,9 @@
 LINK WEB: https://valverde-101.github.io/App-Nevera/
 
+LINK OAUTH: https://console.cloud.google.com/welcome?authuser=1&hl=es&project=frigoflow
+
+LINK PLAY CONSOLE: https://play.google.com/console/u/1/developers/8690017036448645518/app-list
+
 # App-Nevera
 
 Aplicación de inventario de alimentos escrita en React Native con soporte para web.
