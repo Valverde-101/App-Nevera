@@ -1,12 +1,12 @@
-LINK WEB: https://valverde-101.github.io/App-Nevera/
-
-LINK OAUTH: https://console.cloud.google.com/welcome?authuser=1&hl=es&project=frigoflow
-
-LINK PLAY CONSOLE: https://play.google.com/console/u/1/developers/8690017036448645518/app-list
-
 # App-Nevera
 
 Aplicación de inventario de alimentos escrita en React Native con soporte para web.
+
+## Enlaces
+
+- [Web](https://valverde-101.github.io/App-Nevera/)
+- [OAuth](https://console.cloud.google.com/welcome?authuser=1&hl=es&project=frigoflow)
+- [Google Play Console](https://play.google.com/console/u/1/developers/8690017036448645518/app-list)
 
 ## Funcionalidades
 - Gestión de inventario por ubicaciones (nevera, congelador, despensa).
@@ -16,19 +16,19 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
 - Creación de alimentos personalizados con iconos propios o predeterminados y días de caducidad por defecto.
 - Persistencia local mediante `AsyncStorage` para uso sin conexión.
 - Sincronización opcional con Google Drive para respaldar y restaurar datos.
-- Inicio de sesión con Google nativo en Android con fallback al flujo web.
+- Inicio de sesión con Google nativo en Android con *fallback* al flujo web.
 
 ## Estructura
 - `MiAppNevera/App.js`: punto de entrada que configura la navegación entre las pantallas.
 - `MiAppNevera/src/screens`: implementa las pantallas de inicio, categorías (nevera, congelador, despensa) y lista de compras.
-- `MiAppNevera/src/context`: hooks de estado con persistencia en `AsyncStorage`.
+- `MiAppNevera/src/context`: *hooks* de estado con persistencia en `AsyncStorage`.
 - `MiAppNevera/assets/foods.json`: estructura de inventario inicial (vacía por defecto).
 
 ## Respaldo en Google Drive
 1. Conecta tu cuenta desde **Datos de usuario** para obtener acceso a `Google Drive`.
 2. Al subir un respaldo se conserva un máximo de 10 revisiones en `appDataFolder`.
 3. Al restaurar un respaldo se sobrescribirán los datos locales.
-4. IDs de OAuth utilizados (guárdalos para futuras configuraciones):
+4. IDs de OAuth utilizados:
    - Android: `388689708365-4g4lnv5ilksj12cghfa17flc68c5d5qk.apps.googleusercontent.com`
    - Web: `388689708365-54q3jlb6efa8dm3fkfcrbsk25pb41s27.apps.googleusercontent.com`
 
@@ -55,6 +55,12 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
    npm start
    ```
 
+## Exportar versión web estática
+Genera un build estático de la aplicación web:
+```bash
+npx expo export --platform web --output-dir web-build
+```
+
 ## Build con EAS
 1. Instala la CLI si es necesario:
    ```bash
@@ -70,59 +76,52 @@ Aplicación de inventario de alimentos escrita en React Native con soporte para 
    ```
 
 ## Compilar versión de producción en Windows
-
 1. Preparar proyecto nativo si usas Expo:
    ```bash
    npx expo prebuild
    ```
 2. Asigna una letra de unidad a la carpeta del proyecto para acortar la ruta:
    ```powershell
-   subst N: "C:\Users\leoni\OneDrive\Documentos\GitHub\App-Nevera\MiAppNevera"
+   subst N: "C:\\Users\\leoni\\OneDrive\\Documentos\\GitHub\\App-Nevera\\MiAppNevera"
    ```
 3. Ve al directorio `android` usando la nueva ruta:
    ```powershell
-   cd N:\android
+   cd N:\\android
    ```
-4. Limpia y genera el APK de release:
+4. Limpia y genera el APK de *release*:
    ```powershell
-   .\gradlew clean
+   .\\gradlew clean
    $env:NODE_ENV = "production"
-   .\gradlew assembleRelease
+   .\\gradlew assembleRelease
    ```
 
-El estado de inventario y lista de compras se guarda localmente usando `AsyncStorage`,
-permitiendo uso sin conexión. La misma base de código funciona en Android, iOS y web
-mediante `react-native-web` y Expo.
+El estado de inventario y lista de compras se guarda localmente usando `AsyncStorage`, permitiendo uso sin conexión. La misma base de código funciona en Android, iOS y web mediante `react-native-web` y Expo.
 
-
-LICENCIAS
-
-https://www.flaticon.es/packs/fruit-and-vegetable-5
-https://www.flaticon.es/packs/vegan-food-4
-https://www.flaticon.es/packs/food-and-drink-18
-https://www.flaticon.es/packs/beverages-14
-https://www.flaticon.es/packs/beverages-26
-https://www.flaticon.es/packs/food-260
-https://www.flaticon.es/packs/meat-23
-https://www.flaticon.es/packs/meat-7
-https://www.flaticon.es/packs/nuts-and-seeds-2
-https://www.flaticon.es/packs/autumn-167
-https://www.flaticon.es/packs/international-food-16
-https://www.flaticon.es/packs/food-75
-https://www.flaticon.es/packs/christmas-food-drinks-2
-https://www.flaticon.es/packs/sea-life-85
-https://www.flaticon.es/packs/food-177
-https://www.flaticon.es/packs/food-75
-https://www.flaticon.es/packs/dairy-products-11
-https://www.flaticon.es/packs/condiment
-https://www.flaticon.es/packs/seasoning
-https://www.flaticon.es/packs/all-about-sandwich-3
-https://www.flaticon.es/packs/bakery-150
-https://www.flaticon.es/packs/desserts-and-candies-8
-https://www.flaticon.es/packs/sweets-and-candies-58
-https://www.flaticon.es/packs/sweets-and-candies-49
-https://www.flaticon.es/packs/bakery-20
-https://www.flaticon.es/packs/sweets-5
-
-
-https://www.flaticon.es/packs/treatments-1
+## Licencias
+- https://www.flaticon.es/packs/fruit-and-vegetable-5
+- https://www.flaticon.es/packs/vegan-food-4
+- https://www.flaticon.es/packs/food-and-drink-18
+- https://www.flaticon.es/packs/beverages-14
+- https://www.flaticon.es/packs/beverages-26
+- https://www.flaticon.es/packs/food-260
+- https://www.flaticon.es/packs/meat-23
+- https://www.flaticon.es/packs/meat-7
+- https://www.flaticon.es/packs/nuts-and-seeds-2
+- https://www.flaticon.es/packs/autumn-167
+- https://www.flaticon.es/packs/international-food-16
+- https://www.flaticon.es/packs/food-75
+- https://www.flaticon.es/packs/christmas-food-drinks-2
+- https://www.flaticon.es/packs/sea-life-85
+- https://www.flaticon.es/packs/food-177
+- https://www.flaticon.es/packs/food-75
+- https://www.flaticon.es/packs/dairy-products-11
+- https://www.flaticon.es/packs/condiment
+- https://www.flaticon.es/packs/seasoning
+- https://www.flaticon.es/packs/all-about-sandwich-3
+- https://www.flaticon.es/packs/bakery-150
+- https://www.flaticon.es/packs/desserts-and-candies-8
+- https://www.flaticon.es/packs/sweets-and-candies-58
+- https://www.flaticon.es/packs/sweets-and-candies-49
+- https://www.flaticon.es/packs/bakery-20
+- https://www.flaticon.es/packs/sweets-5
+- https://www.flaticon.es/packs/treatments-1
