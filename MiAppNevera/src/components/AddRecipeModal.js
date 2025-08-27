@@ -6,7 +6,7 @@
 // - Botones personalizados (accent/neutral/danger), sin <Button> nativo
 // - Soporte de imagen (galería o URL)
 // - Compatible con initialRecipe para editar
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Modal,
   View,
@@ -25,6 +25,11 @@ import { useUnits } from '../context/UnitsContext';
 import { useLanguage } from '../context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
+import {
+  RichEditor,
+  RichToolbar,
+  actions,
+} from 'react-native-pell-rich-editor';
 
 export default function AddRecipeModal({
   visible,
@@ -42,6 +47,7 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
+  const richText = useRef(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -58,6 +64,19 @@ export default function AddRecipeModal({
     });
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+    }
+  };
+
+  const handleInsertImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      base64: true,
+      quality: 0.7,
+    });
+    if (!result.canceled) {
+      const asset = result.assets[0];
+      const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
+      richText.current?.insertImage(uri);
     }
   };
 
@@ -91,6 +110,12 @@ export default function AddRecipeModal({
       setSelected([]);
     }
   }, [visible, initialRecipe]);
+
+  useEffect(() => {
+    if (visible) {
+      richText.current?.setContentHTML(steps);
+    }
+  }, [visible, steps]);
 
   const addIngredient = (foodName, foodIcon) => {
     setIngredients(prev => [
@@ -368,13 +393,25 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          <TextInput
-            multiline
-            style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
+          <RichEditor
+            ref={richText}
+            initialContentHTML={steps}
+            style={[styles.rich, { minHeight: 120 }]}
             placeholder={t('system.recipes.add.stepsPlaceholder')}
-            placeholderTextColor={palette.textDim}
-            value={steps}
-            onChangeText={setSteps}
+            onChange={setSteps}
+          />
+          <RichToolbar
+            editor={richText}
+            actions={[actions.setBold, actions.insertBulletsList, actions.insertOrderedList, actions.insertImage]}
+            style={styles.richBar}
+            iconTint={palette.text}
+            selectedIconTint={palette.accent}
+            iconMap={{
+              [actions.insertImage]: ({ tintColor }) => (
+                <Text style={{ color: tintColor }}>🖼️</Text>
+              ),
+            }}
+            onPressAddImage={handleInsertImage}
           />
         </ScrollView>
 
@@ -481,6 +518,21 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: Platform.OS === 'web' ? 10 : 8,
+  },
+  rich: {
+    backgroundColor: palette.surface2,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    padding: 8,
+    color: palette.text,
+  },
+  richBar: {
+    backgroundColor: palette.surface2,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    marginTop: 6,
   },
 
   // image
