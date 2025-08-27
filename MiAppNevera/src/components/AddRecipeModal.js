@@ -6,7 +6,7 @@
 // - Botones personalizados (accent/neutral/danger), sin <Button> nativo
 // - Soporte de imagen (galería o URL)
 // - Compatible con initialRecipe para editar
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Modal,
   View,
@@ -19,6 +19,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
+import { RichEditor, RichToolbar, actions } from 'react-native-pell-rich-editor';
 import FoodPickerModal from './FoodPickerModal';
 import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
@@ -48,6 +49,12 @@ export default function AddRecipeModal({
   const [unitPickerVisible, setUnitPickerVisible] = useState(false);
   const [unitPickerIndex, setUnitPickerIndex] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const richText = useRef();
+  let QuillEditor;
+  if (Platform.OS === 'web') {
+    QuillEditor = require('react-quill').default;
+    require('react-quill/dist/quill.snow.css');
+  }
 
   const isEditing = !!initialRecipe;
 
@@ -91,6 +98,12 @@ export default function AddRecipeModal({
       setSelected([]);
     }
   }, [visible, initialRecipe]);
+
+  useEffect(() => {
+    if (visible && Platform.OS !== 'web') {
+      richText.current?.setContentHTML(steps || '');
+    }
+  }, [visible]);
 
   const addIngredient = (foodName, foodIcon) => {
     setIngredients(prev => [
@@ -368,14 +381,36 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          <TextInput
-            multiline
-            style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
-            placeholder={t('system.recipes.add.stepsPlaceholder')}
-            placeholderTextColor={palette.textDim}
-            value={steps}
-            onChangeText={setSteps}
-          />
+          {Platform.OS === 'web' ? (
+            <View style={styles.richEditor}>
+              {QuillEditor && (
+                <QuillEditor
+                  theme="snow"
+                  value={steps}
+                  onChange={setSteps}
+                  placeholder={t('system.recipes.add.stepsPlaceholder')}
+                />
+              )}
+            </View>
+          ) : (
+            <>
+              <RichEditor
+                ref={richText}
+                initialContentHTML={steps}
+                onChange={setSteps}
+                editorStyle={{ backgroundColor: palette.surface2, color: palette.text }}
+                placeholder={t('system.recipes.add.stepsPlaceholder')}
+                style={styles.richEditor}
+              />
+              <RichToolbar
+                editor={richText}
+                actions={[actions.setBold, actions.setItalic, actions.insertBulletsList, actions.insertOrderedList, actions.insertLink]}
+                iconTint={palette.text}
+                selectedIconTint={palette.accent}
+                style={styles.toolbar}
+              />
+            </>
+          )}
         </ScrollView>
 
         {/* Picker de unidades */}
@@ -481,6 +516,20 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: Platform.OS === 'web' ? 10 : 8,
+  },
+  richEditor: {
+    backgroundColor: palette.surface2,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    minHeight: 120,
+  },
+  toolbar: {
+    backgroundColor: palette.surface3,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
+    marginTop: 6,
   },
 
   // image
