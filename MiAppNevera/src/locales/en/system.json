@@ -96,16 +96,13 @@
     "sort": {
       "name": "Name",
       "expiration": "Expiration date",
-      "registered": "Date added",
-      "unitPrice": "Unit price",
-      "totalPrice": "Total price"
+      "registered": "Date added"
     },
     "viewTitle": "View type",
     "view": {
       "list": "List",
       "grid": "Grid"
     },
-    "showPrices": "Show prices",
     "addToShoppingConfirm": "Add the following %{count} items to the shopping list?",
     "add": "Add",
     "cancel": "Cancel",
