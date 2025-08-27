@@ -11,8 +11,7 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import RenderHTML from 'react-native-render-html';
-import { useWindowDimensions } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import { useRecipes } from '../context/RecipeContext';
 import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
@@ -40,7 +39,6 @@ export default function RecipeDetailScreen({ route }) {
   const [editVisible, setEditVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const { t } = useLanguage();
-  const { width } = useWindowDimensions();
 
   const groupedIngredients = useMemo(() => {
     if (!recipe) return {};
@@ -140,11 +138,19 @@ export default function RecipeDetailScreen({ route }) {
         ))}
 
         <Text style={styles.blockTitle}>{t('system.recipes.detail.steps')}</Text>
-        <RenderHTML
-          contentWidth={width}
-          source={{ html: recipe.steps || '' }}
-          baseStyle={{ color: palette.text, lineHeight: 20 }}
-        />
+        <Markdown
+          style={{
+            body: { color: palette.text, lineHeight: 20 },
+            list_item: { color: palette.text },
+            paragraph: { color: palette.text },
+            bullet_list: { color: palette.text },
+            ordered_list: { color: palette.text },
+            fence: { color: palette.text },
+            code_block: { color: palette.text },
+          }}
+        >
+          {recipe.steps}
+        </Markdown>
       </ScrollView>
 
       <AddRecipeModal
