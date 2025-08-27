@@ -96,13 +96,17 @@
     "sort": {
       "name": "Nombre",
       "expiration": "Fecha de caducidad",
-      "registered": "Fecha de registro"
+      "registered": "Fecha de registro",
+      "unitPrice": "Precio unitario",
+      "totalPrice": "Precio total"
     },
+    "invertOrder": "Invertir orden",
     "viewTitle": "Tipo de vista",
     "view": {
       "list": "Lista",
       "grid": "Cuadrícula"
     },
+    "showPrices": "Mostrar precios",
     "addToShoppingConfirm": "Añadir los siguientes %{count} elementos a la lista de compras?",
     "add": "Añadir",
     "cancel": "Cancelar",
