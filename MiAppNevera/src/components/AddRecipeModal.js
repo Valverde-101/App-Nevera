@@ -11,7 +11,6 @@ import {
   Modal,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   Image,
@@ -25,6 +24,7 @@ import { useUnits } from '../context/UnitsContext';
 import { useLanguage } from '../context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
+import RichTextEditor from './RichTextEditor';
 
 export default function AddRecipeModal({
   visible,
@@ -368,13 +368,10 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          <TextInput
-            multiline
-            style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
-            placeholder={t('system.recipes.add.stepsPlaceholder')}
-            placeholderTextColor={palette.textDim}
+          <RichTextEditor
             value={steps}
-            onChangeText={setSteps}
+            onChange={setSteps}
+            placeholder={t('system.recipes.add.stepsPlaceholder')}
           />
         </ScrollView>
 
