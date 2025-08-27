@@ -164,11 +164,15 @@ export default function InventoryScreen({ navigation }) {
   const [sortVisible, setSortVisible] = useState(false);
   const [viewVisible, setViewVisible] = useState(false);
   const [sortOrder, setSortOrder] = useState('name');
+  const [sortDesc, setSortDesc] = useState(false);
   const [groupBy, setGroupBy] = useState('category');
   const [viewType, setViewType] = useState('grid');
+  const [showPrices, setShowPrices] = useState(true);
   const [tempSortOrder, setTempSortOrder] = useState(sortOrder);
   const [tempGroupBy, setTempGroupBy] = useState(groupBy);
+  const [tempSortDesc, setTempSortDesc] = useState(sortDesc);
   const [tempViewType, setTempViewType] = useState(viewType);
+  const [tempShowPrices, setTempShowPrices] = useState(showPrices);
   const [searchVisible, setSearchVisible] = useState(false);
 
   // ---- Selección múltiple ----
@@ -180,8 +184,14 @@ export default function InventoryScreen({ navigation }) {
   const [shoppingVisible, setShoppingVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
 
-  useEffect(() => { if (sortVisible) { setTempSortOrder(sortOrder); setTempGroupBy(groupBy); } }, [sortVisible]);
-  useEffect(() => { if (viewVisible) { setTempViewType(viewType); } }, [viewVisible]);
+  useEffect(() => {
+    if (sortVisible) {
+      setTempSortOrder(sortOrder);
+      setTempGroupBy(groupBy);
+      setTempSortDesc(sortDesc);
+    }
+  }, [sortVisible]);
+  useEffect(() => { if (viewVisible) { setTempViewType(viewType); setTempShowPrices(showPrices); } }, [viewVisible]);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -239,8 +249,11 @@ export default function InventoryScreen({ navigation }) {
     if (sortOrder === 'name') return a.name.localeCompare(b.name);
     if (sortOrder === 'expiration') return new Date(a.expiration || '9999-12-31') - new Date(b.expiration || '9999-12-31');
     if (sortOrder === 'registered') return new Date(a.registered || '9999-12-31') - new Date(b.registered || '9999-12-31');
+    if (sortOrder === 'unitPrice') return (a.price || 0) - (b.price || 0);
+    if (sortOrder === 'totalPrice') return (a.price || 0) * (a.quantity || 0) - (b.price || 0) * (b.quantity || 0);
     return 0;
   });
+  if (sortDesc) sortedItems.reverse();
 
   let grouped = {};
   let groupOrder = [];
@@ -512,8 +525,13 @@ export default function InventoryScreen({ navigation }) {
                                 </TouchableOpacity>
                                 <View style={{ alignItems: 'center' }}>
                                   <Text style={{ color: palette.textDim, fontSize: 12 }}>
-                                    {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - ${symbol}${(item.price * item.quantity).toFixed(2)}`}
+                                    {item.quantity} {getLabel(item.quantity, item.unit)}
                                   </Text>
+                                  {showPrices && item.price > 0 && (
+                                    <Text style={{ color: palette.textDim, fontSize: 12 }}>
+                                      {symbol}{(item.price * item.quantity).toFixed(2)}
+                                    </Text>
+                                  )}
                                 </View>
                                 <TouchableOpacity onPress={() => updateQuantity(item.location, item.index, 1)} style={{ backgroundColor: palette.surface3, borderWidth: 1, borderColor: palette.border, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginHorizontal: 2 }}>
                                   <Text style={{ color: palette.accent, fontSize: 16 }}>→</Text>
@@ -556,8 +574,13 @@ export default function InventoryScreen({ navigation }) {
                                 {label}
                               </Text>
                               <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
-                                {item.quantity} {getLabel(item.quantity, item.unit)}{item.price > 0 && ` - ${symbol}${(item.price * item.quantity).toFixed(2)}`}
+                                {item.quantity} {getLabel(item.quantity, item.unit)}
                               </Text>
+                              {showPrices && item.price > 0 && (
+                                <Text style={{ textAlign: 'center', color: palette.textDim, fontSize: 11 }}>
+                                  {symbol}{(item.price * item.quantity).toFixed(2)}
+                                </Text>
+                              )}
                             </LinearGradient>
                           </View>
                         </TouchableOpacity>
@@ -660,16 +683,68 @@ export default function InventoryScreen({ navigation }) {
             <TouchableWithoutFeedback>
               <View style={{ backgroundColor: palette.surface, padding: 20, borderRadius: 12, width: '80%', maxWidth: 300, borderWidth: 1, borderColor: palette.border }}>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10, color: palette.text }}>{t('system.inventory.sortTitle')}</Text>
-                {[{ key: 'name', label: t('system.inventory.sort.name') },{ key: 'expiration', label: t('system.inventory.sort.expiration') },{ key: 'registered', label: t('system.inventory.sort.registered') }].map(opt => (
-                  <TouchableOpacity key={opt.key} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }} onPress={() => setTempSortOrder(opt.key)}>
-                    <Text style={{ color: palette.text }}>{tempSortOrder === opt.key ? '◉' : '○'}</Text>
+                {[
+                  { key: 'name', label: t('system.inventory.sort.name'), icon: '🔤' },
+                  { key: 'expiration', label: t('system.inventory.sort.expiration'), icon: '📅' },
+                  { key: 'registered', label: t('system.inventory.sort.registered'), icon: '🕒' },
+                  { key: 'unitPrice', label: t('system.inventory.sort.unitPrice'), icon: '💲' },
+                  { key: 'totalPrice', label: t('system.inventory.sort.totalPrice'), icon: '💰' },
+                ].map(opt => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 6,
+                      padding: 6,
+                      borderRadius: 8,
+                      backgroundColor: tempSortOrder === opt.key ? palette.surface2 : 'transparent',
+                    }}
+                    onPress={() => setTempSortOrder(opt.key)}
+                  >
+                    <Text style={{ fontSize: 16, color: tempSortOrder === opt.key ? palette.accent : palette.text }}>
+                      {opt.icon}
+                    </Text>
                     <Text style={{ marginLeft: 6, color: palette.text }}>{opt.label}</Text>
                   </TouchableOpacity>
                 ))}
+                <TouchableOpacity
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                    padding: 6,
+                    borderRadius: 8,
+                    backgroundColor: tempSortDesc ? palette.surface2 : 'transparent',
+                  }}
+                  onPress={() => setTempSortDesc(v => !v)}
+                >
+                  <Text style={{ fontSize: 16, color: tempSortDesc ? palette.accent : palette.text }}>
+                    {tempSortDesc ? '🔽' : '🔼'}
+                  </Text>
+                  <Text style={{ marginLeft: 6, color: palette.text }}>{t('system.inventory.invertOrder')}</Text>
+                </TouchableOpacity>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10, color: palette.text }}>{t('system.inventory.groupBy')}</Text>
-                {[{ key: 'category', label: t('system.inventory.group.category') },{ key: 'none', label: t('system.inventory.group.none') },{ key: 'registered', label: t('system.inventory.group.registered') }].map(opt => (
-                  <TouchableOpacity key={opt.key} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }} onPress={() => setTempGroupBy(opt.key)}>
-                    <Text style={{ color: palette.text }}>{tempGroupBy === opt.key ? '◉' : '○'}</Text>
+                {[
+                  { key: 'category', label: t('system.inventory.group.category'), icon: '🗂️' },
+                  { key: 'none', label: t('system.inventory.group.none'), icon: '🚫' },
+                  { key: 'registered', label: t('system.inventory.group.registered'), icon: '🕒' },
+                ].map(opt => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 6,
+                      padding: 6,
+                      borderRadius: 8,
+                      backgroundColor: tempGroupBy === opt.key ? palette.surface2 : 'transparent',
+                    }}
+                    onPress={() => setTempGroupBy(opt.key)}
+                  >
+                    <Text style={{ fontSize: 16, color: tempGroupBy === opt.key ? palette.accent : palette.text }}>
+                      {opt.icon}
+                    </Text>
                     <Text style={{ marginLeft: 6, color: palette.text }}>{opt.label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -677,7 +752,7 @@ export default function InventoryScreen({ navigation }) {
                   <TouchableOpacity onPress={() => setSortVisible(false)} style={{ padding: 10, marginRight: 10 }}>
                     <Text style={{ color: palette.accent }}>{t('system.inventory.cancel')}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => { setSortOrder(tempSortOrder); setGroupBy(tempGroupBy); setSortVisible(false); }} style={{ backgroundColor: palette.accent, padding: 10, borderRadius: 6 }}>
+                  <TouchableOpacity onPress={() => { setSortOrder(tempSortOrder); setGroupBy(tempGroupBy); setSortDesc(tempSortDesc); setSortVisible(false); }} style={{ backgroundColor: palette.accent, padding: 10, borderRadius: 6 }}>
                     <Text style={{ color: '#1b1d22' }}>{t('system.inventory.confirm')}</Text>
                   </TouchableOpacity>
                 </View>
@@ -699,11 +774,15 @@ export default function InventoryScreen({ navigation }) {
                     <Text style={{ marginLeft: 6, color: palette.text }}>{opt.label}</Text>
                   </TouchableOpacity>
                 ))}
+                <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }} onPress={() => setTempShowPrices(v => !v)}>
+                  <Text style={{ color: palette.text }}>{tempShowPrices ? '☑' : '☐'}</Text>
+                  <Text style={{ marginLeft: 6, color: palette.text }}>{t('system.inventory.showPrices')}</Text>
+                </TouchableOpacity>
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 }}>
                   <TouchableOpacity onPress={() => setViewVisible(false)} style={{ padding: 10, marginRight: 10 }}>
                     <Text style={{ color: palette.accent }}>{t('system.inventory.cancel')}</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => { setViewType(tempViewType); setViewVisible(false); }} style={{ backgroundColor: palette.accent, padding: 10, borderRadius: 6 }}>
+                  <TouchableOpacity onPress={() => { setViewType(tempViewType); setShowPrices(tempShowPrices); setViewVisible(false); }} style={{ backgroundColor: palette.accent, padding: 10, borderRadius: 6 }}>
                     <Text style={{ color: '#1b1d22' }}>{t('system.inventory.confirm')}</Text>
                   </TouchableOpacity>
                 </View>
