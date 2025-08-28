@@ -10,8 +10,9 @@ import {
   TouchableWithoutFeedback,
   StyleSheet,
   Platform,
+  useWindowDimensions,
 } from 'react-native';
-import Markdown from 'react-native-markdown-display';
+import RenderHtml from 'react-native-render-html';
 import { useRecipes } from '../context/RecipeContext';
 import { useInventory } from '../context/InventoryContext';
 import { useShopping } from '../context/ShoppingContext';
@@ -39,6 +40,30 @@ export default function RecipeDetailScreen({ route }) {
   const [editVisible, setEditVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const { t } = useLanguage();
+  const { width } = useWindowDimensions();
+
+  const domVisitors = useMemo(
+    () => ({
+      onElement: element => {
+        if (element.tagName === 'img') {
+          const dir = element.attribs['data-align'] || 'left';
+          const style = element.attribs.style || '';
+          const widthMatch = style.match(/width:\s*[^;]+/);
+          const widthStyle = widthMatch ? `${widthMatch[0]};` : '';
+          let alignStyle;
+          if (dir === 'right') {
+            alignStyle = 'align-self:flex-end;margin-left:8px;';
+          } else if (dir === 'center') {
+            alignStyle = 'align-self:center;';
+          } else {
+            alignStyle = 'align-self:flex-start;margin-right:8px;';
+          }
+          element.attribs.style = `${widthStyle}${alignStyle}`;
+        }
+      },
+    }),
+    [],
+  );
 
   const groupedIngredients = useMemo(() => {
     if (!recipe) return {};
@@ -138,19 +163,19 @@ export default function RecipeDetailScreen({ route }) {
         ))}
 
         <Text style={styles.blockTitle}>{t('system.recipes.detail.steps')}</Text>
-        <Markdown
-          style={{
-            body: { color: palette.text, lineHeight: 20 },
-            list_item: { color: palette.text },
-            paragraph: { color: palette.text },
-            bullet_list: { color: palette.text },
-            ordered_list: { color: palette.text },
-            fence: { color: palette.text },
-            code_block: { color: palette.text },
-          }}
-        >
-          {recipe.steps}
-        </Markdown>
+        <View style={styles.stepsBox}>
+          <RenderHtml
+            contentWidth={width - 56}
+            source={{ html: recipe.steps }}
+            baseStyle={{ color: palette.text, lineHeight: 20 }}
+            tagsStyles={{
+              p: { color: palette.text },
+              li: { color: palette.text },
+            }}
+            renderersProps={{ img: { enableExperimentalPercentWidth: true } }}
+            domVisitors={domVisitors}
+          />
+        </View>
       </ScrollView>
 
       <AddRecipeModal
@@ -250,6 +275,14 @@ const createStyles = (palette) => StyleSheet.create({
   meta: { color: palette.textDim, marginBottom: 6 },
 
   blockTitle: { color: palette.text, fontWeight: '700', fontSize: 16, marginTop: 12 },
+  stepsBox: {
+    marginTop: 6,
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: palette.surface2,
+    borderRadius: 12,
+    padding: 12,
+  },
   section: {
     marginTop: 6,
     borderWidth: 1,
