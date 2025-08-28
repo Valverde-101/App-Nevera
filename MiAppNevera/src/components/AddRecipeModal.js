@@ -51,6 +51,7 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
+  const [fontLevel, setFontLevel] = useState(3); // track last used font size level
   const richText = useRef(null);
   const webEditor = useRef(null);
   const fileInput = useRef(null);
@@ -73,9 +74,17 @@ export default function AddRecipeModal({
     }
   };
 
+  const sizeMap = { 1: '10px', 2: '13px', 3: '16px', 4: '18px', 5: '24px', 6: '32px', 7: '48px' };
+  const normalizeFontTags = html =>
+    html
+      ? html.replace(/<font[^>]*size="([1-7])"[^>]*>(.*?)<\/font>/gi, (_, s, c) =>
+          `<span style="font-size:${sizeMap[s]};">${c}</span>`,
+        )
+      : '';
+
   const handleWebChange = () => {
     if (isWeb && webEditor.current) {
-      setSteps(webEditor.current.innerHTML);
+      setSteps(normalizeFontTags(webEditor.current.innerHTML));
     }
   };
 
@@ -110,13 +119,36 @@ export default function AddRecipeModal({
 
   const lastRange = useRef(null);
   const selectedImage = useRef(null);
+  const updateFontFromSelection = () => {
+    if (isWeb) {
+      const sel = window.getSelection();
+      if (sel && sel.focusNode) {
+        const node = sel.focusNode.nodeType === 3 ? sel.focusNode.parentElement : sel.focusNode;
+        if (node) {
+          const size = window.getComputedStyle(node).fontSize;
+          const found = Object.entries(sizeMap).find(([, v]) => parseInt(v) === parseInt(size));
+          if (found) setFontLevel(Number(found[0]));
+        }
+      }
+    } else {
+      richText.current?.commandDOM?.(`(function(){
+        var sel = window.getSelection();
+        if(sel && sel.focusNode){
+          var node = sel.focusNode.nodeType===3? sel.focusNode.parentElement : sel.focusNode;
+          var size = window.getComputedStyle(node).fontSize;
+          window.ReactNativeWebView.postMessage(JSON.stringify({type:'FONT_SIZE', data:size}));
+        }
+      })()`);
+    }
+  };
   const saveRange = e => {
     if (!isWeb) return;
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
-      lastRange.current = sel.getRangeAt(0);
+      lastRange.current = sel.getRangeAt(0).cloneRange();
     }
     selectedImage.current = e?.target?.tagName === 'IMG' ? e.target : null;
+    updateFontFromSelection();
   };
 
   const resizeImage = pct => {
@@ -138,6 +170,7 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
+        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -164,6 +197,7 @@ export default function AddRecipeModal({
           }
         }
         if(img){img.style.width='${pct}';}
+        saveSelection();
       })()`);
     }
   };
@@ -205,6 +239,7 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
+        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -251,7 +286,49 @@ export default function AddRecipeModal({
             img.style.alignSelf='flex-end';
           }
         }
+        saveSelection();
       })()`);
+    }
+  };
+
+  const changeFontSize = dir => {
+    setFontLevel(level => {
+      const next = Math.max(1, Math.min(7, level + dir));
+      if (isWeb) {
+        const sel = window.getSelection();
+        if (lastRange.current && sel) {
+          sel.removeAllRanges();
+          sel.addRange(lastRange.current);
+          document.execCommand('fontSize', false, String(next));
+          handleWebChange();
+          sel.removeAllRanges();
+          sel.addRange(lastRange.current);
+          lastRange.current = sel.getRangeAt(0).cloneRange();
+        } else {
+          document.execCommand('fontSize', false, String(next));
+          handleWebChange();
+        }
+      } else {
+        richText.current?.commandDOM?.(`(function(){
+          focusCurrent();
+          var sel = window.getSelection();
+          if(!sel || !sel.rangeCount) return;
+          var range = sel.getRangeAt(0);
+          document.execCommand('fontSize', false, '${next}');
+          sel.removeAllRanges();
+          sel.addRange(range);
+          saveSelection();
+        })()`);
+      }
+      return next;
+    });
+  };
+
+  const handleEditorMessage = message => {
+    if (message?.type === 'FONT_SIZE') {
+      const px = parseInt(message.data);
+      const found = Object.entries(sizeMap).find(([, v]) => parseInt(v) === px);
+      if (found) setFontLevel(Number(found[0]));
     }
   };
 
@@ -278,6 +355,12 @@ export default function AddRecipeModal({
     }
   };
 
+  useEffect(() => {
+    if (!isWeb && visible) {
+      richText.current?.registerToolbar(() => updateFontFromSelection());
+    }
+  }, [visible]);
+
   // cargar/limpiar datos
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -285,8 +368,9 @@ export default function AddRecipeModal({
       setImage(initialRecipe.image || '');
       setPersons(String(initialRecipe.persons || 1));
       setDifficulty(initialRecipe.difficulty || '');
-      const initialSteps = initialRecipe.steps || '';
+      const initialSteps = normalizeFontTags(initialRecipe.steps || '');
       setSteps(initialSteps);
+      setFontLevel(3);
       if (isWeb && webEditor.current) {
         webEditor.current.innerHTML = initialSteps;
       } else {
@@ -308,6 +392,7 @@ export default function AddRecipeModal({
       } else {
         richText.current?.setContentHTML?.('');
       }
+      setFontLevel(3);
     } else if (!visible) {
       // resetear cuando se cierra
       setName('');
@@ -318,6 +403,7 @@ export default function AddRecipeModal({
       setIngredients([]);
       setSelectMode(false);
       setSelected([]);
+      setFontLevel(3);
     }
   }, [visible, initialRecipe]);
 
@@ -597,6 +683,21 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
+          <View style={styles.stepControls}>
+            <TouchableOpacity
+              onPress={() => changeFontSize(-1)}
+              style={styles.stepBtn}
+            >
+              <Text style={styles.stepBtnTxt}>A-</Text>
+            </TouchableOpacity>
+            <Text style={styles.stepSize}>{parseInt(sizeMap[fontLevel])}</Text>
+            <TouchableOpacity
+              onPress={() => changeFontSize(1)}
+              style={styles.stepBtn}
+            >
+              <Text style={styles.stepBtnTxt}>A+</Text>
+            </TouchableOpacity>
+          </View>
           {isWeb ? (
             <>
               <div
@@ -607,6 +708,7 @@ const save = () => {
                   ...StyleSheet.flatten(styles.rich),
                   minHeight: 120,
                   outline: 'none',
+                  fontSize: 16,
                 }}
                 onInput={handleWebChange}
                 onKeyUp={saveRange}
@@ -703,8 +805,13 @@ const save = () => {
                 ref={richText}
                 initialContentHTML={steps}
                 style={[styles.rich, { minHeight: 120 }]}
+                editorStyle={{
+                  cssText: `color:${palette.text};`,
+                  contentCSSText: `color:${palette.text};`,
+                }}
                 placeholder={t('system.recipes.add.stepsPlaceholder')}
-                onChange={setSteps}
+                onChange={html => setSteps(normalizeFontTags(html))}
+                onMessage={handleEditorMessage}
               />
               <RichToolbar
                 editor={richText}
@@ -889,6 +996,23 @@ const createStyles = (palette) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
+  stepControls: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 6,
+  },
+  stepSize: { color: palette.text, alignSelf: 'center', marginHorizontal: 6 },
+  stepBtn: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginLeft: 6,
+  },
+  stepBtnTxt: { color: palette.text, fontSize: 16 },
 
   // image
   image: { width: '60%',
