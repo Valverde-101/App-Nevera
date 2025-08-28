@@ -52,19 +52,13 @@ export default function RecipeDetailScreen({ route }) {
           const widthStyle = widthMatch ? `${widthMatch[0]};` : '';
           let alignStyle;
           if (dir === 'right') {
-            alignStyle = 'margin-left:8px;';
+            alignStyle = 'align-self:flex-end;margin-left:8px;';
           } else if (dir === 'center') {
-            alignStyle = 'margin:0 auto;';
+            alignStyle = 'align-self:center;';
           } else {
-            alignStyle = 'margin-right:8px;';
+            alignStyle = 'align-self:flex-start;margin-right:8px;';
           }
           element.attribs.style = `${widthStyle}${alignStyle}`;
-          const parent = element.parent;
-          if (parent && dir !== 'center') {
-            const base = parent.attribs.style || '';
-            const row = dir === 'right' ? 'row-reverse' : 'row';
-            parent.attribs.style = `${base}display:flex;flex-direction:${row};flex-wrap:wrap;align-items:flex-start;`;
-          }
         }
       },
     }),
@@ -173,10 +167,10 @@ export default function RecipeDetailScreen({ route }) {
           <RenderHtml
             contentWidth={width - 56}
             source={{ html: recipe.steps }}
-            baseStyle={{ color: palette.text, lineHeight: 20, fontSize: 16 }}
+            baseStyle={{ color: palette.text, lineHeight: 20 }}
             tagsStyles={{
-              p: { color: palette.text, lineHeight: 20, fontSize: 16 },
-              li: { color: palette.text, lineHeight: 20, fontSize: 16 },
+              p: { color: palette.text },
+              li: { color: palette.text },
             }}
             renderersProps={{ img: { enableExperimentalPercentWidth: true } }}
             domVisitors={domVisitors}
