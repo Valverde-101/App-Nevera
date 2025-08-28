@@ -6,7 +6,7 @@
 // - Botones personalizados (accent/neutral/danger), sin <Button> nativo
 // - Soporte de imagen (galería o URL)
 // - Compatible con initialRecipe para editar
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   View,
@@ -26,15 +26,6 @@ import { useLanguage } from '../context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
 
-const isWeb = Platform.OS === 'web';
-let RichEditor, RichToolbar, actions;
-if (!isWeb) {
-  const rich = require('react-native-pell-rich-editor');
-  RichEditor = rich.RichEditor;
-  RichToolbar = rich.RichToolbar;
-  actions = rich.actions;
-}
-
 export default function AddRecipeModal({
   visible,
   onSave,
@@ -51,9 +42,6 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
-  const richText = useRef(null);
-  const webEditor = useRef(null);
-  const fileInput = useRef(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -73,235 +61,6 @@ export default function AddRecipeModal({
     }
   };
 
-  const handleWebChange = () => {
-    if (isWeb && webEditor.current) {
-      setSteps(webEditor.current.innerHTML);
-    }
-  };
-
-  const handleInsertImage = async () => {
-    if (isWeb) {
-      fileInput.current?.click();
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      base64: true,
-      quality: 0.7,
-    });
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-      richText.current?.insertImage(uri);
-    }
-  };
-
-  const onFileChange = e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      document.execCommand('insertImage', false, reader.result);
-      handleWebChange();
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
-  const lastRange = useRef(null);
-  const saveRange = () => {
-    if (!isWeb) return;
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      lastRange.current = sel.getRangeAt(0);
-    }
-  };
-
-  const resizeImage = pct => {
-    if (isWeb) {
-      const range = lastRange.current;
-      if (!range) return;
-      const sel = window.getSelection();
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-      let node = range.startContainer;
-      let img = null;
-      if (node.nodeType === 1 && node.tagName === 'IMG') {
-        img = node;
-      } else if (node.nodeType === 1) {
-        const child = node.childNodes[range.startOffset];
-        if (child && child.tagName === 'IMG') img = child;
-        else if (range.startOffset > 0) {
-          const prev = node.childNodes[range.startOffset - 1];
-          if (prev && prev.tagName === 'IMG') img = prev;
-        }
-      } else if (node.nodeType === 3) {
-        const parent = node.parentElement;
-        if (parent.tagName === 'IMG') img = parent;
-        else if (parent) {
-          const child = parent.childNodes[range.startOffset];
-          if (child && child.tagName === 'IMG') img = child;
-          else if (range.startOffset > 0) {
-            const prev = parent.childNodes[range.startOffset - 1];
-            if (prev && prev.tagName === 'IMG') img = prev;
-          }
-        }
-      }
-      if (img) {
-        img.style.width = pct;
-        handleWebChange();
-      }
-    } else {
-      richText.current?.commandDOM?.(`(function(){
-        var sel = window.getSelection();
-        if(!sel || !sel.rangeCount) return;
-        var range = sel.getRangeAt(0);
-        var node = range.startContainer;
-        var img = null;
-        if(node.nodeType===1 && node.tagName==='IMG') img=node;
-        else if(node.nodeType===1){
-          var child=node.childNodes[range.startOffset];
-          if(child && child.tagName==='IMG') img=child;
-          else if(range.startOffset>0){
-            var prev=node.childNodes[range.startOffset-1];
-            if(prev && prev.tagName==='IMG') img=prev;
-          }
-        } else if(node.nodeType===3){
-          var parent=node.parentElement;
-          if(parent.tagName==='IMG') img=parent;
-          else if(parent){
-            var child2=parent.childNodes[range.startOffset];
-            if(child2 && child2.tagName==='IMG') img=child2;
-            else if(range.startOffset>0){
-              var prev2=parent.childNodes[range.startOffset-1];
-              if(prev2 && prev2.tagName==='IMG') img=prev2;
-            }
-          }
-        }
-        if(img){img.style.width='${pct}';}
-      })()`);
-    }
-  };
-
-  const alignImage = dir => {
-    if (isWeb) {
-      const range = lastRange.current;
-      if (!range) return;
-      const sel = window.getSelection();
-      sel?.removeAllRanges();
-      sel?.addRange(range);
-      let node = range.startContainer;
-      let img = null;
-      if (node.nodeType === 1 && node.tagName === 'IMG') {
-        img = node;
-      } else if (node.nodeType === 1) {
-        const child = node.childNodes[range.startOffset];
-        if (child && child.tagName === 'IMG') img = child;
-        else if (range.startOffset > 0) {
-          const prev = node.childNodes[range.startOffset - 1];
-          if (prev && prev.tagName === 'IMG') img = prev;
-        }
-      } else if (node.nodeType === 3) {
-        const parent = node.parentElement;
-        if (parent.tagName === 'IMG') img = parent;
-        else if (parent) {
-          const child = parent.childNodes[range.startOffset];
-          if (child && child.tagName === 'IMG') img = child;
-          else if (range.startOffset > 0) {
-            const prev = parent.childNodes[range.startOffset - 1];
-            if (prev && prev.tagName === 'IMG') img = prev;
-          }
-        }
-      }
-      if (img) {
-        if (dir === 'center') {
-          img.style.display = 'block';
-          img.style.margin = '0 auto';
-          img.style.float = '';
-        } else if (dir === 'left') {
-          img.style.display = 'block';
-          img.style.margin = '0';
-          img.style.float = 'left';
-          img.style.marginRight = '8px';
-        } else if (dir === 'right') {
-          img.style.display = 'block';
-          img.style.margin = '0';
-          img.style.float = 'right';
-          img.style.marginLeft = '8px';
-        }
-        handleWebChange();
-      }
-    } else {
-      richText.current?.commandDOM?.(`(function(){
-        var sel = window.getSelection();
-        if(!sel || !sel.rangeCount) return;
-        var range = sel.getRangeAt(0);
-        var node = range.startContainer;
-        var img = null;
-        if(node.nodeType===1 && node.tagName==='IMG') img=node;
-        else if(node.nodeType===1){
-          var child=node.childNodes[range.startOffset];
-          if(child && child.tagName==='IMG') img=child;
-          else if(range.startOffset>0){
-            var prev=node.childNodes[range.startOffset-1];
-            if(prev && prev.tagName==='IMG') img=prev;
-          }
-        } else if(node.nodeType===3){
-          var parent=node.parentElement;
-          if(parent.tagName==='IMG') img=parent;
-          else if(parent){
-            var child2=parent.childNodes[range.startOffset];
-            if(child2 && child2.tagName==='IMG') img=child2;
-            else if(range.startOffset>0){
-              var prev2=parent.childNodes[range.startOffset-1];
-              if(prev2 && prev2.tagName==='IMG') img=prev2;
-            }
-          }
-        }
-        if(img){
-          if('${dir}'==='center'){
-            img.style.display='block';
-            img.style.margin='0 auto';
-            img.style.float='';
-          } else if('${dir}'==='left'){
-            img.style.display='block';
-            img.style.margin='0';
-            img.style.float='left';
-            img.style.marginRight='8px';
-          } else if('${dir}'==='right'){
-            img.style.display='block';
-            img.style.margin='0';
-            img.style.float='right';
-            img.style.marginLeft='8px';
-          }
-        }
-      })()`);
-    }
-  };
-
-  const handleToolbarPress = action => {
-    if (action === actions.insertImage) {
-      handleInsertImage();
-    } else if (action === 'resize100') {
-      resizeImage('100%');
-    } else if (action === 'resize50') {
-      resizeImage('50%');
-    } else if (action === 'resize25') {
-      resizeImage('25%');
-    } else if (action === actions.alignLeft) {
-      richText.current?.command?.(action);
-      alignImage('left');
-    } else if (action === actions.alignCenter) {
-      richText.current?.command?.(action);
-      alignImage('center');
-    } else if (action === actions.alignRight) {
-      richText.current?.command?.(action);
-      alignImage('right');
-    } else {
-      richText.current?.command?.(action);
-    }
-  };
-
   // cargar/limpiar datos
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -309,13 +68,7 @@ export default function AddRecipeModal({
       setImage(initialRecipe.image || '');
       setPersons(String(initialRecipe.persons || 1));
       setDifficulty(initialRecipe.difficulty || '');
-      const initialSteps = initialRecipe.steps || '';
-      setSteps(initialSteps);
-      if (isWeb && webEditor.current) {
-        webEditor.current.innerHTML = initialSteps;
-      } else {
-        richText.current?.setContentHTML?.(initialSteps);
-      }
+      setSteps(initialRecipe.steps || '');
       setIngredients(
         initialRecipe.ingredients
           ? initialRecipe.ingredients.map(ing => ({
@@ -326,12 +79,6 @@ export default function AddRecipeModal({
             }))
           : [],
       );
-    } else if (visible && !initialRecipe) {
-      if (isWeb && webEditor.current) {
-        webEditor.current.innerHTML = '';
-      } else {
-        richText.current?.setContentHTML?.('');
-      }
     } else if (!visible) {
       // resetear cuando se cierra
       setName('');
@@ -621,167 +368,14 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          {isWeb ? (
-            <>
-              <div
-                ref={webEditor}
-                contentEditable
-                suppressContentEditableWarning
-                style={{
-                  ...StyleSheet.flatten(styles.rich),
-                  minHeight: 120,
-                  outline: 'none',
-                }}
-                onInput={handleWebChange}
-                onKeyUp={saveRange}
-                onMouseUp={saveRange}
-                onClick={saveRange}
-              />
-              <View style={styles.richBar}>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('bold')}
-                  style={styles.richBtn}
-                >
-                  <Text
-                    style={{ color: palette.text, fontWeight: '700', fontSize: 16 }}
-                  >
-                    B
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('underline')}
-                  style={styles.richBtn}
-                >
-                  <Text
-                    style={{ color: palette.text, textDecorationLine: 'underline', fontSize: 16 }}
-                  >
-                    U
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('insertUnorderedList')}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>•</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('insertOrderedList')}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>1.</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    document.execCommand('justifyLeft');
-                    alignImage('left');
-                    handleWebChange();
-                  }}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>L</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    document.execCommand('justifyCenter');
-                    alignImage('center');
-                    handleWebChange();
-                  }}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>C</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    document.execCommand('justifyRight');
-                    alignImage('right');
-                    handleWebChange();
-                  }}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>R</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleInsertImage} style={styles.richBtn}>
-                  <Text style={{ color: palette.text, fontSize: 16 }}>🖼️</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => resizeImage('100%')} style={styles.richBtn}>
-                  <Text style={{ color: palette.text, fontSize: 14 }}>100%</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => resizeImage('50%')} style={styles.richBtn}>
-                  <Text style={{ color: palette.text, fontSize: 14 }}>50%</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => resizeImage('25%')} style={styles.richBtn}>
-                  <Text style={{ color: palette.text, fontSize: 14 }}>25%</Text>
-                </TouchableOpacity>
-              </View>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
-                style={{ display: 'none' }}
-              />
-            </>
-          ) : (
-            <>
-              <RichEditor
-                ref={richText}
-                initialContentHTML={steps}
-                style={[styles.rich, { minHeight: 120 }]}
-                placeholder={t('system.recipes.add.stepsPlaceholder')}
-                onChange={setSteps}
-              />
-              <RichToolbar
-                editor={richText}
-                actions={[
-                  actions.setBold,
-                  actions.setUnderline,
-                  actions.insertBulletsList,
-                  actions.insertOrderedList,
-                  actions.alignLeft,
-                  actions.alignCenter,
-                  actions.alignRight,
-                  actions.insertImage,
-                  'resize100',
-                  'resize50',
-                  'resize25',
-                ]}
-                style={styles.richBar}
-                iconTint={palette.text}
-                selectedIconTint={palette.accent}
-                onPress={handleToolbarPress}
-                iconMap={{
-                  [actions.insertImage]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor }}>🖼️</Text>
-                  ),
-                  resize100: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12 }}>100%</Text>
-                  ),
-                  resize50: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12 }}>50%</Text>
-                  ),
-                  resize25: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12 }}>25%</Text>
-                  ),
-                  [actions.alignLeft]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12 }}>L</Text>
-                  ),
-                  [actions.alignCenter]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12 }}>C</Text>
-                  ),
-                  [actions.alignRight]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12 }}>R</Text>
-                  ),
-                  [actions.setUnderline]: ({ tintColor }) => (
-                    <Text
-                      style={{ color: tintColor, textDecorationLine: 'underline', fontSize: 12 }}
-                    >
-                      U
-                    </Text>
-                  ),
-                }}
-              />
-            </>
-          )}
+          <TextInput
+            multiline
+            style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
+            placeholder={t('system.recipes.add.stepsPlaceholder')}
+            placeholderTextColor={palette.textDim}
+            value={steps}
+            onChangeText={setSteps}
+          />
         </ScrollView>
 
         {/* Picker de unidades */}
@@ -887,28 +481,6 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: Platform.OS === 'web' ? 10 : 8,
-  },
-  rich: {
-    backgroundColor: palette.surface2,
-    borderWidth: 1,
-    borderColor: palette.border,
-    borderRadius: 10,
-    padding: 8,
-    color: palette.text,
-  },
-  richBar: {
-    backgroundColor: palette.surface2,
-    borderWidth: 1,
-    borderColor: palette.border,
-    borderRadius: 10,
-    marginTop: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 4,
-  },
-  richBtn: {
-    padding: 4,
-    marginHorizontal: 2,
   },
 
   // image
