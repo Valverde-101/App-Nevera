@@ -50,15 +50,19 @@ export default function RecipeDetailScreen({ route }) {
           const style = element.attribs.style || '';
           const widthMatch = style.match(/width:\s*[^;]+/);
           const widthStyle = widthMatch ? `${widthMatch[0]};` : '';
-          let alignStyle;
-          if (dir === 'right') {
-            alignStyle = 'align-self:flex-end;margin-left:8px;';
-          } else if (dir === 'center') {
-            alignStyle = 'align-self:center;';
+
+          if (dir === 'center') {
+            element.attribs.style = `${widthStyle}margin-left:auto;margin-right:auto;`;
           } else {
-            alignStyle = 'align-self:flex-start;margin-right:8px;';
+            const parent = element.parent;
+            if (parent && ['p', 'li'].includes(parent.name)) {
+              const pStyle = parent.attribs.style || '';
+              const flexDir = dir === 'right' ? 'row-reverse' : 'row';
+              parent.attribs.style = `${pStyle}display:flex;flex-direction:${flexDir};align-items:flex-start;flex-wrap:wrap;`;
+            }
+            const margin = dir === 'right' ? 'margin-left:8px;' : 'margin-right:8px;';
+            element.attribs.style = `${widthStyle}${margin}`;
           }
-          element.attribs.style = `${widthStyle}${alignStyle}`;
         }
       },
     }),
@@ -167,10 +171,10 @@ export default function RecipeDetailScreen({ route }) {
           <RenderHtml
             contentWidth={width - 56}
             source={{ html: recipe.steps }}
-            baseStyle={{ color: palette.text, lineHeight: 20 }}
+            baseStyle={{ color: palette.text, lineHeight: 20, fontSize: 16 }}
             tagsStyles={{
-              p: { color: palette.text },
-              li: { color: palette.text },
+              p: { color: palette.text, lineHeight: 20, fontSize: 16 },
+              li: { color: palette.text, lineHeight: 20, fontSize: 16 },
             }}
             renderersProps={{ img: { enableExperimentalPercentWidth: true } }}
             domVisitors={domVisitors}
