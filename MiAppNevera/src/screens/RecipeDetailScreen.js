@@ -39,6 +39,7 @@ export default function RecipeDetailScreen({ route }) {
   const { categories } = useCategories();
   const [editVisible, setEditVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [stepFont, setStepFont] = useState(1);
   const { t } = useLanguage();
   const { width } = useWindowDimensions();
 
@@ -164,13 +165,27 @@ export default function RecipeDetailScreen({ route }) {
 
         <Text style={styles.blockTitle}>{t('system.recipes.detail.steps')}</Text>
         <View style={styles.stepsBox}>
+          <View style={styles.stepControls}>
+            <TouchableOpacity
+              onPress={() => setStepFont((s) => Math.max(0.5, s - 0.1))}
+              style={styles.stepBtn}
+            >
+              <Text style={styles.stepBtnTxt}>A-</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setStepFont((s) => Math.min(2, s + 0.1))}
+              style={styles.stepBtn}
+            >
+              <Text style={styles.stepBtnTxt}>A+</Text>
+            </TouchableOpacity>
+          </View>
           <RenderHtml
             contentWidth={width - 56}
             source={{ html: recipe.steps }}
-            baseStyle={{ color: palette.text, lineHeight: 20 }}
+            baseStyle={{ color: palette.text, lineHeight: 20 * stepFont, fontSize: 16 * stepFont }}
             tagsStyles={{
-              p: { color: palette.text },
-              li: { color: palette.text },
+              p: { color: palette.text, lineHeight: 20 * stepFont, fontSize: 16 * stepFont },
+              li: { color: palette.text, lineHeight: 20 * stepFont, fontSize: 16 * stepFont },
             }}
             renderersProps={{ img: { enableExperimentalPercentWidth: true } }}
             domVisitors={domVisitors}
@@ -283,6 +298,21 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 12,
     padding: 12,
   },
+  stepControls: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 8,
+  },
+  stepBtn: {
+    backgroundColor: palette.surface3,
+    borderColor: palette.border,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    marginLeft: 6,
+  },
+  stepBtnTxt: { color: palette.text, fontSize: 16 },
   section: {
     marginTop: 6,
     borderWidth: 1,
