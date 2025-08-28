@@ -6,7 +6,7 @@
 // - Botones personalizados (accent/neutral/danger), sin <Button> nativo
 // - Soporte de imagen (galería o URL)
 // - Compatible con initialRecipe para editar
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Modal,
   View,
@@ -26,15 +26,6 @@ import { useLanguage } from '../context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../context/ThemeContext';
 
-const isWeb = Platform.OS === 'web';
-let RichEditor, RichToolbar, actions;
-if (!isWeb) {
-  const rich = require('react-native-pell-rich-editor');
-  RichEditor = rich.RichEditor;
-  RichToolbar = rich.RichToolbar;
-  actions = rich.actions;
-}
-
 export default function AddRecipeModal({
   visible,
   onSave,
@@ -51,9 +42,6 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
-  const richText = useRef(null);
-  const webEditor = useRef(null);
-  const fileInput = useRef(null);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -73,41 +61,6 @@ export default function AddRecipeModal({
     }
   };
 
-  const handleWebChange = () => {
-    if (isWeb && webEditor.current) {
-      setSteps(webEditor.current.innerHTML);
-    }
-  };
-
-  const handleInsertImage = async () => {
-    if (isWeb) {
-      fileInput.current?.click();
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      base64: true,
-      quality: 0.7,
-    });
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-      richText.current?.insertImage(uri);
-    }
-  };
-
-  const onFileChange = e => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      document.execCommand('insertImage', false, reader.result);
-      handleWebChange();
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
   // cargar/limpiar datos
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -115,13 +68,7 @@ export default function AddRecipeModal({
       setImage(initialRecipe.image || '');
       setPersons(String(initialRecipe.persons || 1));
       setDifficulty(initialRecipe.difficulty || '');
-      const initialSteps = initialRecipe.steps || '';
-      setSteps(initialSteps);
-      if (isWeb && webEditor.current) {
-        webEditor.current.innerHTML = initialSteps;
-      } else {
-        richText.current?.setContentHTML?.(initialSteps);
-      }
+      setSteps(initialRecipe.steps || '');
       setIngredients(
         initialRecipe.ingredients
           ? initialRecipe.ingredients.map(ing => ({
@@ -132,12 +79,6 @@ export default function AddRecipeModal({
             }))
           : [],
       );
-    } else if (visible && !initialRecipe) {
-      if (isWeb && webEditor.current) {
-        webEditor.current.innerHTML = '';
-      } else {
-        richText.current?.setContentHTML?.('');
-      }
     } else if (!visible) {
       // resetear cuando se cierra
       setName('');
@@ -427,78 +368,14 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          {isWeb ? (
-            <>
-              <div
-                ref={webEditor}
-                contentEditable
-                suppressContentEditableWarning
-                style={{
-                  ...StyleSheet.flatten(styles.rich),
-                  minHeight: 120,
-                  outline: 'none',
-                }}
-                onInput={handleWebChange}
-              />
-              <View style={styles.richBar}>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('bold')}
-                  style={styles.richBtn}
-                >
-                  <Text
-                    style={{ color: palette.text, fontWeight: '700', fontSize: 16 }}
-                  >
-                    B
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('insertUnorderedList')}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>•</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('insertOrderedList')}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>1.</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleInsertImage} style={styles.richBtn}>
-                  <Text style={{ color: palette.text, fontSize: 16 }}>🖼️</Text>
-                </TouchableOpacity>
-              </View>
-              <input
-                ref={fileInput}
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
-                style={{ display: 'none' }}
-              />
-            </>
-          ) : (
-            <>
-              <RichEditor
-                ref={richText}
-                initialContentHTML={steps}
-                style={[styles.rich, { minHeight: 120 }]}
-                placeholder={t('system.recipes.add.stepsPlaceholder')}
-                onChange={setSteps}
-              />
-              <RichToolbar
-                editor={richText}
-                actions={[actions.setBold, actions.insertBulletsList, actions.insertOrderedList, actions.insertImage]}
-                style={styles.richBar}
-                iconTint={palette.text}
-                selectedIconTint={palette.accent}
-                iconMap={{
-                  [actions.insertImage]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor }}>🖼️</Text>
-                  ),
-                }}
-                onPressAddImage={handleInsertImage}
-              />
-            </>
-          )}
+          <TextInput
+            multiline
+            style={[styles.input, { height: 120, textAlignVertical: 'top' }]}
+            placeholder={t('system.recipes.add.stepsPlaceholder')}
+            placeholderTextColor={palette.textDim}
+            value={steps}
+            onChangeText={setSteps}
+          />
         </ScrollView>
 
         {/* Picker de unidades */}
@@ -604,28 +481,6 @@ const createStyles = (palette) => StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: Platform.OS === 'web' ? 10 : 8,
-  },
-  rich: {
-    backgroundColor: palette.surface2,
-    borderWidth: 1,
-    borderColor: palette.border,
-    borderRadius: 10,
-    padding: 8,
-    color: palette.text,
-  },
-  richBar: {
-    backgroundColor: palette.surface2,
-    borderWidth: 1,
-    borderColor: palette.border,
-    borderRadius: 10,
-    marginTop: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 4,
-  },
-  richBtn: {
-    padding: 4,
-    marginHorizontal: 2,
   },
 
   // image
