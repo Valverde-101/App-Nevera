@@ -51,7 +51,6 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
-  const [stepFont, setStepFont] = useState(1);
   const richText = useRef(null);
   const webEditor = useRef(null);
   const fileInput = useRef(null);
@@ -288,7 +287,6 @@ export default function AddRecipeModal({
       setDifficulty(initialRecipe.difficulty || '');
       const initialSteps = initialRecipe.steps || '';
       setSteps(initialSteps);
-      setStepFont(1);
       if (isWeb && webEditor.current) {
         webEditor.current.innerHTML = initialSteps;
       } else {
@@ -310,7 +308,6 @@ export default function AddRecipeModal({
       } else {
         richText.current?.setContentHTML?.('');
       }
-      setStepFont(1);
     } else if (!visible) {
       // resetear cuando se cierra
       setName('');
@@ -321,7 +318,6 @@ export default function AddRecipeModal({
       setIngredients([]);
       setSelectMode(false);
       setSelected([]);
-      setStepFont(1);
     }
   }, [visible, initialRecipe]);
 
@@ -601,20 +597,6 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          <View style={styles.stepControls}>
-            <TouchableOpacity
-              onPress={() => setStepFont((s) => Math.max(0.5, s - 0.1))}
-              style={styles.stepBtn}
-            >
-              <Text style={styles.stepBtnTxt}>A-</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setStepFont((s) => Math.min(2, s + 0.1))}
-              style={styles.stepBtn}
-            >
-              <Text style={styles.stepBtnTxt}>A+</Text>
-            </TouchableOpacity>
-          </View>
           {isWeb ? (
             <>
               <div
@@ -625,7 +607,6 @@ const save = () => {
                   ...StyleSheet.flatten(styles.rich),
                   minHeight: 120,
                   outline: 'none',
-                  fontSize: 16 * stepFont,
                 }}
                 onInput={handleWebChange}
                 onKeyUp={saveRange}
@@ -722,10 +703,6 @@ const save = () => {
                 ref={richText}
                 initialContentHTML={steps}
                 style={[styles.rich, { minHeight: 120 }]}
-                editorStyle={{
-                  cssText: `font-size:${16 * stepFont}px;color:${palette.text};`,
-                  contentCSSText: `font-size:${16 * stepFont}px;color:${palette.text};`,
-                }}
                 placeholder={t('system.recipes.add.stepsPlaceholder')}
                 onChange={setSteps}
               />
@@ -912,22 +889,6 @@ const createStyles = (palette) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  stepControls: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 6,
-  },
-  stepBtn: {
-    backgroundColor: palette.surface3,
-    borderColor: palette.border,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginLeft: 6,
-  },
-  stepBtnTxt: { color: palette.text, fontSize: 16 },
 
   // image
   image: { width: '60%',
