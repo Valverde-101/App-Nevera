@@ -51,7 +51,6 @@ export default function AddRecipeModal({
   const [difficulty, setDifficulty] = useState('');
   const [ingredients, setIngredients] = useState([]);
   const [steps, setSteps] = useState('');
-  const [fontLevel, setFontLevel] = useState(3); // track last used font size level
   const richText = useRef(null);
   const webEditor = useRef(null);
   const fileInput = useRef(null);
@@ -74,17 +73,9 @@ export default function AddRecipeModal({
     }
   };
 
-  const sizeMap = { 1: '10px', 2: '13px', 3: '16px', 4: '18px', 5: '24px', 6: '32px', 7: '48px' };
-  const normalizeFontTags = html =>
-    html
-      ? html.replace(/<font[^>]*size="([1-7])"[^>]*>(.*?)<\/font>/gi, (_, s, c) =>
-          `<span style="font-size:${sizeMap[s]};">${c}</span>`,
-        )
-      : '';
-
   const handleWebChange = () => {
     if (isWeb && webEditor.current) {
-      setSteps(normalizeFontTags(webEditor.current.innerHTML));
+      setSteps(webEditor.current.innerHTML);
     }
   };
 
@@ -102,7 +93,6 @@ export default function AddRecipeModal({
       const asset = result.assets[0];
       const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
       richText.current?.insertImage(uri);
-      alignImage('center');
     }
   };
 
@@ -112,7 +102,6 @@ export default function AddRecipeModal({
     const reader = new FileReader();
     reader.onload = () => {
       document.execCommand('insertImage', false, reader.result);
-      alignImage('center');
       handleWebChange();
     };
     reader.readAsDataURL(file);
@@ -121,36 +110,13 @@ export default function AddRecipeModal({
 
   const lastRange = useRef(null);
   const selectedImage = useRef(null);
-  const updateFontFromSelection = () => {
-    if (isWeb) {
-      const sel = window.getSelection();
-      if (sel && sel.focusNode) {
-        const node = sel.focusNode.nodeType === 3 ? sel.focusNode.parentElement : sel.focusNode;
-        if (node) {
-          const size = window.getComputedStyle(node).fontSize;
-          const found = Object.entries(sizeMap).find(([, v]) => parseInt(v) === parseInt(size));
-          if (found) setFontLevel(Number(found[0]));
-        }
-      }
-    } else {
-      richText.current?.commandDOM?.(`(function(){
-        var sel = window.getSelection();
-        if(sel && sel.focusNode){
-          var node = sel.focusNode.nodeType===3? sel.focusNode.parentElement : sel.focusNode;
-          var size = window.getComputedStyle(node).fontSize;
-          window.ReactNativeWebView.postMessage(JSON.stringify({type:'FONT_SIZE', data:size}));
-        }
-      })()`);
-    }
-  };
   const saveRange = e => {
     if (!isWeb) return;
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) {
-      lastRange.current = sel.getRangeAt(0).cloneRange();
+      lastRange.current = sel.getRangeAt(0);
     }
     selectedImage.current = e?.target?.tagName === 'IMG' ? e.target : null;
-    updateFontFromSelection();
   };
 
   const resizeImage = pct => {
@@ -172,7 +138,6 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
-        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -199,7 +164,6 @@ export default function AddRecipeModal({
           }
         }
         if(img){img.style.width='${pct}';}
-        saveSelection();
       })()`);
     }
   };
@@ -225,15 +189,15 @@ export default function AddRecipeModal({
           img.style.alignSelf = 'center';
         } else if (dir === 'left') {
           img.style.display = 'block';
-          img.style.marginLeft = '0';
-          img.style.marginRight = 'auto';
-          img.style.float = '';
+          img.style.margin = '0';
+          img.style.float = 'left';
+          img.style.marginRight = '8px';
           img.style.alignSelf = 'flex-start';
         } else if (dir === 'right') {
           img.style.display = 'block';
-          img.style.marginLeft = 'auto';
-          img.style.marginRight = '0';
-          img.style.float = '';
+          img.style.margin = '0';
+          img.style.float = 'right';
+          img.style.marginLeft = '8px';
           img.style.alignSelf = 'flex-end';
         }
         handleWebChange();
@@ -241,7 +205,6 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
-        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -276,61 +239,19 @@ export default function AddRecipeModal({
             img.style.alignSelf='center';
           } else if('${dir}'==='left'){
             img.style.display='block';
-            img.style.marginLeft='0';
-            img.style.marginRight='auto';
-            img.style.float='';
+            img.style.margin='0';
+            img.style.float='left';
+            img.style.marginRight='8px';
             img.style.alignSelf='flex-start';
           } else if('${dir}'==='right'){
             img.style.display='block';
-            img.style.marginLeft='auto';
-            img.style.marginRight='0';
-            img.style.float='';
+            img.style.margin='0';
+            img.style.float='right';
+            img.style.marginLeft='8px';
             img.style.alignSelf='flex-end';
           }
         }
-        saveSelection();
       })()`);
-    }
-  };
-
-  const changeFontSize = dir => {
-    setFontLevel(level => {
-      const next = Math.max(1, Math.min(7, level + dir));
-      if (isWeb) {
-        const sel = window.getSelection();
-        if (lastRange.current && sel) {
-          sel.removeAllRanges();
-          sel.addRange(lastRange.current);
-          document.execCommand('fontSize', false, String(next));
-          handleWebChange();
-          sel.removeAllRanges();
-          sel.addRange(lastRange.current);
-          lastRange.current = sel.getRangeAt(0).cloneRange();
-        } else {
-          document.execCommand('fontSize', false, String(next));
-          handleWebChange();
-        }
-      } else {
-        richText.current?.commandDOM?.(`(function(){
-          focusCurrent();
-          var sel = window.getSelection();
-          if(!sel || !sel.rangeCount) return;
-          var range = sel.getRangeAt(0);
-          document.execCommand('fontSize', false, '${next}');
-          sel.removeAllRanges();
-          sel.addRange(range);
-          saveSelection();
-        })()`);
-      }
-      return next;
-    });
-  };
-
-  const handleEditorMessage = message => {
-    if (message?.type === 'FONT_SIZE') {
-      const px = parseInt(message.data);
-      const found = Object.entries(sizeMap).find(([, v]) => parseInt(v) === px);
-      if (found) setFontLevel(Number(found[0]));
     }
   };
 
@@ -343,10 +264,6 @@ export default function AddRecipeModal({
       resizeImage('50%');
     } else if (action === 'resize25') {
       resizeImage('25%');
-    } else if (action === 'fontDecrease') {
-      changeFontSize(-1);
-    } else if (action === 'fontIncrease') {
-      changeFontSize(1);
     } else if (action === actions.alignLeft) {
       richText.current?.command?.(action);
       alignImage('left');
@@ -361,12 +278,6 @@ export default function AddRecipeModal({
     }
   };
 
-  useEffect(() => {
-    if (!isWeb && visible) {
-      richText.current?.registerToolbar(() => updateFontFromSelection());
-    }
-  }, [visible]);
-
   // cargar/limpiar datos
   useEffect(() => {
     if (visible && initialRecipe) {
@@ -374,9 +285,8 @@ export default function AddRecipeModal({
       setImage(initialRecipe.image || '');
       setPersons(String(initialRecipe.persons || 1));
       setDifficulty(initialRecipe.difficulty || '');
-      const initialSteps = normalizeFontTags(initialRecipe.steps || '');
+      const initialSteps = initialRecipe.steps || '';
       setSteps(initialSteps);
-      setFontLevel(3);
       if (isWeb && webEditor.current) {
         webEditor.current.innerHTML = initialSteps;
       } else {
@@ -398,7 +308,6 @@ export default function AddRecipeModal({
       } else {
         richText.current?.setContentHTML?.('');
       }
-      setFontLevel(3);
     } else if (!visible) {
       // resetear cuando se cierra
       setName('');
@@ -409,7 +318,6 @@ export default function AddRecipeModal({
       setIngredients([]);
       setSelectMode(false);
       setSelected([]);
-      setFontLevel(3);
     }
   }, [visible, initialRecipe]);
 
@@ -689,21 +597,6 @@ const save = () => {
 
           {/* Pasos */}
           <Text style={styles.label}>{t('system.recipes.add.stepsLabel')}</Text>
-          <View style={styles.stepControls}>
-            <TouchableOpacity
-              onPress={() => changeFontSize(-1)}
-              style={styles.stepBtn}
-            >
-              <Text style={styles.stepBtnTxt}>A-</Text>
-            </TouchableOpacity>
-            <Text style={styles.stepSize}>{parseInt(sizeMap[fontLevel])}</Text>
-            <TouchableOpacity
-              onPress={() => changeFontSize(1)}
-              style={styles.stepBtn}
-            >
-              <Text style={styles.stepBtnTxt}>A+</Text>
-            </TouchableOpacity>
-          </View>
           {isWeb ? (
             <>
               <div
@@ -714,7 +607,6 @@ const save = () => {
                   ...StyleSheet.flatten(styles.rich),
                   minHeight: 120,
                   outline: 'none',
-                  fontSize: 16,
                 }}
                 onInput={handleWebChange}
                 onKeyUp={saveRange}
@@ -723,38 +615,22 @@ const save = () => {
               />
               <View style={styles.richBar}>
                 <TouchableOpacity
-                  onPress={() => changeFontSize(-1)}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>A-</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => changeFontSize(1)}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16 }}>A+</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   onPress={() => document.execCommand('bold')}
                   style={styles.richBtn}
                 >
-                  <Text style={{ color: palette.text, fontWeight: '700', fontSize: 16 }}>
+                  <Text
+                    style={{ color: palette.text, fontWeight: '700', fontSize: 16 }}
+                  >
                     B
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => document.execCommand('italic')}
-                  style={styles.richBtn}
-                >
-                  <Text style={{ color: palette.text, fontSize: 16, fontStyle: 'italic' }}>
-                    I
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => document.execCommand('underline')}
                   style={styles.richBtn}
                 >
-                  <Text style={{ color: palette.text, textDecorationLine: 'underline', fontSize: 16 }}>
+                  <Text
+                    style={{ color: palette.text, textDecorationLine: 'underline', fontSize: 16 }}
+                  >
                     U
                   </Text>
                 </TouchableOpacity>
@@ -827,21 +703,13 @@ const save = () => {
                 ref={richText}
                 initialContentHTML={steps}
                 style={[styles.rich, { minHeight: 120 }]}
-                editorStyle={{
-                  cssText: `color:${palette.text};`,
-                  contentCSSText: `color:${palette.text};`,
-                }}
                 placeholder={t('system.recipes.add.stepsPlaceholder')}
-                onChange={html => setSteps(normalizeFontTags(html))}
-                onMessage={handleEditorMessage}
+                onChange={setSteps}
               />
               <RichToolbar
                 editor={richText}
                 actions={[
-                  'fontDecrease',
-                  'fontIncrease',
                   actions.setBold,
-                  actions.setItalic,
                   actions.setUnderline,
                   actions.insertBulletsList,
                   actions.insertOrderedList,
@@ -858,12 +726,6 @@ const save = () => {
                 selectedIconTint={palette.accent}
                 onPress={handleToolbarPress}
                 iconMap={{
-                  fontDecrease: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 16 }}>A-</Text>
-                  ),
-                  fontIncrease: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 16 }}>A+</Text>
-                  ),
                   [actions.insertImage]: ({ tintColor }) => (
                     <Text style={{ color: tintColor }}>🖼️</Text>
                   ),
@@ -886,12 +748,11 @@ const save = () => {
                     <Text style={{ color: tintColor, fontSize: 12 }}>R</Text>
                   ),
                   [actions.setUnderline]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, textDecorationLine: 'underline', fontSize: 12 }}>
+                    <Text
+                      style={{ color: tintColor, textDecorationLine: 'underline', fontSize: 12 }}
+                    >
                       U
                     </Text>
-                  ),
-                  [actions.setItalic]: ({ tintColor }) => (
-                    <Text style={{ color: tintColor, fontSize: 12, fontStyle: 'italic' }}>I</Text>
                   ),
                 }}
               />
@@ -1012,41 +873,22 @@ const createStyles = (palette) => StyleSheet.create({
     color: palette.text,
   },
   richBar: {
-    backgroundColor: palette.surface3,
-    borderRadius: 16,
+    backgroundColor: palette.surface2,
+    borderWidth: 1,
+    borderColor: palette.border,
+    borderRadius: 10,
     marginTop: 6,
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-    justifyContent: 'center',
     padding: 4,
   },
   richBtn: {
-    width: 32,
-    height: 32,
-    margin: 4,
-    borderRadius: 8,
-    backgroundColor: palette.surface2,
+    padding: 4,
+    marginHorizontal: 2,
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  stepControls: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 6,
-  },
-  stepSize: { color: palette.text, alignSelf: 'center', marginHorizontal: 6 },
-  stepBtn: {
-    backgroundColor: palette.surface3,
-    borderColor: palette.border,
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginLeft: 6,
-  },
-  stepBtnTxt: { color: palette.text, fontSize: 16 },
 
   // image
   image: { width: '60%',
