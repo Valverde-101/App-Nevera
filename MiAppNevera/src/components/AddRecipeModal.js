@@ -24,6 +24,7 @@ import { getFoodIcon, getFoodInfo } from '../foodIcons';
 import { useUnits } from '../context/UnitsContext';
 import { useLanguage } from '../context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { useTheme } from '../context/ThemeContext';
 
 const isWeb = Platform.OS === 'web';
@@ -64,13 +65,28 @@ export default function AddRecipeModal({
 
   const isEditing = !!initialRecipe;
 
+  const ensureMediaPermission = async () => {
+    let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
+    if (perm.granted) return true;
+    perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      setErrorMsg(t('permiso_galeria') || 'Permiso de galería requerido');
+      return false;
+    }
+    return true;
+  };
+
   const pickImage = async () => {
+    const ok = await ensureMediaPermission();
+    if (!ok) return;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 0.7,
     });
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+    const cancelled = result.canceled ?? result.cancelled;
+    if (!cancelled) {
+      const asset = result.assets?.[0] || result;
+      setImage(asset.uri);
     }
   };
 
@@ -93,16 +109,35 @@ export default function AddRecipeModal({
       fileInput.current?.click();
       return;
     }
+    const ok = await ensureMediaPermission();
+    if (!ok) return;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       base64: true,
       quality: 0.7,
     });
-    if (!result.canceled) {
-      const asset = result.assets[0];
-      const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-      richText.current?.insertImage(uri);
-      alignImage('center');
+    const cancelled = result.canceled ?? result.cancelled;
+    if (!cancelled) {
+      const asset = result.assets?.[0] || result;
+      let b64 = asset.base64;
+      if (!b64) {
+        try {
+          b64 = await FileSystem.readAsStringAsync(asset.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
+      const src = b64
+        ? `data:${asset.mimeType || 'image/jpeg'};base64,${b64}`
+        : asset.uri;
+      richText.current?.focusContentEditor();
+      richText.current?.insertImage({ src, width: '100%' });
+      setTimeout(() => {
+        resizeImage('100%');
+        alignImage('center');
+      }, 50);
     }
   };
 
@@ -172,7 +207,6 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
-        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -198,8 +232,13 @@ export default function AddRecipeModal({
             }
           }
         }
-        if(img){img.style.width='${pct}';}
-        saveSelection();
+        if(img){
+          img.style.width='${pct}';
+          img.style.height='auto';
+          img.setAttribute('width','${pct}');
+          img.removeAttribute('height');
+        }
+        saveSelection && saveSelection();
       })()`);
     }
   };
@@ -241,7 +280,6 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
-        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -288,7 +326,7 @@ export default function AddRecipeModal({
             img.style.alignSelf='flex-end';
           }
         }
-        saveSelection();
+        saveSelection && saveSelection();
       })()`);
     }
   };
@@ -312,14 +350,13 @@ export default function AddRecipeModal({
         }
       } else {
         richText.current?.commandDOM?.(`(function(){
-          focusCurrent();
           var sel = window.getSelection();
           if(!sel || !sel.rangeCount) return;
           var range = sel.getRangeAt(0);
           document.execCommand('fontSize', false, '${next}');
           sel.removeAllRanges();
           sel.addRange(range);
-          saveSelection();
+          saveSelection && saveSelection();
         })()`);
       }
       return next;
@@ -337,8 +374,6 @@ export default function AddRecipeModal({
   const handleToolbarPress = action => {
     if (action === 'fontSizeLabel') {
       return;
-    } else if (action === actions.insertImage) {
-      handleInsertImage();
     } else if (action === 'resize100') {
       resizeImage('100%');
     } else if (action === 'resize50') {
@@ -838,16 +873,21 @@ const save = () => {
                   actions.alignLeft,
                   actions.alignCenter,
                   actions.alignRight,
-                  actions.insertImage,
-                  'resize100',
-                  'resize50',
-                  'resize25',
-                ]}
-                style={styles.richBar}
-                iconTint={palette.text}
-                selectedIconTint={palette.accent}
-                onPress={action => action === 'fontSizeLabel' ? null : handleToolbarPress(action)}
-                iconMap={{
+                actions.insertImage,
+                'resize100',
+                'resize50',
+                'resize25',
+              ]}
+              style={styles.richBar}
+              iconTint={palette.text}
+              selectedIconTint={palette.accent}
+              onPressAddImage={handleInsertImage}
+              onPress={action =>
+                action === 'fontSizeLabel' || action === actions.insertImage
+                  ? null
+                  : handleToolbarPress(action)
+              }
+              iconMap={{
                   fontDecrease: ({ tintColor }) => (
                     <Text style={{ color: tintColor, fontSize: 16 }}>A-</Text>
                   ),
