@@ -64,22 +64,9 @@ export default function AddRecipeModal({
 
   const isEditing = !!initialRecipe;
 
-  const ensureMediaPermission = async () => {
-    let perm = await ImagePicker.getMediaLibraryPermissionsAsync();
-    if (perm.granted) return true;
-    perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      setErrorMsg(t('permiso_galeria') || 'Permiso de galería requerido');
-      return false;
-    }
-    return true;
-  };
-
   const pickImage = async () => {
-    const ok = await ensureMediaPermission();
-    if (!ok) return;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
     });
     if (!result.canceled) {
@@ -106,19 +93,15 @@ export default function AddRecipeModal({
       fileInput.current?.click();
       return;
     }
-    const ok = await ensureMediaPermission();
-    if (!ok) return;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       base64: true,
       quality: 0.7,
     });
     if (!result.canceled) {
       const asset = result.assets[0];
       const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-      richText.current?.focusContentEditor();
-      richText.current?.insertImage({ src: uri, width: '100%' });
-      resizeImage('100%');
+      richText.current?.insertImage(uri);
       alignImage('center');
     }
   };
@@ -189,6 +172,7 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
+        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -214,13 +198,8 @@ export default function AddRecipeModal({
             }
           }
         }
-        if(img){
-          img.style.width='${pct}';
-          img.style.height='auto';
-          img.setAttribute('width','${pct}');
-          img.removeAttribute('height');
-        }
-        saveSelection && saveSelection();
+        if(img){img.style.width='${pct}';}
+        saveSelection();
       })()`);
     }
   };
@@ -262,6 +241,7 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
+        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -308,7 +288,7 @@ export default function AddRecipeModal({
             img.style.alignSelf='flex-end';
           }
         }
-        saveSelection && saveSelection();
+        saveSelection();
       })()`);
     }
   };
@@ -332,13 +312,14 @@ export default function AddRecipeModal({
         }
       } else {
         richText.current?.commandDOM?.(`(function(){
+          focusCurrent();
           var sel = window.getSelection();
           if(!sel || !sel.rangeCount) return;
           var range = sel.getRangeAt(0);
           document.execCommand('fontSize', false, '${next}');
           sel.removeAllRanges();
           sel.addRange(range);
-          saveSelection && saveSelection();
+          saveSelection();
         })()`);
       }
       return next;
@@ -356,6 +337,8 @@ export default function AddRecipeModal({
   const handleToolbarPress = action => {
     if (action === 'fontSizeLabel') {
       return;
+    } else if (action === actions.insertImage) {
+      handleInsertImage();
     } else if (action === 'resize100') {
       resizeImage('100%');
     } else if (action === 'resize50') {
@@ -855,21 +838,16 @@ const save = () => {
                   actions.alignLeft,
                   actions.alignCenter,
                   actions.alignRight,
-                actions.insertImage,
-                'resize100',
-                'resize50',
-                'resize25',
-              ]}
-              style={styles.richBar}
-              iconTint={palette.text}
-              selectedIconTint={palette.accent}
-              onPressAddImage={handleInsertImage}
-              onPress={action =>
-                action === 'fontSizeLabel' || action === actions.insertImage
-                  ? null
-                  : handleToolbarPress(action)
-              }
-              iconMap={{
+                  actions.insertImage,
+                  'resize100',
+                  'resize50',
+                  'resize25',
+                ]}
+                style={styles.richBar}
+                iconTint={palette.text}
+                selectedIconTint={palette.accent}
+                onPress={action => action === 'fontSizeLabel' ? null : handleToolbarPress(action)}
+                iconMap={{
                   fontDecrease: ({ tintColor }) => (
                     <Text style={{ color: tintColor, fontSize: 16 }}>A-</Text>
                   ),
