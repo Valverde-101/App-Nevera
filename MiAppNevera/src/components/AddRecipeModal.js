@@ -65,8 +65,6 @@ export default function AddRecipeModal({
   const isEditing = !!initialRecipe;
 
   const pickImage = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
@@ -95,8 +93,6 @@ export default function AddRecipeModal({
       fileInput.current?.click();
       return;
     }
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       base64: true,
@@ -105,8 +101,7 @@ export default function AddRecipeModal({
     if (!result.canceled) {
       const asset = result.assets[0];
       const uri = `data:${asset.mimeType || 'image/jpeg'};base64,${asset.base64}`;
-      richText.current?.insertImage({ src: uri, width: '100%' });
-      resizeImage('100%');
+      richText.current?.insertImage(uri);
       alignImage('center');
     }
   };
@@ -177,7 +172,7 @@ export default function AddRecipeModal({
       }
     } else {
       richText.current?.commandDOM?.(`(function(){
-        focusCurrent && focusCurrent();
+        focusCurrent();
         var sel = window.getSelection();
         if(!sel || !sel.rangeCount) return;
         var range = sel.getRangeAt(0);
@@ -203,13 +198,8 @@ export default function AddRecipeModal({
             }
           }
         }
-        if(img){
-          img.style.width='${pct}';
-          img.style.height='auto';
-          img.setAttribute('width','${pct}');
-          img.removeAttribute('height');
-        }
-        saveSelection && saveSelection();
+        if(img){img.style.width='${pct}';}
+        saveSelection();
       })()`);
     }
   };
